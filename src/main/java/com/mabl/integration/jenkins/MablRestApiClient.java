@@ -3,8 +3,6 @@ package com.mabl.integration.jenkins;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.remoting.Base64;
 import org.apache.http.Header;
@@ -12,19 +10,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.concurrent.Future;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
@@ -47,7 +44,7 @@ public class MablRestApiClient {
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
-    private final CloseableHttpAsyncClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final HttpClientContext localContext;
     private final String restApiBaseUrl;
     private final String restApiKey;
@@ -86,14 +83,13 @@ public class MablRestApiClient {
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
 
-        httpClient = HttpAsyncClients.custom()
+        httpClient = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
+//                .setRetryHandler()
                 // TODO why isn't this setting the required Basic auth headers?
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
                 .build();
-
-        httpClient.start();
 
         localContext = HttpClientContext.create();
         localContext.setCredentialsProvider(getApiCredentialsProvider(restApiKey));
@@ -118,10 +114,10 @@ public class MablRestApiClient {
         return new BasicHeader("Authorization", "Basic " + encoded);
     }
 
-    public Future<HttpResponse> createDeploymentEvent(
+    public CloseableHttpResponse createDeploymentEvent(
             final String environmentId,
             final String applicationId
-    ) throws UnsupportedEncodingException, JsonProcessingException {
+    ) throws IOException {
 
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
@@ -135,10 +131,10 @@ public class MablRestApiClient {
         request.addHeader(getBasicAuthHeader(restApiKey));
         request.addHeader(JSON_TYPE_HEADER);
 
-        return httpClient.execute(request, localContext, null);
+        return httpClient.execute(request);
     }
 
-    public CreateDeploymentResult parseCreateDeploymentEventReponse(final HttpResponse response) throws IOException {
+    public CreateDeploymentResult parseCreateDeploymentEventResponse(final HttpResponse response) throws IOException {
         return objectMapper.reader(CreateDeploymentResult.class).readValue(response.getEntity().getContent());
     }
 

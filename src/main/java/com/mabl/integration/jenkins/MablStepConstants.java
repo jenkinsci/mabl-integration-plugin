@@ -5,6 +5,7 @@ package com.mabl.integration.jenkins;
  *
  */
 class MablStepConstants {
+    static final String PLUGIN_SYMBOL = "mabl";
     private static final String PLUGIN_VERSION = "0.1.0";
     static final String PLUGIN_USER_AGENT = "mabl-jenkins-plugin/"+PLUGIN_VERSION;
 

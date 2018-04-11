@@ -7,6 +7,7 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.PrintStream;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
+import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -29,16 +31,23 @@ public class MablStepBuilder extends Builder {
     private final String restApiKey;
     private final String environmentId;
     private final String applicationId;
+    private final boolean continueOnPlanFailure;
+    private final boolean continueOnMablError;
 
     @DataBoundConstructor
     public MablStepBuilder(
             final String restApiKey,
             final String environmentId,
-            final String applicationId
+            final String applicationId,
+            final boolean continueOnPlanFailure,
+            final boolean continueOnMablError
+
     ) {
         this.restApiKey = restApiKey;
         this.environmentId = environmentId;
         this.applicationId = applicationId;
+        this.continueOnPlanFailure = continueOnPlanFailure;
+        this.continueOnMablError = continueOnMablError;
     }
 
     // Accessors to be used by Jelly UI templates
@@ -62,14 +71,18 @@ public class MablStepBuilder extends Builder {
             final BuildListener listener
     ) throws InterruptedException {
 
-        PrintStream outputStream = listener.getLogger();
+        final PrintStream outputStream = listener.getLogger();
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 outputStream,
                 restApiKey,
                 environmentId,
-                applicationId
+                applicationId,
+                continueOnPlanFailure,
+                continueOnMablError
         );
+
+        // TODO crop and cleanup if someone entered string with "key:XXXX"
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
@@ -93,7 +106,7 @@ public class MablStepBuilder extends Builder {
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
-    @Extension
+    @Extension @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
 
         public MablStepDescriptor() {

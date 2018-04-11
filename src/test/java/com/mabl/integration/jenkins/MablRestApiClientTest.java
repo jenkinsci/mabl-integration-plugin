@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -61,12 +62,11 @@ public class MablRestApiClientTest {
         MablRestApiClient client = null;
         try {
             client = new MablRestApiClient(baseUrl, fakeRestApiKey);
-            Future<HttpResponse> responseFuture = client.createDeploymentEvent(environmentId, applicationId);
-            HttpResponse response = responseFuture.get();
+            CloseableHttpResponse response = client.createDeploymentEvent(environmentId, applicationId);
 
             Assert.assertEquals(SC_CREATED, response.getStatusLine().getStatusCode());
 
-            MablRestApiClient.CreateDeploymentResult result = client.parseCreateDeploymentEventReponse(response);
+            MablRestApiClient.CreateDeploymentResult result = client.parseCreateDeploymentEventResponse(response);
             Assert.assertEquals("foo-id-v", result.id);
         } finally {
             if (client != null) {
