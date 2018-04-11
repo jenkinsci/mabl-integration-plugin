@@ -13,7 +13,7 @@
     </parent>
 
     <groupId>com.mabl.integration.jenkins</groupId>
-    <artifactId>mabl-integration-plugin</artifactId>
+    <artifactId>mabl-integration</artifactId>
     <packaging>hpi</packaging>
     <version>0.0.3-SNAPSHOT</version>
 
