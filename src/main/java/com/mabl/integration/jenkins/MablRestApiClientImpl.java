@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
@@ -25,9 +26,11 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
+import static com.mabl.integration.jenkins.MablStepConstants.REQUEST_TIMEOUT_MILLISECONDS;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
 import static org.apache.commons.httpclient.HttpStatus.SC_NOT_FOUND;
 import static org.apache.commons.httpclient.HttpStatus.SC_OK;
@@ -47,9 +50,9 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
 
-    protected static final String REST_API_USERNAME_PLACEHOLDER = "key";
-    protected static final String DEPLOYMENT_TRIGGER_ENDPOINT = "/events/deployment";
-    protected static final String DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE = "/execution/result/event/%s";
+    static final String REST_API_USERNAME_PLACEHOLDER = "key";
+    static final String DEPLOYMENT_TRIGGER_ENDPOINT = "/events/deployment";
+    static final String DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE = "/execution/result/event/%s";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -57,7 +60,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private final String restApiBaseUrl;
     private final String restApiKey;
 
-    public MablRestApiClientImpl(
+    MablRestApiClientImpl(
             final String restApiBaseUrl,
             final String restApiKey
     ) {
@@ -71,6 +74,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
+                .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
+                .setDefaultRequestConfig(getDefaultRequestConfig())
                 .build();
     }
 
@@ -159,6 +164,15 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         }
 
         return objectMapper.reader(CreateDeploymentResult.class).readValue(response.getEntity().getContent());
+    }
+
+    private RequestConfig getDefaultRequestConfig() {
+        // TODO we should retry connection timeouts
+        return RequestConfig.custom()
+                .setConnectTimeout(REQUEST_TIMEOUT_MILLISECONDS)
+                .setConnectionRequestTimeout(REQUEST_TIMEOUT_MILLISECONDS)
+                .setSocketTimeout(REQUEST_TIMEOUT_MILLISECONDS)
+                .build();
     }
 
     @Override

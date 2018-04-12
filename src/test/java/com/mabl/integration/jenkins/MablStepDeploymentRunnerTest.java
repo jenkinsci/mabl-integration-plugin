@@ -9,6 +9,7 @@ import org.junit.rules.Timeout;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
@@ -22,8 +23,8 @@ import static org.mockito.Mockito.when;
  */
 public class MablStepDeploymentRunnerTest {
 
-
-    private static final long TEST_TIMEOUT_SECONDS = 10;
+    private static final long TEST_TIMEOUT_SECONDS = 2;
+    private static final long TEST_POLLING_INTERVAL_MILLISECONDS = 50;
 
     private final String environmentId = "foo-env-e";
     private final String applicationId = "foo-app-a";
@@ -46,6 +47,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -68,6 +70,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -96,6 +99,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -115,6 +119,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -136,6 +141,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -158,6 +164,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 false,
@@ -177,6 +184,7 @@ public class MablStepDeploymentRunnerTest {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 true,
@@ -204,6 +212,10 @@ public class MablStepDeploymentRunnerTest {
                         new ExecutionResult.ExecutionSummary
                                 (status, "all is well",
                                         success, 0L, 0L,
-                                        null, null)));
+                                        null,
+                                        null,
+                                        new ArrayList<ExecutionResult.JourneySummary>(),
+                                        new ArrayList<ExecutionResult.JourneyExecutionResult>()
+                                )));
     }
 }

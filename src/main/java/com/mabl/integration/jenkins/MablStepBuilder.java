@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
+import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
@@ -78,6 +79,7 @@ public class MablStepBuilder extends Builder {
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
+                EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS,
                 environmentId,
                 applicationId,
                 continueOnPlanFailure,
@@ -92,14 +94,15 @@ public class MablStepBuilder extends Builder {
             return runnerFuture.get(EXECUTION_TIMEOUT_SECONDS, SECONDS);
 
         } catch (ExecutionException e) {
-            outputStream.println("Execution error during mabl deployment step");
+            outputStream.println("There was an execution error trying to run your journeys in mabl");
             e.printStackTrace(outputStream);
+            return continueOnMablError;
 
         } catch (TimeoutException e) {
-            outputStream.printf("Execution time limit of %d seconds exceeded by mabl deployment step\n", EXECUTION_TIMEOUT_SECONDS);
+            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.\n"+
+                    "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
+            return continueOnMablError;
         }
-
-        return true;
     }
 
     @Override
