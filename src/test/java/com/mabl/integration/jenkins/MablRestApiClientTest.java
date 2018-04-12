@@ -1,73 +1,44 @@
 package com.mabl.integration.jenkins;
 
-import com.github.tomakehurst.wiremock.client.MappingBuilder;
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import org.apache.http.HttpResponse;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Rule;
+import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
+import com.mabl.integration.jenkins.domain.ExecutionResult;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.created;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
-import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE;
+import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for REST API calls
  */
-// TODO pull out into abstract test
-public class MablRestApiClientTest {
-
-    // Annotation used only for static rules, so we only startup a single Wiremock instance
-    @ClassRule
-    public static WireMockClassRule wireMockRule = new WireMockClassRule();
-
-    // Pass the above instance to all concrete implementations
-    @Rule
-    public WireMockClassRule instanceRule = wireMockRule;
-
-    private Map<String, String> expectedUrls = new HashMap<String, String>();
+public class MablRestApiClientTest extends AbstractWiremockTest {
 
     @Test
-    public void createDeploymentHappyPathTest() throws IOException, ExecutionException, InterruptedException {
+    public void createDeploymentHappyPathTest() throws IOException, MablSystemError {
 
         final String fakeRestApiKey = "pa$$\\/\\/orD";
         final String environmentId = "foo-env-e";
         final String applicationId = "foo-app-a";
 
         registerPostMapping(
-                MablRestApiClient.DEPLOYMENT_TRIGGER_ENDPOINT,
-                "{\"id\":\"foo-id-v\",\"unknown\":\"dont-break\"}",
-                MablRestApiClient.REST_API_USERNAME_PLACEHOLDER,
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey
         );
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClient(baseUrl, fakeRestApiKey);
-            Future<HttpResponse> responseFuture = client.createDeploymentEvent(environmentId, applicationId);
-            HttpResponse response = responseFuture.get();
-
-            Assert.assertEquals(SC_CREATED, response.getStatusLine().getStatusCode());
-
-            MablRestApiClient.CreateDeploymentResult result = client.parseCreateDeploymentEventReponse(response);
-            Assert.assertEquals("foo-id-v", result.id);
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId);
+            assertEquals("d1To4-GYeZ4nl-4Ag1JyQg-v", result.id);
         } finally {
             if (client != null) {
                 client.close();
@@ -77,100 +48,62 @@ public class MablRestApiClientTest {
         verifyExpectedUrls();
     }
 
-    /**
-     * Register the local file to a mapping and provide full URL path
-     *
-     * @param path             mapped relative path
-     * @param jsonResponse     return json body on hit
-     * @param expectedUsername required username
-     * @param expectedPassword required password
-     * @return mapped URL (full URL)
-     */
-    private String registerPostMapping(
-            final String path,
-            final String jsonResponse,
-            final String expectedUsername,
-            final String expectedPassword
-    ) {
+    @Test
+    public void getExecutionResultHappyPathTest() throws IOException, MablSystemError {
 
-        final String mappedUrl = generatePageUrl(path);
-        expectedUrls.put(path, "POST");
+        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String eventId = "fake-event-id";
 
-        final MappingBuilder mappingBuilder = post(urlPathEqualTo(path))
-                .willReturn(created()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(jsonResponse));
+        registerGetMapping(
+                String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE,eventId),
+                ok(),
+                MablTestConstants.EXECUTION_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKey
+        );
+        final String baseUrl = getBaseUrl();
 
-        mappingBuilder.withBasicAuth(expectedUsername, expectedPassword);
-        mappingBuilder.withHeader("user-agent", new EqualToPattern(PLUGIN_USER_AGENT));
-        mappingBuilder.withHeader("Content-Type", new EqualToPattern("application/json"));
-        mappingBuilder.withRequestBody(
-                new EqualToPattern(
-                        "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\"}"));
-
-        stubFor(mappingBuilder);
-
-        return mappedUrl;
-    }
-
-    /**
-     * Register the local file to a mapping and provide full URL path
-     *
-     * @param path             mapped relative path
-     * @param jsonResponse     return json body on hit
-     * @param expectedUsername required username
-     * @param expectedPassword required password
-     * @return mapped URL (full URL)
-     */
-    private String registerGetMapping(
-            final String path,
-            final String jsonResponse,
-            final String expectedUsername,
-            final String expectedPassword
-    ) {
-
-        final String mappedUrl = generatePageUrl(path);
-        expectedUrls.put(path, "GET");
-
-        final MappingBuilder mappingBuilder = get(urlPathEqualTo(path))
-                .willReturn(created()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(jsonResponse));
-
-        mappingBuilder.withBasicAuth(expectedUsername, expectedPassword);
-        mappingBuilder.withHeader("user-agent", new EqualToPattern(PLUGIN_USER_AGENT));
-
-        stubFor(mappingBuilder);
-
-        return mappedUrl;
-    }
-
-    protected void verifyExpectedUrls() {
-        for (final Map.Entry<String, String> expectedUrlEntry : this.expectedUrls.entrySet()) {
-
-            final String method = expectedUrlEntry.getValue();
-            final String url = expectedUrlEntry.getKey();
-
-            RequestPatternBuilder builder = null;
-
-            if ("GET".equals(method)) {
-                builder = getRequestedFor(urlPathEqualTo(url));
-
-            } else if ("POST".equals(method)) {
-                builder = postRequestedFor(urlPathEqualTo(url));
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            ExecutionResult result = client.getExecutionResults(eventId);
+            assertEquals("succeeded", result.executions.get(0).status);
+            assertTrue("expected success", result.executions.get(0).success);
+        } finally {
+            if (client != null) {
+                client.close();
             }
-
-            verify(builder);
         }
+
+        verifyExpectedUrls();
     }
 
-    private String generatePageUrl(final String path) {
-        return getBaseUrl() + path;
-    }
+    @Test
+    public void getExecutionResultNotFoundTest() throws IOException, MablSystemError {
 
-    private String getBaseUrl() {
-        final int portNumber = wireMockRule.getOptions().portNumber();
-        final String address = wireMockRule.getOptions().bindAddress();
-        return String.format("http://%s:%d", address, portNumber);
+        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String eventId = "fake-event-id";
+
+        registerGetMapping(
+                String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE,eventId),
+                notFound(),
+                MablTestConstants.EXECUTION_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKey
+        );
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            ExecutionResult result = client.getExecutionResults(eventId);
+            assertNull(result);
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+
+        verifyExpectedUrls();
     }
 }

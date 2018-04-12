@@ -7,6 +7,7 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.PrintStream;
@@ -17,7 +18,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
+import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
+import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -29,16 +33,23 @@ public class MablStepBuilder extends Builder {
     private final String restApiKey;
     private final String environmentId;
     private final String applicationId;
+    private final boolean continueOnPlanFailure;
+    private final boolean continueOnMablError;
 
     @DataBoundConstructor
     public MablStepBuilder(
             final String restApiKey,
             final String environmentId,
-            final String applicationId
+            final String applicationId,
+            final boolean continueOnPlanFailure,
+            final boolean continueOnMablError
+
     ) {
         this.restApiKey = restApiKey;
         this.environmentId = environmentId;
         this.applicationId = applicationId;
+        this.continueOnPlanFailure = continueOnPlanFailure;
+        this.continueOnMablError = continueOnMablError;
     }
 
     // Accessors to be used by Jelly UI templates
@@ -62,27 +73,36 @@ public class MablStepBuilder extends Builder {
             final BuildListener listener
     ) throws InterruptedException {
 
-        PrintStream outputStream = listener.getLogger();
+        final PrintStream outputStream = listener.getLogger();
+        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, restApiKey);
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
                 outputStream,
-                restApiKey,
+                EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS,
                 environmentId,
-                applicationId
+                applicationId,
+                continueOnPlanFailure,
+                continueOnMablError
         );
+
+        // TODO crop and cleanup if someone entered string with "key:XXXX"
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
         try {
             return runnerFuture.get(EXECUTION_TIMEOUT_SECONDS, SECONDS);
-        } catch (ExecutionException e) {
-            outputStream.println("Execution error during mabl deployment step");
-            e.printStackTrace(outputStream);
-        } catch (TimeoutException e) {
-            outputStream.printf("Execution time limit of %d seconds exceeded by mabl deployment step\n", EXECUTION_TIMEOUT_SECONDS);
-        }
 
-        return true;
+        } catch (ExecutionException e) {
+            outputStream.println("There was an execution error trying to run your journeys in mabl");
+            e.printStackTrace(outputStream);
+            return continueOnMablError;
+
+        } catch (TimeoutException e) {
+            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.\n"+
+                    "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
+            return continueOnMablError;
+        }
     }
 
     @Override
@@ -93,7 +113,7 @@ public class MablStepBuilder extends Builder {
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
-    @Extension
+    @Extension @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
 
         public MablStepDescriptor() {
@@ -102,7 +122,6 @@ public class MablStepBuilder extends Builder {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> clazz) {
-//            return FreeStyleProject.class.isAssignableFrom(clazz);
             return true; // Plugin may be used by all project types
         }
 

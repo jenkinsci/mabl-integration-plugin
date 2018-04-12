@@ -15,13 +15,14 @@
     <groupId>com.mabl.integration.jenkins</groupId>
     <artifactId>mabl-integration</artifactId>
     <packaging>hpi</packaging>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
 
     <name>mabl journey runner</name>
     <description>Launch mabl journeys from CI builds</description>
     <url>https://help.mabl.com/v1.0/docs/jenkins-integration</url>
 
     <properties>
+        <!-- Last Jenkins LTS release -->
         <jenkins.version>1.580.1</jenkins.version>
         <jenkins-test-harness.version>1.580.1</jenkins-test-harness.version>
         <release.skipTests>false</release.skipTests>
@@ -43,16 +44,16 @@
 
     <developers>
         <developer>
-            <id>twistedpair</id>
+            <id>mabl</id>
             <name>Joseph Lust</name>
+            <email>joe@mabl.com</email>
         </developer>
     </developers>
 
-    <!-- TODO change to Jenkins Github repo once cloned -->
     <scm>
-        <connection>scm:git:git://github.com:mablhq/jenkins-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:mablhq/jenkins-plugin.git</developerConnection>
-        <url>https://github.com/mablhq/jenkins-plugin</url>
+        <connection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/mabl-integration-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -77,10 +78,11 @@
     </pluginRepositories>
 
     <dependencies>
+        <!-- 1.14+ breaks dependency limitations for 1.x builds -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpasyncclient</artifactId>
-            <version>4.1.3</version>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.13</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -98,6 +100,11 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.3.10</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>

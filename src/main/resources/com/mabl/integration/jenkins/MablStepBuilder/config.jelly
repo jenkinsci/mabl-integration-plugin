@@ -1,16 +1,24 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-  <f:entry title="API Key" field="restApiKey">
+  <f:entry title="${%API Key}" field="restApiKey">
     <f:textbox/>
   </f:entry>
 
-  <f:entry title="Application ID" field="applicationId">
+  <f:entry title="${%Application ID}" field="applicationId">
     <f:textbox/>
   </f:entry>
 
-  <f:entry title="Environment ID" field="environmentId">
+  <f:entry title="${%Environment ID}" field="environmentId">
     <f:textbox/>
   </f:entry>
 
+  <f:advanced>
+    <f:entry title="${%Continue on plan failure(s)}" field="continueOnPlanFailure">
+      <f:checkbox default="false" />
+    </f:entry>
+    <f:entry title="${%Continue on mabl API failure}" field="continueOnMablError">
+      <f:checkbox default="false" />
+    </f:entry>
+  </f:advanced>
 </j:jelly>
