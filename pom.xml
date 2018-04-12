@@ -57,11 +57,6 @@
         <tag>HEAD</tag>
     </scm>
 
-    <issueManagement>
-        <system>JIRA</system>
-        <url>https://issues.jenkins-ci.org/browse/JENKINS/component/15896</url>
-    </issueManagement>
-
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
