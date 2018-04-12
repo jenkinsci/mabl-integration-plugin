@@ -1,41 +1,54 @@
 package com.mabl.integration.jenkins;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
+import com.google.common.collect.ImmutableSet;
+import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
+import com.mabl.integration.jenkins.domain.ExecutionResult;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Set;
 import java.util.concurrent.Callable;
-
-import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
-import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
 
 /**
  * mabl runner to launch all plans for a given
  * environment and application
+ *
+ * NOTE: Runner will attempt to run until all tests are completion.
+ * It is the responsibility of the Step to terminate at max time.
  */
 public class MablStepDeploymentRunner implements Callable<Boolean> {
 
-    private final String restApiKey;
+    private static final long RESULT_POLLING_INTERVAL_MILLISECONDS = 1000;
+    private static final Set<String> COMPLETE_STATUSES = ImmutableSet.of(
+      "succeeded",
+      "failed",
+      "cancelled",
+      "completed",
+      "terminated",
+      "post_execution" // ensure bug is fixed
+    );
+
+    private final MablRestApiClient client;
+    private final PrintStream outputStream;
+
     private final String environmentId;
     private final String applicationId;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
-    private final PrintStream outputStream;
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
     @DataBoundConstructor
     public MablStepDeploymentRunner(
+            final MablRestApiClient client,
             final PrintStream outputStream,
-            final String restApiKey,
             final String environmentId,
             final String applicationId,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError
     ) {
         this.outputStream = outputStream;
-        this.restApiKey = restApiKey;
+        this.client = client;
         this.environmentId = environmentId;
         this.applicationId = applicationId;
         this.continueOnPlanFailure = continueOnPlanFailure;
@@ -47,12 +60,27 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         try {
             execute();
             return true;
+
         } catch (MablSystemError error) {
-            // TODO consolidate printing error messages
+            printException(error);
             return continueOnMablError;
+
         } catch (MablPlanExecutionFailure failure) {
-            // TODO consolidate printing error messages
+            printException(failure);
             return continueOnPlanFailure;
+        }
+
+        //        catch (Exception e) {
+//            outputStream.println("Unexpected exception");
+//            e.printStackTrace(outputStream);
+//        }
+    }
+
+    private void printException(final Exception exception) {
+        outputStream.print(exception.getMessage());
+
+        if (exception.getCause() != null) {
+            exception.getCause().printStackTrace(outputStream);
         }
     }
 
@@ -64,40 +92,44 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 applicationId
         );
 
-        MablRestApiClient client = null;
         try {
-            client = new MablRestApiClient(MABL_REST_API_BASE_URL, restApiKey);
-            CloseableHttpResponse response = client.createDeploymentEvent(environmentId, applicationId);
+            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId);
 
-            final int statusCode = response.getStatusLine().getStatusCode();
-            if(SC_CREATED != response.getStatusLine().getStatusCode()) {
-                outputStream.printf("Unexpected status from mabl API on deployment event creation: %d\n"+
-                        "body: [%s]", statusCode, EntityUtils.toString((response.getEntity())));
+            try {
 
-                throw new MablSystemError(String.format(
-                        "Unexpected status from mabl API on deployment event creation: %d", statusCode
-                ));
+                // Poll until we are successful or failed - note execution service is responsible for timeout
+                ExecutionResult executionResult;
+                do {
+                    Thread.sleep(RESULT_POLLING_INTERVAL_MILLISECONDS);
+                    executionResult = client.getExecutionResults(deployment.id);
+
+                    if(executionResult==null ) {
+                        // No such id - this shouldn't happen
+                        throw new MablSystemError(String.format("No deployment event for id [%s] in mabl API", deployment.id));
+                    }
+
+                } while(!allPlansComplete(executionResult));
+
+
+                if(!allPlansSuccess(executionResult)) {
+                    // TODO better logging specifics about which plan
+                    throw new MablPlanExecutionFailure("Plans experienced failure");
+                }
+
+
+            } catch (InterruptedException e) {
+                // TODO better error handling/logging
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
             }
 
-            // TODO capture test failure
-            if(false) {
-                throw new MablPlanExecutionFailure("Plan XXX failed");
-            }
-
-            MablRestApiClient.CreateDeploymentResult result = client.parseCreateDeploymentEventResponse(response);
-            final String deploymentEventId = result.id;
-
-            outputStream.printf("Deployment event created with id [%s]\n", deploymentEventId);
+            outputStream.printf("Deployment event created with id [%s]\n", deployment.id);
             outputStream.println("mabl deployment step complete.");
             return;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             outputStream.println("Request error creating deployment event via mabl API.");
         }
-//        catch (Exception e) {
-//            outputStream.println("Unexpected exception");
-//            e.printStackTrace(outputStream);
-//        }
+
         finally {
             if (client != null) {
                 client.close();
@@ -105,5 +137,27 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
 
         throw new MablSystemError("Unable to properly execute plans");
+    }
+
+    private boolean allPlansComplete(final ExecutionResult result) {
+
+        boolean isComplete = true;
+
+        for(ExecutionResult.ExecutionSummary summary : result.executions) {
+            isComplete &= COMPLETE_STATUSES.contains(summary.status.toLowerCase());
+        }
+
+        return isComplete;
+    }
+
+    private boolean allPlansSuccess(final ExecutionResult result) {
+
+        boolean isSuccess = true;
+
+        for(ExecutionResult.ExecutionSummary summary : result.executions) {
+            isSuccess &= summary.success;
+        }
+
+        return isSuccess;
     }
 }

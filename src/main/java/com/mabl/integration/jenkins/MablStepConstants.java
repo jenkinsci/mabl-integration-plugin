@@ -13,6 +13,6 @@ class MablStepConstants {
     static final String BUILD_STEP_DISPLAY_NAME = "Run mabl journeys";
     static final String MABL_REST_API_BASE_URL = "https://api.mabl.com";
     static final String MABL_WEBAPP_BASE_URL = "https://app.mabl.com";
-    static final long EXECUTION_TIMEOUT_SECONDS = 600;
+    static final int EXECUTION_TIMEOUT_SECONDS = 600;
     static final long REQUEST_TIMEOUT_SECONDS = 60;
 }

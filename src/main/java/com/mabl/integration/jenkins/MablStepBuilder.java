@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
+import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -72,10 +73,11 @@ public class MablStepBuilder extends Builder {
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
+        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, restApiKey);
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
                 outputStream,
-                restApiKey,
                 environmentId,
                 applicationId,
                 continueOnPlanFailure,
@@ -88,9 +90,11 @@ public class MablStepBuilder extends Builder {
         Future<Boolean> runnerFuture = executorService.submit(runner);
         try {
             return runnerFuture.get(EXECUTION_TIMEOUT_SECONDS, SECONDS);
+
         } catch (ExecutionException e) {
             outputStream.println("Execution error during mabl deployment step");
             e.printStackTrace(outputStream);
+
         } catch (TimeoutException e) {
             outputStream.printf("Execution time limit of %d seconds exceeded by mabl deployment step\n", EXECUTION_TIMEOUT_SECONDS);
         }
@@ -115,7 +119,6 @@ public class MablStepBuilder extends Builder {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> clazz) {
-//            return FreeStyleProject.class.isAssignableFrom(clazz);
             return true; // Plugin may be used by all project types
         }
 
