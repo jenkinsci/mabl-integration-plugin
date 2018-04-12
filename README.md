@@ -21,3 +21,19 @@ You can also install the `.hpi` file from the web UI by visting
 2. Select **Run mabl journeys** from the **Add build step** drop down list
 3. Copy your API key, `environment_id`, and `application_id` from the [API Settings Page](https://help.mabl.com/v1.0/docs/triggering-tests-via-the-api)
 4. Save and run your build
+
+## Local Development
+
+Overview of how to launch a Jenkins Docker instance with Jenkins, then build the plugin and deploy it that instance.
+
+```bash
+# Launch Jenkins
+docker run -d -p 9090:8080 --name=jenkins-master jenkins
+
+# Setup your Jenkins instance
+
+# Build and deploy plugin to Jenkins
+mvn clean package \
+  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
+  && docker restart jenkins-master
+```
