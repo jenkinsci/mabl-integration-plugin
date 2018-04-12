@@ -19,7 +19,7 @@
 
     <name>mabl journey runner</name>
     <description>Launch mabl journeys from CI builds</description>
-    <url>https://help.mabl.com/v1.0/docs/jenkins-integration</url>
+    <url>https://wiki.jenkins.io/display/JENKINS/mabl+Integration</url>
 
     <properties>
         <!-- Last Jenkins LTS release -->
@@ -57,7 +57,6 @@
         <tag>HEAD</tag>
     </scm>
 
-    <!-- TODO add the mabl page in Jenkins JIRA here -->
     <issueManagement>
         <system>JIRA</system>
         <url>https://issues.jenkins-ci.org/browse/JENKINS/component/15896</url>
