@@ -73,16 +73,19 @@ public class ExecutionResult {
     @SuppressWarnings("WeakerAccess")
     public static class JourneySummary {
         public final String id;
+        public final String name;
         public final String href;
         public final String appHref;
 
         @JsonCreator
         public JourneySummary(
                 @JsonProperty("id") final String id,
+                @JsonProperty("name") final String name,
                 @JsonProperty("href") final String href,
                 @JsonProperty("app_href") final String appHref
         ) {
             this.id = id;
+            this.name = name;
             this.href = href;
             this.appHref = appHref;
         }

@@ -156,7 +156,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private void printFinalStatuses(final ExecutionResult result) {
 
-        outputStream.println("The Final Plan states in mabl:");
+        outputStream.println("The final Plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
             outputStream.printf("  Plan [%s] is %s in state [%s]\n", safePlanName(summary), successState, summary.status);
@@ -169,7 +169,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             outputStream.printf("  Plan [%s] is [%s]\n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                outputStream.printf("  Journey [%s] is [%s]\n", journeyResult.id, journeyResult.status);
+                outputStream.printf("  Journey [%s] is [%s]\n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
             }
         }
     }
@@ -184,8 +184,26 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private String safePlanName(final ExecutionResult.ExecutionSummary summary) {
         // Defensive treatment of possibly malformed future payloads
-        return summary.plan != null && summary.plan.name != null
-                ? summary.plan.name :
-                "<Unknown Plan>";
+        return summary.plan != null &&
+                summary.plan.name != null &&
+                !summary.plan.name.isEmpty()
+                    ? summary.plan.name :
+                    "<Unnamed Plan>";
+    }
+
+    private String safeJourneyName(
+            final ExecutionResult.ExecutionSummary summary,
+            final String journeyId
+    ) {
+        // Defensive treatment of possibly malformed future payloads
+        String journeyName = "<Unnamed Journey>";
+        for(ExecutionResult.JourneySummary journeySummary: summary.journeys) {
+            if(journeySummary.id.equals(journeyId) && !journeySummary.name.isEmpty()) {
+                journeyName = journeySummary.name;
+                break;
+            }
+        }
+
+        return journeyName;
     }
 }
