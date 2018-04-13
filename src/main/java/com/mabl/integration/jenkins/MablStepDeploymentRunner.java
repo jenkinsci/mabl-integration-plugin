@@ -62,7 +62,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     @Override
     public Boolean call() {
         try {
-            outputStream.printf("\nmabl Jenkins plugin v%s running...\n", PLUGIN_VERSION);
+            outputStream.printf("%nmabl Jenkins plugin v%s running...%n", PLUGIN_VERSION);
             execute();
             return true;
 
@@ -75,7 +75,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             return continueOnPlanFailure;
 
         } catch (Exception e) {
-            outputStream.printf("Unexpected %s exception\n", PLUGIN_NAME);
+            outputStream.printf("Unexpected %s exception%n", PLUGIN_NAME);
             e.printStackTrace(outputStream);
             return continueOnMablError;
         }
@@ -87,14 +87,14 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void execute() throws MablSystemError, MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
-        outputStream.printf("mabl is creating a deployment event:\n  environment_id: %s \n  application_id: %s\n",
+        outputStream.printf("mabl is creating a deployment event:%n  environment_id: %s %n  application_id: %s%n",
                 environmentId,
                 applicationId
         );
 
         try {
             final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId);
-            outputStream.printf("Deployment event was created with id [%s] in mabl.\n", deployment.id);
+            outputStream.printf("Deployment event was created with id [%s] in mabl.%n", deployment.id);
 
             try {
 
@@ -160,7 +160,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         outputStream.println("The final Plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
-            outputStream.printf("  Plan [%s] is %s in state [%s]\n", safePlanName(summary), successState, summary.status);
+            outputStream.printf("  Plan [%s] is %s in state [%s]%n", safePlanName(summary), successState, summary.status);
         }
     }
 
@@ -168,9 +168,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
         outputStream.println("Running mabl journey(s) status update:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
-            outputStream.printf("  Plan [%s] is [%s]\n", safePlanName(summary), summary.status);
+            outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                outputStream.printf("  Journey [%s] is [%s]\n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
+                outputStream.printf("  Journey [%s] is [%s]%n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
             }
         }
     }

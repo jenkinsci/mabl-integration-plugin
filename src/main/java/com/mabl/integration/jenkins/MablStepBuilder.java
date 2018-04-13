@@ -99,7 +99,7 @@ public class MablStepBuilder extends Builder {
             return continueOnMablError;
 
         } catch (TimeoutException e) {
-            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.\n"+
+            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n"+
                     "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
             return continueOnMablError;
         }

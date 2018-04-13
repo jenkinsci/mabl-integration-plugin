@@ -1,5 +1,7 @@
 ![mabl logo](https://avatars3.githubusercontent.com/u/25963599?s=100&v=4)
 # mabl Jenkins Plugin
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/mabl-integration-plugin/job/master/7/badge/icon)](https://ci.jenkins.io/job/Plugins/job/mabl-integration-plugin/job/master/7/)
+
 This plugin allows easy launching of [mabl](https://www.mabl.com) journeys as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
 # Plugin Installation

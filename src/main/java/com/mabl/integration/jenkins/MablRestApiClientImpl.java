@@ -145,7 +145,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             default:
 
                 final String message = String.format(
-                        "Unexpected status from mabl API on execution result fetch: %d\n" +
+                        "Unexpected status from mabl API on execution result fetch: %d%n" +
                                 "body: [%s]\n", statusCode, EntityUtils.toString((response.getEntity())));
 
                 throw new MablSystemError(message);
@@ -157,8 +157,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         final int statusCode = response.getStatusLine().getStatusCode();
         if (SC_CREATED != response.getStatusLine().getStatusCode()) {
             final String message = String.format(
-                    "Unexpected status from mabl API on deployment event creation: %d\n" +
-                            "body: [%s]\n", statusCode, EntityUtils.toString((response.getEntity())));
+                    "Unexpected status from mabl API on deployment event creation: %d%n" +
+                            "body: [%s]%n", statusCode, EntityUtils.toString((response.getEntity())));
 
             throw new MablSystemError(message);
         }
