@@ -10,7 +10,8 @@ import java.io.PrintStream;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static com.mabl.integration.jenkins.MablStepConstants.MABL_PLUGIN_NAME;
+import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_NAME;
+import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_VERSION;
 
 /**
  * mabl runner to launch all plans for a given
@@ -61,7 +62,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     @Override
     public Boolean call() {
         try {
-            outputStream.print("\nmabl Jenkins plugging running...\n");
+            outputStream.printf("\nmabl Jenkins plugin v%s running...\n", PLUGIN_VERSION);
             execute();
             return true;
 
@@ -74,7 +75,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             return continueOnPlanFailure;
 
         } catch (Exception e) {
-            outputStream.printf("Unexpected %s exception\n", MABL_PLUGIN_NAME);
+            outputStream.printf("Unexpected %s exception\n", PLUGIN_NAME);
             e.printStackTrace(outputStream);
             return continueOnMablError;
         }
