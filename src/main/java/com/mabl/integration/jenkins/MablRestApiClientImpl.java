@@ -26,6 +26,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
@@ -94,7 +95,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private Header getBasicAuthHeader(
             final String restApiKey
     ) {
-        final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey).getBytes());
+        final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey)
+                .getBytes(Charset.forName("UTF-8")));
         return new BasicHeader("Authorization", "Basic " + encoded);
     }
 
@@ -146,7 +148,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
                 final String message = String.format(
                         "Unexpected status from mabl API on execution result fetch: %d%n" +
-                                "body: [%s]\n", statusCode, EntityUtils.toString((response.getEntity())));
+                                "body: [%s]%n", statusCode, EntityUtils.toString((response.getEntity())));
 
                 throw new MablSystemError(message);
         }
