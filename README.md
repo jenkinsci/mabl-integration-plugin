@@ -39,3 +39,14 @@ mvn clean package \
   && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
   && docker restart jenkins-master
 ```
+
+## Deployment
+
+Before making a new plugin release, ensure code is in high quality, fully tested state. See [extra checks](https://wiki.jenkins.io/display/JENKINS/Plugin+Release+Tips).
+
+1. Update your `~/.m2/settings.xml` according to the [Jenkins docs](https://wiki.jenkins.io/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkins-ci.org).
+2. Setup and run a GitHub [ssh agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent).
+3. Run `mvn release:prepare release:perform -B` from the HEAD of master
+4. Run `mvn deploy` on sucess of above step.
+
+Wait ~8 hours for plugin to become GA across all Jenkins instances under the "Available Plugins" listing.
