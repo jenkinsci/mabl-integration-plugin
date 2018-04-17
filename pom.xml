@@ -9,13 +9,13 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>2.6</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.mabl.integration.jenkins</groupId>
     <artifactId>mabl-integration</artifactId>
     <packaging>hpi</packaging>
-    <version>0.0.5</version>
+    <version>0.0.5-SNAPSHOT</version>
 
     <name>mabl journey runner</name>
     <description>Launch mabl journeys from CI builds</description>
