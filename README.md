@@ -4,8 +4,10 @@
 
 This plugin allows easy launching of [mabl](https://www.mabl.com) journeys as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
+See [**official mabl plugin site**](https://plugins.jenkins.io/mabl-integration) for documentation.
+
 # Plugin Installation
-The plugin is not yet available from the Jenkins plugin repo (coming soon), so you will need to build and install from source.
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.580+` server from the *Available Plugins* tab by searing for "mabl".
 
 ## Building from Source
 
