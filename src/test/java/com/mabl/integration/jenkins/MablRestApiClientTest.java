@@ -19,8 +19,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class MablRestApiClientTest extends AbstractWiremockTest {
 
+    private static final String EXPECTED_DEPLOYMENT_EVENT_ID = "d1To4-GYeZ4nl-4Ag1JyQg-v";
+
     @Test
-    public void createDeploymentHappyPathTest() throws IOException, MablSystemError {
+    public void createDeploymentAllParametersHappyPathTest() throws IOException, MablSystemError {
 
         final String fakeRestApiKey = "pa$$\\/\\/orD";
         final String environmentId = "foo-env-e";
@@ -30,15 +32,62 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey
+                fakeRestApiKey,
+                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\"}"
         );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
+    }
+
+    @Test
+    public void createDeploymentOnlyEnvironmentHappyPathTest() throws IOException, MablSystemError {
+
+        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String environmentId = "foo-env-e";
+        final String applicationId = null;
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKey,
+                "{\"environment_id\":\"foo-env-e\"}"
+        );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
+    }
+
+    @Test
+    public void createDeploymentOnlyApplicationHappyPathTest() throws IOException, MablSystemError {
+
+        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String environmentId = null;
+        final String applicationId = "foo-app-a";
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKey,
+                "{\"application_id\":\"foo-app-a\"}"
+        );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
+    }
+
+    private void assertSuccessfulCreateDeploymentRequest(
+            final String restApiKey,
+            final String environmentId,
+            final String applicationId
+    ) throws IOException, MablSystemError {
+
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, restApiKey);
             CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId);
-            assertEquals("d1To4-GYeZ4nl-4Ag1JyQg-v", result.id);
+            assertEquals(EXPECTED_DEPLOYMENT_EVENT_ID, result.id);
         } finally {
             if (client != null) {
                 client.close();

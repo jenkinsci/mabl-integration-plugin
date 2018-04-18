@@ -1,5 +1,6 @@
 package com.mabl.integration.jenkins;
 
+import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -7,8 +8,10 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.io.PrintStream;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +26,7 @@ import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_S
 import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.apache.commons.lang.StringUtils.trimToNull;
 
 /**
  * mabl custom build step
@@ -45,9 +49,9 @@ public class MablStepBuilder extends Builder {
             final boolean continueOnMablError
 
     ) {
-        this.restApiKey = restApiKey;
-        this.environmentId = environmentId;
-        this.applicationId = applicationId;
+        this.restApiKey = trimToNull(restApiKey);
+        this.environmentId = trimToNull(environmentId);
+        this.applicationId = trimToNull(applicationId);
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
     }
@@ -86,8 +90,6 @@ public class MablStepBuilder extends Builder {
                 continueOnMablError
         );
 
-        // TODO crop and cleanup if someone entered string with "key:XXXX"
-
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
         try {
@@ -99,7 +101,7 @@ public class MablStepBuilder extends Builder {
             return continueOnMablError;
 
         } catch (TimeoutException e) {
-            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n"+
+            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n" +
                     "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
             return continueOnMablError;
         }
@@ -113,7 +115,8 @@ public class MablStepBuilder extends Builder {
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
-    @Extension @Symbol(PLUGIN_SYMBOL)
+    @Extension
+    @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
 
         public MablStepDescriptor() {
@@ -128,6 +131,15 @@ public class MablStepBuilder extends Builder {
         @Override
         public String getDisplayName() {
             return BUILD_STEP_DISPLAY_NAME;
+        }
+
+
+        public FormValidation doValidateForm(
+                @QueryParameter("restApiKey") final String restApiKey,
+                @QueryParameter("environmentId") final String environmentId,
+                @QueryParameter("applicationId") final String applicationId
+        ) {
+            return MablStepBuilderValidator.validateForm(restApiKey, environmentId, applicationId);
         }
     }
 }

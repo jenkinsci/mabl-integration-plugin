@@ -8,7 +8,7 @@ import java.util.jar.Manifest;
 /**
  * mabl custom build step
  */
-class MablStepConstants {
+public class MablStepConstants {
     static final String PLUGIN_SYMBOL = "mabl";
     static final String PLUGIN_NAME = "mabl-integration-plugin";
     private static final String PLUGIN_ARTIFACT_NAME = "mabl-integration";
@@ -23,6 +23,11 @@ class MablStepConstants {
     static final int EXECUTION_TIMEOUT_SECONDS = 3600;
     static final int REQUEST_TIMEOUT_MILLISECONDS = 60000;
     static final long EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS = 10000;
+
+    // Form labels
+    public static final String FORM_API_KEY_LABEL = "API Key";
+    public static final String FORM_ENVIRONMENT_ID_LABEL = "Application ID";
+    public static final String FORM_APPLICATION_ID_LABEL = "Environment ID";
 
 
     /**

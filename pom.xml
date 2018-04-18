@@ -15,7 +15,7 @@
     <packaging>hpi</packaging>
     <version>0.0.6-SNAPSHOT</version>
 
-    <name>mabl journey runner</name>
+    <name>mabl</name>
     <description>Launch mabl journeys from CI builds</description>
     <url>https://wiki.jenkins.io/display/JENKINS/mabl+Integration</url>
 

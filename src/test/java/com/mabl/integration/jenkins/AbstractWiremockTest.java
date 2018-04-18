@@ -60,7 +60,8 @@ public abstract class AbstractWiremockTest {
             final String path,
             final String jsonResponse,
             final String expectedUsername,
-            final String expectedPassword
+            final String expectedPassword,
+            final String expectedBody
     ) {
 
         final String mappedUrl = generatePageUrl(path);
@@ -74,9 +75,7 @@ public abstract class AbstractWiremockTest {
         mappingBuilder.withBasicAuth(expectedUsername, expectedPassword);
         mappingBuilder.withHeader("user-agent", new EqualToPattern(PLUGIN_USER_AGENT));
         mappingBuilder.withHeader("Content-Type", new EqualToPattern("application/json"));
-        mappingBuilder.withRequestBody(
-                new EqualToPattern(
-                        "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\"}"));
+        mappingBuilder.withRequestBody(new EqualToPattern(expectedBody));
 
         stubFor(mappingBuilder);
 
