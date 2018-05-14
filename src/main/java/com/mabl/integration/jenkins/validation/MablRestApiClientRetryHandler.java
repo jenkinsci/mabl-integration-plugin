@@ -16,8 +16,8 @@ public class MablRestApiClientRetryHandler implements ServiceUnavailableRetryStr
             SC_NOT_IMPLEMENTED,
             SC_BAD_GATEWAY
     ));
-    private final int maxRetries = 5;
-    private final long retryInterval = 1000L;
+    private static final int maxRetries = 5;
+    private static final long retryInterval = 1000L;
 
     @Override
     public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
