@@ -11,7 +11,7 @@ import static org.apache.commons.httpclient.HttpStatus.SC_NOT_IMPLEMENTED; // 50
 import static org.apache.commons.httpclient.HttpStatus.SC_BAD_GATEWAY; // 502
 
 public class MablRestApiClientRetryHandler extends DefaultServiceUnavailableRetryStrategy {
-    private final ArrayList<Integer> retryStatusCodes = new ArrayList<>(Arrays.asList(SC_NOT_IMPLEMENTED, SC_BAD_GATEWAY));
+    private final ArrayList<Integer> retryStatusCodes = new ArrayList<Integer>(Arrays.asList(SC_NOT_IMPLEMENTED, SC_BAD_GATEWAY));
     private final int maxExecutionCount = 5;
 
     @Override
