@@ -7,11 +7,18 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for REST API calls
@@ -185,24 +192,25 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             final int status,
             final int numTimes
     ) {
-        String state = Scenario.STARTED;
+        String whenState = Scenario.STARTED;
         for(int i=1;i<=numTimes;i++) {
+            String willState = "Requested "+i+" Times";
             stubFor(post(urlEqualTo(postUrl))
                     .inScenario(scenario)
-                    .whenScenarioStateIs(state)
-                    .willSetStateTo("Requested "+i+" Times")
+                    .whenScenarioStateIs(whenState)
+                    .willSetStateTo(willState)
                     .willReturn(aResponse()
                             .withStatus(status)
                             .withHeader("Content-Type", "application/json")
                             .withBody(""+status))
             );
 
-            state = "Requested "+i+" Times";
+            whenState = willState;
         }
 
         stubFor(post(urlEqualTo(postUrl))
                 .inScenario(scenario)
-                .whenScenarioStateIs(state)
+                .whenScenarioStateIs(whenState)
                 .willReturn(aResponse()
                         .withStatus(SC_CREATED)
                         .withHeader("Content-Type", "application/json")
