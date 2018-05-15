@@ -1,18 +1,17 @@
 package com.mabl.integration.jenkins;
 
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
+import static org.junit.Assert.*;
 
 /**
  * Unit test for REST API calls
@@ -154,5 +153,60 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         }
 
         verifyExpectedUrls();
+    }
+
+    @Test(expected = MablSystemError.class)
+    public void apiClientDoesntRetryOn503() throws IOException, MablSystemError {
+        registerPostCreateRetryMappings("/events/deployment", "503", 503, 1);
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a");
+    }
+
+    @Test
+    public void apiClientRetriesOn501() throws IOException, MablSystemError {
+        registerPostCreateRetryMappings("/events/deployment", "501", 501, 1);
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a");
+    }
+
+    @Test
+    public void apiClientRetriesOn501MaxtimesSuccess() throws IOException, MablSystemError {
+        registerPostCreateRetryMappings("/events/deployment", "501", 501, 5);
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a");
+    }
+
+    @Test(expected = MablSystemError.class)
+    public void apiClientRetriesOn501OverMaxtimesFailure() throws IOException, MablSystemError {
+        registerPostCreateRetryMappings("/events/deployment", "501", 501, 6);
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a");
+    }
+
+    private void registerPostCreateRetryMappings(
+            final String postUrl,
+            final String scenario,
+            final int status,
+            final int numTimes
+    ) {
+        String state = Scenario.STARTED;
+        for(int i=1;i<=numTimes;i++) {
+            stubFor(post(urlEqualTo(postUrl))
+                    .inScenario(scenario)
+                    .whenScenarioStateIs(state)
+                    .willSetStateTo("Requested "+i+" Times")
+                    .willReturn(aResponse()
+                            .withStatus(status)
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(""+status))
+            );
+
+            state = "Requested "+i+" Times";
+        }
+
+        stubFor(post(urlEqualTo(postUrl))
+                .inScenario(scenario)
+                .whenScenarioStateIs(state)
+                .willReturn(aResponse()
+                        .withStatus(SC_CREATED)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON))
+        );
     }
 }
