@@ -9,7 +9,7 @@ import java.util.List;
  * mabl result from deployment event creation
  */
 
-public class ExecutionResult {
+public class ExecutionResult extends ApiResult {
     public List<ExecutionSummary> executions;
 
     @JsonCreator

@@ -5,9 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.mabl.integration.jenkins.domain.ApiResult;
 import com.mabl.integration.jenkins.domain.CreateDeploymentPayload;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
+import com.mabl.integration.jenkins.domain.GetApiKeyResult;
+import com.mabl.integration.jenkins.domain.GetApplicationsResult;
+import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import hudson.remoting.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -56,6 +60,9 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String REST_API_USERNAME_PLACEHOLDER = "key";
     static final String DEPLOYMENT_TRIGGER_ENDPOINT = "/events/deployment";
     static final String DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE = "/execution/result/event/%s";
+    static final String GET_ORGANIZATION_ENDPOINT_TEMPLATE = "/apiKeys/%s";
+    static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
+    static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -120,30 +127,47 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         request.addHeader(getBasicAuthHeader(restApiKey));
         request.addHeader(JSON_TYPE_HEADER);
 
-        return parseCreateDeploymentEventResponse(httpClient.execute(request));
+        return (CreateDeploymentResult) parseApiResult(httpClient.execute(request), CreateDeploymentResult.class);
     }
 
     @Override
     public ExecutionResult getExecutionResults(String eventId) throws IOException, MablSystemError {
-
         final String url = restApiBaseUrl + String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId);
-        final HttpGet request = new HttpGet(url);
-
-        request.addHeader(getBasicAuthHeader(restApiKey));
-
-        return parseExecutionResultResponse(httpClient.execute(request));
+        return (ExecutionResult) parseApiResult(httpClient.execute(buildGetRequest(url)), ExecutionResult.class);
     }
 
-    private ExecutionResult parseExecutionResultResponse(final HttpResponse response) throws IOException, MablSystemError {
+    public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
+        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
+        return (GetApiKeyResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
+    }
 
-        // TODO handle key error
-        // TODO handle not found
+    public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemError {
+        final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
+        return (GetApplicationsResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
+    }
 
+    public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException, MablSystemError {
+        final String url = restApiBaseUrl + String.format(GET_ENVIRONMENTS_ENDPOINT_TEMPLATE, organizationId);
+        return (GetEnvironmentsResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
+    }
+
+    private HttpGet buildGetRequest(String url) throws MablSystemError {
+        try {
+            final HttpGet request = new HttpGet(url);
+            request.addHeader(getBasicAuthHeader(restApiKey));
+            return request;
+        } catch (IllegalArgumentException e) {
+            throw new MablSystemError(String.format("Unexpecetd status from mabl trying to build API url: %s", url));
+        }
+    }
+
+    private ApiResult parseApiResult(final HttpResponse response, Class resultClass) throws IOException, MablSystemError {
         final int statusCode = response.getStatusLine().getStatusCode();
 
         switch (statusCode) {
-            case SC_OK:
-                return objectMapper.reader(ExecutionResult.class).readValue(response.getEntity().getContent());
+            case SC_OK: // fall through case
+            case SC_CREATED:
+                return objectMapper.reader(resultClass).readValue(response.getEntity().getContent());
             case SC_NOT_FOUND:
                 return null;
             default:
@@ -154,20 +178,6 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
                 throw new MablSystemError(message);
         }
-    }
-
-    private CreateDeploymentResult parseCreateDeploymentEventResponse(final HttpResponse response) throws IOException, MablSystemError {
-
-        final int statusCode = response.getStatusLine().getStatusCode();
-        if (SC_CREATED != response.getStatusLine().getStatusCode()) {
-            final String message = String.format(
-                    "Unexpected status from mabl API on deployment event creation: %d%n" +
-                            "body: [%s]%n", statusCode, EntityUtils.toString((response.getEntity())));
-
-            throw new MablSystemError(message);
-        }
-
-        return objectMapper.reader(CreateDeploymentResult.class).readValue(response.getEntity().getContent());
     }
 
     private RequestConfig getDefaultRequestConfig() {

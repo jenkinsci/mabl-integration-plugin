@@ -6,11 +6,11 @@
   </f:entry>
 
   <f:entry title="${%Application ID}" field="applicationId">
-    <f:textbox/>
+    <f:select />
   </f:entry>
 
   <f:entry title="${%Environment ID}" field="environmentId">
-    <f:textbox/>
+    <f:select />
   </f:entry>
 
   <f:validateButton

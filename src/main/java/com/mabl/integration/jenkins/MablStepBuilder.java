@@ -1,5 +1,8 @@
 package com.mabl.integration.jenkins;
 
+import com.mabl.integration.jenkins.domain.GetApiKeyResult;
+import com.mabl.integration.jenkins.domain.GetApplicationsResult;
+import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.Extension;
 import hudson.Launcher;
@@ -9,10 +12,12 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -68,7 +73,6 @@ public class MablStepBuilder extends Builder {
     public String getApplicationId() {
         return applicationId;
     }
-
 
     @Override
     public boolean perform(
@@ -141,5 +145,72 @@ public class MablStepBuilder extends Builder {
         ) {
             return MablStepBuilderValidator.validateForm(restApiKey, environmentId, applicationId);
         }
+
+        public ListBoxModel doFillApplicationIdItems(@QueryParameter String restApiKey) {
+            if(restApiKey == null || restApiKey.isEmpty()) {
+                ListBoxModel items = new ListBoxModel();
+                items.add("Input an Api Key", "");
+
+                return items;
+            }
+
+            return getApplicationIdItems(restApiKey);
+        }
+
+        private ListBoxModel getApplicationIdItems(String formApiKey) {
+            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey);
+            ListBoxModel items = new ListBoxModel();
+            try {
+                GetApiKeyResult apiKeyResult = ((MablRestApiClientImpl) client).getApiKeyResult(formApiKey);
+                String organizationId = apiKeyResult.organization_id;
+                GetApplicationsResult applicationsResult = ((MablRestApiClientImpl) client)
+                        .getApplicationsResult(organizationId);
+
+                for(GetApplicationsResult.Application application : applicationsResult.applications) {
+                    items.add(application.name, application.id);
+                }
+
+                return items;
+            } catch (IOException e) {
+            } catch (MablSystemError e) {
+            }
+
+            items.add("Input a valid ApiKey", "");
+            return items;
+        }
+
+        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter String restApiKey) {
+            if(restApiKey == null || restApiKey.isEmpty()) {
+                ListBoxModel items = new ListBoxModel();
+                items.add("Input an Api Key", "");
+
+                return items;
+            }
+
+            return getEnvironmentIdItems(restApiKey);
+        }
+
+        private ListBoxModel getEnvironmentIdItems(String formApiKey) {
+            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey);
+            ListBoxModel items = new ListBoxModel();
+            try {
+                GetApiKeyResult apiKeyResult = ((MablRestApiClientImpl) client).getApiKeyResult(formApiKey);
+                String organizationId = apiKeyResult.organization_id;
+                GetEnvironmentsResult environmentsResult = ((MablRestApiClientImpl) client)
+                        .getEnvironmentsResult(organizationId);
+
+                for(GetEnvironmentsResult.Environment environment : environmentsResult.environments) {
+                    items.add(environment.name, environment.id);
+                }
+
+                return items;
+            } catch (IOException e) {
+            } catch (MablSystemError e) {
+            }
+
+            items.add("Input a valid ApiKey", "");
+            return items;
+        }
     }
+
 }
