@@ -166,6 +166,7 @@ public class MablStepBuilder extends Builder {
                 GetApplicationsResult applicationsResult = ((MablRestApiClientImpl) client)
                         .getApplicationsResult(organizationId);
 
+                items.add("","");
                 for(GetApplicationsResult.Application application : applicationsResult.applications) {
                     items.add(application.name, application.id);
                 }
@@ -199,6 +200,7 @@ public class MablStepBuilder extends Builder {
                 GetEnvironmentsResult environmentsResult = ((MablRestApiClientImpl) client)
                         .getEnvironmentsResult(organizationId);
 
+                items.add("","");
                 for(GetEnvironmentsResult.Environment environment : environmentsResult.environments) {
                     items.add(environment.name, environment.id);
                 }
