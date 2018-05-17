@@ -127,7 +127,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         request.addHeader(getBasicAuthHeader(restApiKey));
         request.addHeader(JSON_TYPE_HEADER);
 
-        return (CreateDeploymentResult) parseApiResult(httpClient.execute(request), CreateDeploymentResult.class);
+        return parseApiResult(httpClient.execute(request), CreateDeploymentResult.class);
     }
 
     @Override
