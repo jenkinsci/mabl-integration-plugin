@@ -133,22 +133,22 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     @Override
     public ExecutionResult getExecutionResults(String eventId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId);
-        return (ExecutionResult) parseApiResult(httpClient.execute(buildGetRequest(url)), ExecutionResult.class);
+        return parseApiResult(httpClient.execute(buildGetRequest(url)), ExecutionResult.class);
     }
 
     public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
-        return (GetApiKeyResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
+        return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
     public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
-        return (GetApplicationsResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
+        return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
     }
 
     public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ENVIRONMENTS_ENDPOINT_TEMPLATE, organizationId);
-        return (GetEnvironmentsResult) parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
+        return parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
     }
 
     private HttpGet buildGetRequest(String url) throws MablSystemError {
@@ -161,13 +161,17 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         }
     }
 
-    private ApiResult parseApiResult(final HttpResponse response, Class resultClass) throws IOException, MablSystemError {
+    private <ApiResult> ApiResult parseApiResult(
+            final HttpResponse response,
+            Class<ApiResult> resultClass
+    ) throws IOException, MablSystemError {
+
         final int statusCode = response.getStatusLine().getStatusCode();
 
         switch (statusCode) {
             case SC_OK: // fall through case
             case SC_CREATED:
-                return objectMapper.reader(resultClass).readValue(response.getEntity().getContent());
+                return resultClass.cast(objectMapper.reader(resultClass).readValue(response.getEntity().getContent()));
             case SC_NOT_FOUND:
                 return null;
             default:
