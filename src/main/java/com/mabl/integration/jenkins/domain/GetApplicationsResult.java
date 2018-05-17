@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class GetApplicationsResult extends ApiResult {
+public class GetApplicationsResult implements ApiResult {
     public List<Application> applications;
 
     @JsonCreator

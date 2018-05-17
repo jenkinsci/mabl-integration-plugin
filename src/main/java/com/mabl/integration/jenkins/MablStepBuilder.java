@@ -161,10 +161,9 @@ public class MablStepBuilder extends Builder {
             final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey);
             ListBoxModel items = new ListBoxModel();
             try {
-                GetApiKeyResult apiKeyResult = ((MablRestApiClientImpl) client).getApiKeyResult(formApiKey);
+                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
                 String organizationId = apiKeyResult.organization_id;
-                GetApplicationsResult applicationsResult = ((MablRestApiClientImpl) client)
-                        .getApplicationsResult(organizationId);
+                GetApplicationsResult applicationsResult = client.getApplicationsResult(organizationId);
 
                 items.add("","");
                 for(GetApplicationsResult.Application application : applicationsResult.applications) {
@@ -195,10 +194,9 @@ public class MablStepBuilder extends Builder {
             final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey);
             ListBoxModel items = new ListBoxModel();
             try {
-                GetApiKeyResult apiKeyResult = ((MablRestApiClientImpl) client).getApiKeyResult(formApiKey);
+                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
                 String organizationId = apiKeyResult.organization_id;
-                GetEnvironmentsResult environmentsResult = ((MablRestApiClientImpl) client)
-                        .getEnvironmentsResult(organizationId);
+                GetEnvironmentsResult environmentsResult = client.getEnvironmentsResult(organizationId);
 
                 items.add("","");
                 for(GetEnvironmentsResult.Environment environment : environmentsResult.environments) {

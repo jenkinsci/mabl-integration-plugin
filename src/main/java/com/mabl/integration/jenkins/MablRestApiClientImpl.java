@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.mabl.integration.jenkins.domain.ApiResult;
 import com.mabl.integration.jenkins.domain.CreateDeploymentPayload;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
@@ -137,16 +136,19 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         return parseApiResult(httpClient.execute(buildGetRequest(url)), ExecutionResult.class);
     }
 
+    @Override
     public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
+    @Override
     public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
     }
 
+    @Override
     public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ENVIRONMENTS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
@@ -158,7 +160,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             request.addHeader(getBasicAuthHeader(restApiKey));
             return request;
         } catch (IllegalArgumentException e) {
-            throw new MablSystemError(String.format("Unexpecetd status from mabl trying to build API url: %s", url));
+            throw new MablSystemError(String.format("Unexpected status from mabl trying to build API url: %s", url));
         }
     }
 
@@ -178,7 +180,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             default:
 
                 final String message = String.format(
-                        "Unexpected status from mabl API on execution result fetch: %d%n" +
+                        "Unexpected status from mabl API on result fetch: %d%n" +
                                 "body: [%s]%n", statusCode, EntityUtils.toString((response.getEntity())));
 
                 throw new MablSystemError(message);

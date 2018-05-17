@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class GetEnvironmentsResult extends ApiResult {
+public class GetEnvironmentsResult implements ApiResult {
     public List<Environment> environments;
 
     @JsonCreator

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class GetApiKeyResult extends ApiResult {
+public class GetApiKeyResult implements ApiResult {
     public String organization_id;
 
     @JsonCreator

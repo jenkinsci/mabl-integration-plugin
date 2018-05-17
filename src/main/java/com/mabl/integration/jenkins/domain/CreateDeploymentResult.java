@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * mabl result from deployment event creation
  */
 
-public class CreateDeploymentResult extends ApiResult {
+public class CreateDeploymentResult implements ApiResult {
     public String id;
 
     @JsonCreator
