@@ -12,6 +12,7 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.validation.MablRestApiClientRetryHandler;
 import hudson.remoting.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -80,7 +81,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         httpClient = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
-//                .setRetryHandler() // TODO retry on 50[123] status
+                .setServiceUnavailableRetryStrategy(new MablRestApiClientRetryHandler())
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
