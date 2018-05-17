@@ -1,18 +1,26 @@
 package com.mabl.integration.jenkins;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
+import com.mabl.integration.jenkins.domain.GetApiKeyResult;
+import com.mabl.integration.jenkins.domain.GetApplicationsResult;
+import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE;
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
@@ -26,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 public class MablRestApiClientTest extends AbstractWiremockTest {
 
     private static final String EXPECTED_DEPLOYMENT_EVENT_ID = "d1To4-GYeZ4nl-4Ag1JyQg-v";
+    private static final String EXPECTED_ORGANIZATION_ID = "K8NWhtPqOyFnyvJTvCP0uw-w";
 
     @Test
     public void createDeploymentAllParametersHappyPathTest() throws IOException, MablSystemError {
@@ -161,6 +170,94 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         verifyExpectedUrls();
     }
+
+    @Test
+    public void getApiKeyObjectFromApiKey() throws IOException, MablSystemError {
+
+        final String fakeRestApiKey = "fakeApiKeyValue";
+
+        registerGetMapping(
+                String.format(MablRestApiClientImpl.GET_ORGANIZATION_ENDPOINT_TEMPLATE,fakeRestApiKey),
+                ok(),
+                MablTestConstants.APIKEY_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKey
+        );
+
+        System.out.println(String.format(MablRestApiClientImpl.GET_ORGANIZATION_ENDPOINT_TEMPLATE,fakeRestApiKey));
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            GetApiKeyResult result = client.getApiKeyResult(fakeRestApiKey);
+            assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    @Test
+    public void getApplicationsReturnsTwoResults() throws IOException, MablSystemError {
+
+        final String fakeRestApiKey = "fakeApiKeyValue";
+        final String organization_id = "fakeOrganizationId";
+
+        WireMock.stubFor(get(urlPathEqualTo("/applications"))
+            .withQueryParam("organization_id", equalTo(organization_id))
+                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKey)
+                .withHeader("user-agent", new EqualToPattern(MablStepConstants.PLUGIN_USER_AGENT))
+            .willReturn(ok()
+                .withHeader("Content-Type", "application/json")
+                .withBody(MablTestConstants.APPLICATIONS_RESULT_JSON)
+            ));
+
+        System.out.println(String.format(MablRestApiClientImpl.GET_APPLICATIONS_ENDPOINT_TEMPLATE,organization_id));
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            GetApplicationsResult result = client.getApplicationsResult(organization_id);
+            assertEquals(2, result.applications.size());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    @Test
+    public void getEnvironmentsReturnsOneResult() throws IOException, MablSystemError {
+
+        final String fakeRestApiKey = "fakeApiKeyValue";
+        final String organization_id = "fakeOrganizationId";
+
+        WireMock.stubFor(get(urlPathEqualTo("/environments"))
+                .withQueryParam("organization_id", equalTo(organization_id))
+                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKey)
+                .withHeader("user-agent", new EqualToPattern(MablStepConstants.PLUGIN_USER_AGENT))
+                .willReturn(ok()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(MablTestConstants.ENVIRONMENTS_RESULT_JSON)
+                ));
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            GetEnvironmentsResult result = client.getEnvironmentsResult(organization_id);
+            assertEquals(1, result.environments.size());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+
 
     @Test(expected = MablSystemError.class)
     public void apiClientDoesntRetryOn503() throws IOException, MablSystemError {

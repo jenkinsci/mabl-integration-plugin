@@ -139,12 +139,14 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     @Override
     public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
+        System.out.println(url);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
     @Override
     public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
+        System.out.println(url);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
     }
 
