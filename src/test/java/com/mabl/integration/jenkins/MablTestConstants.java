@@ -63,4 +63,83 @@ class MablTestConstants {
             "    }" +
             "  ]" +
             "}";
+
+    static final String APIKEY_RESULT_JSON = "" +
+            "{" +
+            "   \"id\":\"XjO5GsxvWRi_zwbK3-h2PB\"," +
+            "   \"created_time\":1526412082062," +
+            "   \"created_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "   \"last_updated_time\":1526412082062," +
+            "   \"last_updated_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "   \"organization_id\":\"K8NWhtPqOyFnyvJTvCP0uw-w\"," +
+            "   \"name\":\"Default API Key\"," +
+            "   \"scopes\":[" +
+            "     {" +
+            "       \"permission\":\"write\"," +
+            "       \"target\":\"events\"" +
+            "     }," +
+            "     {" +
+            "       \"permission\":\"read\"," +
+            "       \"target\":\"execution_results\"" +
+            "     }," +
+            "     {" +
+            "       \"permission\":\"read\"," +
+            "       \"target\":\"api_keys\"" +
+            "     }," +
+            "     {" +
+            "       \"permission\":\"read\"," +
+            "       \"target\":\"environments\"" +
+            "     }," +
+            "     {" +
+            "       \"permission\":\"read\"," +
+            "       \"target\":\"applications\"" +
+            "     }" +
+            "   ]," +
+            "   \"tags\":[" +
+            "     {" +
+            "       \"name\":\"default\"" +
+            "     }" +
+            "   ]" +
+            "}";
+
+    static final String APPLICATIONS_RESULT_JSON = "" +
+            "{" +
+            "   \"applications\":[" +
+            "     {" +
+            "       \"id\":\"zFgoXbl__YHLbezTsBEHig-a\"," +
+            "       \"created_time\":1526412127291," +
+            "       \"created_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "       \"last_updated_time\":1526412127291," +
+            "       \"last_updated_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "       \"organization_id\":\"K8NWhtPqOyFnyvJTvCP0uw-w\"," +
+            "       \"name\":\"Wikipedia\"" +
+            "     }," +
+            "     {" +
+            "       \"id\":\"dEfaUiL__HYBeztssIOhNK-a\"," +
+            "       \"created_time\":15264121277623," +
+            "       \"created_by_id\":\"GuDwew9hMqhjI5xnF8H3A\"," +
+            "       \"last_updated_time\":1426412127761," +
+            "       \"last_updated_by_id\":\"GuDwew9hMqhjI5xnF8H3A\"," +
+            "       \"organization_id\":\"K8NWhtPqOyFnyvJTvCP0uw-w\"," +
+            "       \"name\":\"Yahoo\"" +
+            "     }" +
+            "   ]," +
+            "   \"cursor\":\"Cj0SN2oKc35tYWJsLWRldnIpCxILQXBwbGljYXRpb24iGHpGZ29YYmxfX1lITGJlelRzQkVIaWctYQwYACAA\"" +
+            "}";
+
+    static final String ENVIRONMENTS_RESULT_JSON = "" +
+            "{" +
+            "   \"environments\":[" +
+            "     {" +
+            "       \"id\":\"7xNT3ADgflTI2yN9Ihjk_Q-e\"," +
+            "       \"created_time\":1526412127288," +
+            "       \"created_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "       \"last_updated_time\":1526412127288," +
+            "       \"last_updated_by_id\":\"FYuRFw9hMzqhjI5xnFYH3A\"," +
+            "       \"organization_id\":\"K8NWhtPqOyFnyvJTvCP0uw-w\"," +
+            "       \"name\":\"Wikipedia\"" +
+            "     }" +
+            "   ]," +
+            "   \"cursor\":\"Cj0SN2oKc35tYWJsLWRldnIpCxILRW52aXJvbm1lbnQiGDd4TlQzQURnZmxUSTJ5TjlJaGprX1EtZQwYACAA\"" +
+            "}";
 }
