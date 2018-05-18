@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import hudson.model.Run;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,13 +16,23 @@ public class JenkinsModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        FileInputStream inputStream = null;
         try {
             Properties properties = new Properties();
-            properties.load(new FileInputStream(getClass().getResource("/config.properties").getFile()));
+            inputStream = new FileInputStream((getClass().getResource("/config.properties").getFile()));
+            properties.load(inputStream);
             Names.bindProperties(binder(), properties);
         } catch (IOException e) {
             System.out.println("ERROR: Could not load properties");
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
