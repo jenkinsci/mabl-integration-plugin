@@ -184,7 +184,6 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 fakeRestApiKey
         );
 
-        System.out.println(String.format(MablRestApiClientImpl.GET_ORGANIZATION_ENDPOINT_TEMPLATE,fakeRestApiKey));
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
@@ -214,7 +213,6 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 .withBody(MablTestConstants.APPLICATIONS_RESULT_JSON)
             ));
 
-        System.out.println(String.format(MablRestApiClientImpl.GET_APPLICATIONS_ENDPOINT_TEMPLATE,organization_id));
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;

@@ -4,13 +4,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import hudson.model.Run;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class JenkinsModule extends AbstractModule {
+    private static final String CONFIG_FILE = "config.properties";
     private static final String MAX_RETRIES = "com.mabl.http.retryer.max.retries";
     private static final String RETRY_INTERVAL = "com.mabl.http.retryer.retry.interval.milliseconds";
 
@@ -19,8 +19,7 @@ public class JenkinsModule extends AbstractModule {
         FileInputStream inputStream = null;
         try {
             Properties properties = new Properties();
-            inputStream = new FileInputStream((getClass().getResource("/config.properties").getFile()));
-            properties.load(inputStream);
+            properties.load(getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
             Names.bindProperties(binder(), properties);
         } catch (IOException e) {
             System.out.println("ERROR: Could not load properties");

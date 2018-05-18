@@ -17,8 +17,8 @@ public class MablRestApiClientRetryHandler implements ServiceUnavailableRetryStr
             SC_NOT_IMPLEMENTED,
             SC_BAD_GATEWAY
     ));
-    private int maxRetries;
-    private long retryIntervalMillis;
+    private final int maxRetries;
+    private final long retryIntervalMillis;
 
     @Inject
     public MablRestApiClientRetryHandler(
