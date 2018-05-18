@@ -1,5 +1,7 @@
-package com.mabl.integration.jenkins.validation;
+package com.mabl.integration.jenkins;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.protocol.HttpContext;
@@ -15,8 +17,17 @@ public class MablRestApiClientRetryHandler implements ServiceUnavailableRetryStr
             SC_NOT_IMPLEMENTED,
             SC_BAD_GATEWAY
     ));
-    private static final int maxRetries = 5;
-    private static final long retryIntervalMillis = 6000L;
+    private int maxRetries;
+    private long retryIntervalMillis;
+
+    @Inject
+    public MablRestApiClientRetryHandler(
+            @Named("com.mabl.http.retryer.max.retries") int maxRetries,
+            @Named("com.mabl.http.retryer.retry.interval.milliseconds") long retryIntervalMillis
+    ) {
+        this.maxRetries = maxRetries;
+        this.retryIntervalMillis = retryIntervalMillis;
+    }
 
     @Override
     public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {

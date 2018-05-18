@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.mabl.integration.jenkins.domain.CreateDeploymentPayload;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
-import com.mabl.integration.jenkins.validation.MablRestApiClientRetryHandler;
 import hudson.remoting.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -80,13 +81,18 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         httpClient = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
-                .setServiceUnavailableRetryStrategy(new MablRestApiClientRetryHandler())
+                .setServiceUnavailableRetryStrategy(getRetryHandler())
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
                 .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
                 .setDefaultRequestConfig(getDefaultRequestConfig())
                 .build();
+    }
+
+    private MablRestApiClientRetryHandler getRetryHandler() {
+        Injector injector = Guice.createInjector(new JenkinsModule());
+        return injector.getInstance(MablRestApiClientRetryHandler.class);
     }
 
     private CredentialsProvider getApiCredentialsProvider(
@@ -139,14 +145,12 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     @Override
     public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
-        System.out.println(url);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
     @Override
     public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
-        System.out.println(url);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
     }
 
