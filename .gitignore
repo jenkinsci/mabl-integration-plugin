@@ -12,4 +12,6 @@ buildNumber.properties
 !/.mvn/wrapper/maven-wrapper.jar
 
 # IntelliJ ignore
-.idea
+.idea/
+*.iml
+*.iws
