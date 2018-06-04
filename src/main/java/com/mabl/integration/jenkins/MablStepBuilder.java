@@ -5,6 +5,7 @@ import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -17,6 +18,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.ExecutionException;
@@ -91,7 +93,8 @@ public class MablStepBuilder extends Builder {
                 environmentId,
                 applicationId,
                 continueOnPlanFailure,
-                continueOnMablError
+                continueOnMablError,
+                getOutputFileLocation(build)
         );
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -114,6 +117,17 @@ public class MablStepBuilder extends Builder {
     @Override
     public MablStepDescriptor getDescriptor() {
         return (MablStepDescriptor) super.getDescriptor();
+    }
+
+    private FilePath getOutputFileLocation(AbstractBuild<?, ?> build) {
+        FilePath fp;
+        if(build.getWorkspace().isRemote()) {
+            fp = new FilePath(build.getWorkspace().getChannel(), build.getWorkspace().toString() + "/report.xml");
+        } else {
+            fp = new FilePath(new File(build.getWorkspace().toString() + "/report.xml"));
+        }
+
+        return fp;
     }
 
     /**

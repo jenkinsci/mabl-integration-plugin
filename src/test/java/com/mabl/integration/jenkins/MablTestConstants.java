@@ -142,4 +142,33 @@ class MablTestConstants {
             "   ]," +
             "   \"cursor\":\"Cj0SN2oKc35tYWJsLWRldnIpCxILRW52aXJvbm1lbnQiGDd4TlQzQURnZmxUSTJ5TjlJaGprX1EtZQwYACAA\"" +
             "}";
+
+    static final String TEST_CASE_XML = "" +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+            "<testcase classname=\"My Plan Name\" name=\"My Journey Name\" time=\"23\"/>";
+
+    static final String TEST_CASE_XML_WITH_FAILURE = "" +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+            "<testcase classname=\"My Plan Name\" name=\"My Journey Name\" time=\"23\">" +
+                "<failure message=\"My Message\"><reason>My Reason</reason></failure>" +
+            "</testcase>";
+
+    static final String TEST_SUITES_XML = "" +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+            "<testsuites>" +
+                "<testsuite name=\"Empty Test Suite\" tests=\"0\" errors=\"0\" failures=\"0\" time=\"0\" timestamp=\"2013-05-24T10:23:58\">" +
+                    "<properties/>" +
+                "</testsuite>" +
+                "<testsuite name=\"Full Test Suite\" tests=\"2\" errors=\"0\" failures=\"1\" time=\"33\" timestamp=\"2013-05-24T10:23:58\">" +
+                    "<properties>" +
+                        "<property name=\"environment\" value=\"my env-e\"/>" +
+                        "<property name=\"application\" value=\"my app-a\"/>" +
+                    "</properties>" +
+                    "<testcase classname=\"My Plan Name 1\" name=\"My Journey Name 1\" time=\"11\"/>" +
+                    "<testcase classname=\"My Plan Name 2\" name=\"My Journey Name 2\" time=\"22\">" +
+                        "<failure message=\"My Message\"><reason>My Reason</reason></failure>" +
+                    "</testcase>" +
+                "</testsuite>" +
+            "</testsuites>";
+
 }
