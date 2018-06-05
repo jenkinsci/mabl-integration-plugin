@@ -5,6 +5,7 @@ import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.test.output.Failure;
 import com.mabl.integration.jenkins.test.output.Properties;
+import com.mabl.integration.jenkins.test.output.Property;
 import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
@@ -190,8 +191,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                         getDuration(summary)
                 );
 
-                testSuite.addToTestCases(testCase);
-                testSuite.incrementTests();
+                testSuite.addToTestCases(testCase).incrementTests();
 
                 if (!journeyResult.success) {
                     Failure failure = new Failure(journeyResult.status, journeyResult.statusCause);
@@ -237,7 +237,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         Date startDate = new Date(summary.startTime);
         Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String timestamp = format.format(startDate);
-        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp, new Properties());
+        ArrayList<Property> props = new ArrayList<Property>();
+        props.add(new Property("environmentId", this.environmentId));
+        props.add(new Property("applicationId", this.applicationId));
+
+        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp, new Properties(props));
     }
 
     private long getDuration(ExecutionResult.ExecutionSummary summary) {

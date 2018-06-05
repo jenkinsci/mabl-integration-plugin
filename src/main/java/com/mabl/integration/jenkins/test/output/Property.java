@@ -1,9 +1,12 @@
 package com.mabl.integration.jenkins.test.output;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "property")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Property {
 
     @XmlAttribute(name = "name")
@@ -19,5 +22,13 @@ public class Property {
 
     public Property() {
 
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getValue() {
+        return this.value;
     }
 }
