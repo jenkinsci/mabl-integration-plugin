@@ -237,11 +237,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         Date startDate = new Date(summary.startTime);
         Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String timestamp = format.format(startDate);
-        ArrayList<Property> props = new ArrayList<Property>();
-        props.add(new Property("environmentId", this.environmentId));
-        props.add(new Property("applicationId", this.applicationId));
-
-        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp, new Properties(props));
+        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp);
     }
 
     private long getDuration(ExecutionResult.ExecutionSummary summary) {

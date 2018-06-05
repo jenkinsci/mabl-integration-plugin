@@ -44,6 +44,13 @@ public class TestSuite {
         this.testCases = new ArrayList<TestCase>();
     }
 
+    public TestSuite(String name, long time, String timestamp) {
+        this.name = name;
+        this.time = time;
+        this.timestamp = timestamp;
+        this.testCases = new ArrayList<TestCase>();
+    }
+
     public TestSuite() {
 
     }

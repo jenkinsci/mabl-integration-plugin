@@ -120,11 +120,14 @@ public class MablStepBuilder extends Builder {
     }
 
     private FilePath getOutputFileLocation(AbstractBuild<?, ?> build) {
-        FilePath fp;
-        if(build.getWorkspace().isRemote()) {
-            fp = new FilePath(build.getWorkspace().getChannel(), build.getWorkspace().toString() + "/report.xml");
+        FilePath fp = build.getWorkspace();
+        if (fp == null) {
+            return new FilePath(new File("report.xml"));
+        }
+        if(fp.isRemote()) {
+            fp = new FilePath(fp.getChannel(), fp.toString() + "/report.xml");
         } else {
-            fp = new FilePath(new File(build.getWorkspace().toString() + "/report.xml"));
+            fp = new FilePath(new File(fp.toString() + "/report.xml"));
         }
 
         return fp;
