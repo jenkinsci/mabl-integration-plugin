@@ -50,19 +50,19 @@ public class TestSuite {
         return this.testCases;
     }
 
-    public int incrementTests() {
+    public TestSuite incrementTests() {
         this.tests++;
-        return this.tests;
+        return this;
     }
 
-    public int incrementErrors() {
+    public TestSuite incrementErrors() {
         this.errors++;
-        return this.errors;
+        return this;
     }
 
-    public int incrementFailures() {
+    public TestSuite incrementFailures() {
         this.failures++;
-        return this.failures;
+        return this;
     }
 
 }

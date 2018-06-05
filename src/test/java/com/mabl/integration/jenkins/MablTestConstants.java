@@ -150,7 +150,7 @@ class MablTestConstants {
     static final String TEST_CASE_XML_WITH_FAILURE = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
             "<testcase classname=\"My Plan Name\" name=\"My Journey Name\" time=\"23\">" +
-                "<failure message=\"My Message\"><reason>My Reason</reason></failure>" +
+                "<failure message=\"My Message\">My Reason</failure>" +
             "</testcase>";
 
     static final String TEST_SUITES_XML = "" +
@@ -166,7 +166,7 @@ class MablTestConstants {
                     "</properties>" +
                     "<testcase classname=\"My Plan Name 1\" name=\"My Journey Name 1\" time=\"11\"/>" +
                     "<testcase classname=\"My Plan Name 2\" name=\"My Journey Name 2\" time=\"22\">" +
-                        "<failure message=\"My Message\"><reason>My Reason</reason></failure>" +
+                        "<failure message=\"My Message\">My Reason</failure>" +
                     "</testcase>" +
                 "</testsuite>" +
             "</testsuites>";

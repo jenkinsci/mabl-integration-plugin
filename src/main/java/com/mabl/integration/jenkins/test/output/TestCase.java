@@ -33,6 +33,11 @@ public class TestCase {
         this.duration = duration;
         this.failure = failure;
     }
+
+    public TestCase setFailure(Failure failure) {
+        this.failure = failure;
+        return this;
+    }
 }
 
 

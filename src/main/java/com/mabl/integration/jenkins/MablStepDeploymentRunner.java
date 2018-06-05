@@ -9,16 +9,13 @@ import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -181,45 +178,33 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
         outputStream.println("The final Plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
-            long duration = TimeUnit.SECONDS.convert( (summary.stopTime - summary.startTime), TimeUnit.MILLISECONDS);
-            Date startDate = new Date(summary.startTime);
-            Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            String timestamp = format.format(startDate);
-            TestSuite ts = new TestSuite(safePlanName(summary), duration, timestamp, new Properties());
+            TestSuite testSuite = getTestSuite(summary);
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
             outputStream.printf("  Plan [%s] is %s in state [%s]%n", safePlanName(summary), successState, summary.status);
 
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                TestCase tc;
-                if (journeyResult.success) {
-                    tc = new TestCase(safePlanName(summary), safeJourneyName(summary, journeyResult.id), duration);
-                } else {
+
+                TestCase testCase = new TestCase(
+                        safePlanName(summary),
+                        safeJourneyName(summary, journeyResult.id),
+                        getDuration(summary)
+                );
+
+                testSuite.addToTestCases(testCase);
+                testSuite.incrementTests();
+
+                if (!journeyResult.success) {
                     Failure failure = new Failure(journeyResult.status, journeyResult.statusCause);
-                    tc = new TestCase(safePlanName(summary), safeJourneyName(summary, journeyResult.id), duration, failure);
-                    ts.incrementFailures();
+                    testCase.setFailure(failure);
+                    testSuite.incrementFailures();
                 }
 
-                ts.addToTestCases(tc);
-                ts.incrementTests();
             }
 
-            suites.add(ts);
+            suites.add(testSuite);
         }
 
-        try {
-            TestSuites testSuites = new TestSuites(suites);
-            JAXBContext context = JAXBContext.newInstance(TestSuites.class);
-            Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(testSuites, buildPath.write());
-        } catch (JAXBException e) {
-            throw new MablSystemError("There was an error trying to output test results in mabl.", e);
-        } catch (IOException e) {
-            throw new MablSystemError("There was an error trying to write test results in mabl.", e);
-        } catch (InterruptedException e) {
-            throw new MablSystemError("There was an interruption trying to write test results in mabl.", e);
-        }
-
+        outputTestSuiteXml(new TestSuites(suites));
     }
 
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
@@ -231,6 +216,32 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 outputStream.printf("  Journey [%s] is [%s]%n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
             }
         }
+    }
+
+    private void outputTestSuiteXml(TestSuites testSuites) throws MablSystemError {
+        try {
+            JAXBContext context = JAXBContext.newInstance(TestSuites.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(testSuites, buildPath.write());
+        } catch (JAXBException e) {
+            throw new MablSystemError("There was an error trying to output test results in mabl.", e);
+        } catch (IOException e) {
+            throw new MablSystemError("There was an error trying to write test results in mabl.", e);
+        } catch (InterruptedException e) {
+            throw new MablSystemError("There was an interruption trying to write test results in mabl.", e);
+        }
+    }
+
+    private TestSuite getTestSuite(final ExecutionResult.ExecutionSummary summary) {
+        Date startDate = new Date(summary.startTime);
+        Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String timestamp = format.format(startDate);
+        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp, new Properties());
+    }
+
+    private long getDuration(ExecutionResult.ExecutionSummary summary) {
+        return TimeUnit.SECONDS.convert( (summary.stopTime - summary.startTime), TimeUnit.MILLISECONDS);
     }
 
     private void printException(final Exception exception) {

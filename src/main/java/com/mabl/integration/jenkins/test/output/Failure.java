@@ -1,13 +1,13 @@
 package com.mabl.integration.jenkins.test.output;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "failure")
 public class Failure {
 
-    @XmlElement(name="reason")
+    @XmlValue()
     private String reason;
 
     @XmlAttribute(name = "message")

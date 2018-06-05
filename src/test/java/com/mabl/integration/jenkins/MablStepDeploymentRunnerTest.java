@@ -3,7 +3,6 @@ package com.mabl.integration.jenkins;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,6 +31,7 @@ public class MablStepDeploymentRunnerTest {
     private final String environmentId = "foo-env-e";
     private final String applicationId = "foo-app-a";
     private final String eventId = "foo-event-id";
+    private final FilePath buildPath = new FilePath(new File("/dev/null"));
 
     private MablRestApiClient client;
     private PrintStream outputStream;
@@ -55,7 +55,8 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
+
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -79,7 +80,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -109,7 +110,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -130,7 +131,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -153,7 +154,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -177,7 +178,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 true,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))
@@ -198,7 +199,7 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 true,
                 false,
-                new FilePath(new File("/dev/null"))
+                buildPath
         );
 
         when(client.createDeploymentEvent(environmentId, applicationId))

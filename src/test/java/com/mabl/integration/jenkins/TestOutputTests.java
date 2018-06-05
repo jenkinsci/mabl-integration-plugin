@@ -13,7 +13,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
