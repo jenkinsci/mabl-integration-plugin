@@ -15,6 +15,7 @@ public class MablStepConstants {
     static final String PLUGIN_VERSION = getPluginVersion();
     static final String PLUGIN_VERSION_UNKNOWN = "unknown";
     static final String PLUGIN_USER_AGENT = "mabl-jenkins-plugin/" + PLUGIN_VERSION;
+    static final String TEST_OUTPUT_XML_FILENAME = "report.xml";
 
     // Label for build steps drop down list
     static final String BUILD_STEP_DISPLAY_NAME = "Run mabl journeys";

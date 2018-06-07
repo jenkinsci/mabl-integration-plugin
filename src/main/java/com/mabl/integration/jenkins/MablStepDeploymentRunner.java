@@ -1,11 +1,10 @@
 package com.mabl.integration.jenkins;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.test.output.Failure;
-import com.mabl.integration.jenkins.test.output.Properties;
-import com.mabl.integration.jenkins.test.output.Property;
 import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
@@ -22,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -204,7 +204,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             suites.add(testSuite);
         }
 
-        outputTestSuiteXml(new TestSuites(suites));
+        outputTestSuiteXml(new TestSuites(ImmutableList.copyOf(suites)));
     }
 
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
@@ -229,6 +229,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         } catch (IOException e) {
             throw new MablSystemError("There was an error trying to write test results in mabl.", e);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new MablSystemError("There was an interruption trying to write test results in mabl.", e);
         }
     }
@@ -236,6 +237,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private TestSuite getTestSuite(final ExecutionResult.ExecutionSummary summary) {
         Date startDate = new Date(summary.startTime);
         Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        ((SimpleDateFormat) format).setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = format.format(startDate);
         return new TestSuite(safePlanName(summary), getDuration(summary), timestamp);
     }

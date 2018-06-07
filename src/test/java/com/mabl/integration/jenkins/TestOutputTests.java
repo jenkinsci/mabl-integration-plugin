@@ -1,5 +1,6 @@
 package com.mabl.integration.jenkins;
 
+import com.google.common.collect.ImmutableList;
 import com.mabl.integration.jenkins.test.output.Failure;
 import com.mabl.integration.jenkins.test.output.Properties;
 import com.mabl.integration.jenkins.test.output.Property;
@@ -53,7 +54,7 @@ public class TestOutputTests {
         ArrayList<Property> props = new ArrayList<Property>();
         props.add(property1);
         props.add(property2);
-        Properties properties = new Properties(props);
+        Properties properties = new Properties(ImmutableList.copyOf(props));
 
         TestCase testCase1 = new TestCase("My Plan Name 1", "My Journey Name 1", 11L);
         Failure failure = new Failure("My Reason", "My Message");
@@ -73,7 +74,7 @@ public class TestOutputTests {
         ArrayList<TestSuite> suites = new ArrayList<TestSuite>();
         suites.add(emptyTestSuite);
         suites.add(testSuite1);
-        TestSuites testSuites = new TestSuites(suites);
+        TestSuites testSuites = new TestSuites(ImmutableList.copyOf(suites));
 
         JAXBContext jaxbContext = JAXBContext.newInstance(TestSuites.class);
         Marshaller marshaller = jaxbContext.createMarshaller();

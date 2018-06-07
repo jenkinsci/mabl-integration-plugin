@@ -32,6 +32,7 @@ import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_PO
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
+import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FILENAME;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
@@ -122,12 +123,12 @@ public class MablStepBuilder extends Builder {
     private FilePath getOutputFileLocation(AbstractBuild<?, ?> build) {
         FilePath fp = build.getWorkspace();
         if (fp == null) {
-            return new FilePath(new File("report.xml"));
+            return new FilePath(new File(TEST_OUTPUT_XML_FILENAME));
         }
         if(fp.isRemote()) {
-            fp = new FilePath(fp.getChannel(), fp.toString() + "/report.xml");
+            fp = new FilePath(fp.getChannel(), fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME);
         } else {
-            fp = new FilePath(new File(fp.toString() + "/report.xml"));
+            fp = new FilePath(new File(fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME));
         }
 
         return fp;
