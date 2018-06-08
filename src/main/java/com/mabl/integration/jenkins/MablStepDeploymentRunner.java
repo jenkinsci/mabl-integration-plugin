@@ -1,14 +1,29 @@
 package com.mabl.integration.jenkins;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
+import com.mabl.integration.jenkins.test.output.Failure;
+import com.mabl.integration.jenkins.test.output.TestCase;
+import com.mabl.integration.jenkins.test.output.TestSuite;
+import com.mabl.integration.jenkins.test.output.TestSuites;
+import hudson.FilePath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_VERSION;
@@ -38,6 +53,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final String applicationId;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
+    private final FilePath buildPath;
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
     @DataBoundConstructor
@@ -48,7 +64,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final String environmentId,
             final String applicationId,
             final boolean continueOnPlanFailure,
-            final boolean continueOnMablError
+            final boolean continueOnMablError,
+            final FilePath buildPath
+
     ) {
         this.outputStream = outputStream;
         this.client = client;
@@ -57,6 +75,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.applicationId = applicationId;
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
+        this.buildPath = buildPath;
     }
 
     @Override
@@ -155,13 +174,37 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         return isSuccess;
     }
 
-    private void printFinalStatuses(final ExecutionResult result) {
+    private void printFinalStatuses(final ExecutionResult result) throws MablSystemError {
+        ArrayList<TestSuite> suites = new ArrayList<TestSuite>();
 
         outputStream.println("The final Plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
+            TestSuite testSuite = getTestSuite(summary);
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
             outputStream.printf("  Plan [%s] is %s in state [%s]%n", safePlanName(summary), successState, summary.status);
+
+            for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
+
+                TestCase testCase = new TestCase(
+                        safePlanName(summary),
+                        safeJourneyName(summary, journeyResult.id),
+                        getDuration(summary)
+                );
+
+                testSuite.addToTestCases(testCase).incrementTests();
+
+                if (!journeyResult.success) {
+                    Failure failure = new Failure(journeyResult.status, journeyResult.statusCause);
+                    testCase.setFailure(failure);
+                    testSuite.incrementFailures();
+                }
+
+            }
+
+            suites.add(testSuite);
         }
+
+        outputTestSuiteXml(new TestSuites(ImmutableList.copyOf(suites)));
     }
 
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
@@ -173,6 +216,34 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 outputStream.printf("  Journey [%s] is [%s]%n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
             }
         }
+    }
+
+    private void outputTestSuiteXml(TestSuites testSuites) throws MablSystemError {
+        try {
+            JAXBContext context = JAXBContext.newInstance(TestSuites.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(testSuites, buildPath.write());
+        } catch (JAXBException e) {
+            throw new MablSystemError("There was an error trying to output test results in mabl.", e);
+        } catch (IOException e) {
+            throw new MablSystemError("There was an error trying to write test results in mabl.", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MablSystemError("There was an interruption trying to write test results in mabl.", e);
+        }
+    }
+
+    private TestSuite getTestSuite(final ExecutionResult.ExecutionSummary summary) {
+        Date startDate = new Date(summary.startTime);
+        Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        ((SimpleDateFormat) format).setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timestamp = format.format(startDate);
+        return new TestSuite(safePlanName(summary), getDuration(summary), timestamp);
+    }
+
+    private long getDuration(ExecutionResult.ExecutionSummary summary) {
+        return TimeUnit.SECONDS.convert( (summary.stopTime - summary.startTime), TimeUnit.MILLISECONDS);
     }
 
     private void printException(final Exception exception) {

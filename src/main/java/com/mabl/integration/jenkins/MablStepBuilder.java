@@ -5,6 +5,7 @@ import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -17,6 +18,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.ExecutionException;
@@ -30,6 +32,7 @@ import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_PO
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
+import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FILENAME;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
@@ -91,7 +94,8 @@ public class MablStepBuilder extends Builder {
                 environmentId,
                 applicationId,
                 continueOnPlanFailure,
-                continueOnMablError
+                continueOnMablError,
+                getOutputFileLocation(build)
         );
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -114,6 +118,20 @@ public class MablStepBuilder extends Builder {
     @Override
     public MablStepDescriptor getDescriptor() {
         return (MablStepDescriptor) super.getDescriptor();
+    }
+
+    private FilePath getOutputFileLocation(AbstractBuild<?, ?> build) {
+        FilePath fp = build.getWorkspace();
+        if (fp == null) {
+            return new FilePath(new File(TEST_OUTPUT_XML_FILENAME));
+        }
+        if(fp.isRemote()) {
+            fp = new FilePath(fp.getChannel(), fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME);
+        } else {
+            fp = new FilePath(new File(fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME));
+        }
+
+        return fp;
     }
 
     /**
