@@ -1,7 +1,7 @@
 package com.mabl.integration.jenkins.domain;
 
 public class CreateDeploymentProperties {
-    public String deploymentOrigin;
+    private String deploymentOrigin;
     private String repositoryBranchName;
     private String repositoryRevisionNumber;
     private String repositoryUrl;
@@ -12,6 +12,50 @@ public class CreateDeploymentProperties {
     private String buildPlanName;
     private String buildPlanNumber;
     private String buildPlanResultUrl;
+
+    public String getDeploymentOrigin() {
+        return deploymentOrigin;
+    }
+
+    public String getRepositoryBranchName() {
+        return repositoryBranchName;
+    }
+
+    public String getRepositoryRevisionNumber() {
+        return repositoryRevisionNumber;
+    }
+
+    public String getRepositoryUrl() {
+        return repositoryUrl;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public String getRepositoryPreviousRevisionNumber() {
+        return repositoryPreviousRevisionNumber;
+    }
+
+    public String getRepositoryCommitUsername() {
+        return repositoryCommitUsername;
+    }
+
+    public String getBuildPlanId() {
+        return buildPlanId;
+    }
+
+    public String getBuildPlanName() {
+        return buildPlanName;
+    }
+
+    public String getBuildPlanNumber() {
+        return buildPlanNumber;
+    }
+
+    public String getBuildPlanResultUrl() {
+        return buildPlanResultUrl;
+    }
 
     public void setDeploymentOrigin(String plugin) {
         this.deploymentOrigin = plugin;
