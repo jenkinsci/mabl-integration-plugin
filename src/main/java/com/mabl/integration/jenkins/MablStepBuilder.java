@@ -4,6 +4,7 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -95,7 +96,8 @@ public class MablStepBuilder extends Builder {
                 applicationId,
                 continueOnPlanFailure,
                 continueOnMablError,
-                getOutputFileLocation(build)
+                getOutputFileLocation(build),
+                getEnvironmentVars(build, listener)
         );
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -132,6 +134,21 @@ public class MablStepBuilder extends Builder {
         }
 
         return fp;
+    }
+
+    private EnvVars getEnvironmentVars(AbstractBuild<?, ?> build, BuildListener listener) {
+        final PrintStream outputStream = listener.getLogger();
+        EnvVars environmentVars = new EnvVars();
+        try {
+            environmentVars = build.getEnvironment(listener);
+        } catch (IOException e) {
+            outputStream.println(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            outputStream.println(e.getMessage());
+        }
+
+        return environmentVars;
     }
 
     /**

@@ -2,12 +2,14 @@ package com.mabl.integration.jenkins;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.test.output.Failure;
 import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
+import hudson.EnvVars;
 import hudson.FilePath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -54,6 +56,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
     private final FilePath buildPath;
+    private final EnvVars environmentVars;
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
     @DataBoundConstructor
@@ -65,7 +68,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final String applicationId,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
-            final FilePath buildPath
+            final FilePath buildPath,
+            final EnvVars environmentVars
 
     ) {
         this.outputStream = outputStream;
@@ -76,6 +80,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
         this.buildPath = buildPath;
+        this.environmentVars = environmentVars;
     }
 
     @Override
@@ -112,7 +117,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         );
 
         try {
-            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId);
+            final CreateDeploymentProperties properties = getDeploymentProperties();
+            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, properties);
             outputStream.printf("Deployment event was created with id [%s] in mabl.%n", deployment.id);
 
             try {
@@ -152,6 +158,13 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 client.close();
             }
         }
+    }
+
+    private CreateDeploymentProperties getDeploymentProperties() {
+        CreateDeploymentProperties properties = Converter.convert(this.environmentVars);
+        properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+
+        return properties;
     }
 
     private boolean allPlansComplete(final ExecutionResult result) {
