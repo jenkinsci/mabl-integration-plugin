@@ -16,6 +16,10 @@ public class TestCase {
     private String journey;
     @XmlAttribute(name = "time")
     private long duration;
+    @XmlAttribute(name = "xlink:type")
+    private String linkType;
+    @XmlAttribute(name = "xlink:href")
+    private String appHref;
 
     @XmlElement(name = "failure")
     private Failure failure;
@@ -24,16 +28,20 @@ public class TestCase {
 
     }
 
-    public TestCase(String plan, String journey, long duration) {
+    public TestCase(String plan, String journey, long duration, String appHref) {
         this.plan = plan;
         this.journey = journey;
         this.duration = duration;
+        this.linkType = "simple";
+        this.appHref = appHref;
     }
 
-    public TestCase(String plan, String journey, long duration, Failure failure) {
+    public TestCase(String plan, String journey, long duration, String appHref, Failure failure) {
         this.plan = plan;
         this.journey = journey;
         this.duration = duration;
+        this.linkType = "simple";
+        this.appHref = appHref;
         this.failure = failure;
     }
 
@@ -52,6 +60,14 @@ public class TestCase {
 
     public long getDuration() {
         return this.duration;
+    }
+
+    public String getAppHref() {
+        return this.appHref;
+    }
+
+    public String getLinkType() {
+        return this.linkType;
     }
 
     public Failure getFailure() {

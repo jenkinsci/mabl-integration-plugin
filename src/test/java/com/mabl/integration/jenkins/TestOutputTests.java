@@ -21,7 +21,7 @@ public class TestOutputTests {
 
     @Test
     public void testTestCaseOutputNoFailure() throws JAXBException {
-        TestCase testCase = new TestCase("My Plan Name", "My Journey Name", 23L);
+        TestCase testCase = new TestCase("My Plan Name", "My Journey Name", 23L, "http://myapphref.com");
         JAXBContext jaxbContext = JAXBContext.newInstance(TestCase.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter stringWriter = new StringWriter();
@@ -32,7 +32,7 @@ public class TestOutputTests {
     @Test
     public void testTestCaseOutputWithFailure() throws JAXBException {
         Failure failure = new Failure("My Reason", "My Message");
-        TestCase testCase = new TestCase("My Plan Name", "My Journey Name", 23L, failure);
+        TestCase testCase = new TestCase("My Plan Name", "My Journey Name", 23L, "http://myapphref.com", failure);
         JAXBContext jaxbContext = JAXBContext.newInstance(TestCase.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter stringWriter = new StringWriter();
@@ -56,9 +56,9 @@ public class TestOutputTests {
         props.add(property2);
         Properties properties = new Properties(ImmutableList.copyOf(props));
 
-        TestCase testCase1 = new TestCase("My Plan Name 1", "My Journey Name 1", 11L);
+        TestCase testCase1 = new TestCase("My Plan Name 1", "My Journey Name 1", 11L, "http://myapphref.com");
         Failure failure = new Failure("My Reason", "My Message");
-        TestCase testCase2 = new TestCase("My Plan Name 2", "My Journey Name 2", 22L, failure);
+        TestCase testCase2 = new TestCase("My Plan Name 2", "My Journey Name 2", 22L, "http://myapphref.com", failure);
         TestSuite testSuite1 = new TestSuite(
                 "Full Test Suite",
                 33L,
