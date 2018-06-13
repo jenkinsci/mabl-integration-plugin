@@ -27,4 +27,12 @@ public class TestSuites {
     public TestSuites() {
 
     }
+
+    public String getXlink() {
+        return xlink;
+    }
+
+    public ImmutableCollection<TestSuite> getTestSuites() {
+        return testSuites;
+    }
 }
