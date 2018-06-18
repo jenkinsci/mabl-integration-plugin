@@ -1,6 +1,5 @@
 package com.mabl.integration.jenkins;
 
-import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
@@ -13,8 +12,7 @@ public interface MablRestApiClient {
 
     CreateDeploymentResult createDeploymentEvent(
             String environmentId,
-            String applicationId,
-            CreateDeploymentProperties properties
+            String applicationId
     ) throws IOException, MablSystemError;
 
     /**
