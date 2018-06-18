@@ -36,7 +36,7 @@ docker run -d -p 9090:8080 --name=jenkins-master jenkins
 
 # Setup your Jenkins instance
 
-# Build and deploy plugin to Jenkins
+# Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
 mvn clean package \
   && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
   && docker restart jenkins-master
