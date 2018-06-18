@@ -21,13 +21,13 @@
 
     <properties>
         <!-- Last Jenkins LTS release -->
-        <jenkins.version>1.651.2</jenkins.version>
-        <jenkins-test-harness.version>2.1</jenkins-test-harness.version>
+        <jenkins.version>1.580.1</jenkins.version>
+        <jenkins-test-harness.version>1.580.1</jenkins-test-harness.version>
         <release.skipTests>false</release.skipTests>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <findbugs-maven-plugin.version>3.0.2</findbugs-maven-plugin.version>
         <concurrency>1</concurrency>
-        <java.level>7</java.level>
+        <java.level>6</java.level>
         <hpi-plugin.version>1.120</hpi-plugin.version>
         <workflow.version>1.14.2</workflow.version>
     </properties>
@@ -107,23 +107,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.5.3</version>
-        </dependency>
-
-        <!-- pipeline-step dependencies -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <version>1.14</version>
         </dependency>
     </dependencies>
 

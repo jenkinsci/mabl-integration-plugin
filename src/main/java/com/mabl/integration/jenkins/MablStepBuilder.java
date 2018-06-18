@@ -21,6 +21,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -95,10 +96,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @Override
     public void perform(
-            final Run<?, ?> run,
-            FilePath workspace,
-            final Launcher launcher,
-            final TaskListener listener
+            @Nonnull final Run<?, ?> run,
+            @Nonnull FilePath workspace,
+            @Nonnull final Launcher launcher,
+            @Nonnull final TaskListener listener
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
@@ -126,11 +127,19 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         } catch (ExecutionException e) {
             outputStream.println("There was an execution error trying to run your journeys in mabl");
             e.printStackTrace(outputStream);
-            run.setResult(Result.FAILURE);
+            if(continueOnMablError) {
+                run.setResult(Result.FAILURE);
+            } else {
+                run.setResult(Result.SUCCESS);
+            }
         } catch (TimeoutException e) {
             outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n" +
                     "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
-            run.setResult(Result.FAILURE);
+            if (continueOnMablError) {
+                run.setResult(Result.FAILURE);
+            } else {
+                run.setResult(Result.SUCCESS);
+            }
         }
     }
 
