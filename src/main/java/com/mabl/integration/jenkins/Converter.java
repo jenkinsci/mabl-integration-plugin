@@ -4,34 +4,36 @@ import com.google.common.base.Strings;
 import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import hudson.EnvVars;
 
+import java.io.PrintStream;
 import java.util.Map;
 
 public class Converter {
 
-    public static CreateDeploymentProperties convert(EnvVars vars) {
+    public static CreateDeploymentProperties convert(EnvVars vars, PrintStream outputStream) {
         CreateDeploymentProperties props = new CreateDeploymentProperties();
 
         // Repository specific props (Only exists because of other non-mabl steps)
-        props.setRepositoryBranchName(getProperty(vars, "GIT_BRANCH"));
-        props.setRepositoryRevisionNumber(getProperty(vars, "GIT_COMMIT", "SVN_REVISION"));
-        String repoUrl = getProperty(vars, "GIT_URL", "SVN_URL");
+        props.setRepositoryBranchName(getProperty(vars, outputStream, "GIT_BRANCH"));
+        props.setRepositoryRevisionNumber(getProperty(vars, outputStream, "GIT_COMMIT", "SVN_REVISION"));
+        String repoUrl = getProperty(vars, outputStream, "GIT_URL", "SVN_URL");
         props.setRepositoryUrl(repoUrl);
         props.setRepositoryName(getRepositoryName(repoUrl));
-        props.setRepositoryPreviousRevisionNumber(getProperty(vars, "GIT_PREVIOUS_COMMIT"));
-        //props.setRepositoryCommitUsername(getProperty(vars, ""));
+        props.setRepositoryPreviousRevisionNumber(getProperty(vars, outputStream, "GIT_PREVIOUS_COMMIT"));
+        //props.setRepositoryCommitUsername(getProperty(vars, outputStream, ""));
 
         // Jenkins info about the mabl step that should be there no matter what
-        props.setBuildPlanId(getProperty(vars, "JOB_NAME"));
-        props.setBuildPlanName(getProperty(vars, "JOB_NAME"));
-        props.setBuildPlanNumber(getProperty(vars, "BUILD_NUMBER"));
-        props.setBuildPlanResultUrl(getProperty(vars, "RUN_DISPLAY_URL"));
+        props.setBuildPlanId(getProperty(vars, outputStream, "JOB_NAME"));
+        props.setBuildPlanName(getProperty(vars, outputStream, "JOB_NAME"));
+        props.setBuildPlanNumber(getProperty(vars, outputStream, "BUILD_NUMBER"));
+        props.setBuildPlanResultUrl(getProperty(vars, outputStream, "RUN_DISPLAY_URL"));
 
         return props;
     }
 
-    private static <String> String getProperty(Map<String, String> vars, String ...possibleProperties) {
+    private static <String> String getProperty(Map<String, String> vars, PrintStream stream, String ...possibleProperties) {
         for(String property : possibleProperties) {
             if(vars.containsKey(property)) {
+                stream.printf("  '%s' => '%s'%n", property, vars.get(property));
                 return vars.get(property);
             }
         }

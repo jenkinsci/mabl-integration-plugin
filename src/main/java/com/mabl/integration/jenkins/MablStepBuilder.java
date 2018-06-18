@@ -15,9 +15,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +80,10 @@ public class MablStepBuilder extends Builder {
         return applicationId;
     }
 
+    public boolean isCollectVars() {
+        return getDescriptor().collectVars;
+    }
+
     @Override
     public boolean perform(
             final AbstractBuild<?, ?> build,
@@ -96,6 +102,7 @@ public class MablStepBuilder extends Builder {
                 applicationId,
                 continueOnPlanFailure,
                 continueOnMablError,
+                isCollectVars(),
                 getOutputFileLocation(build),
                 getEnvironmentVars(build, listener)
         );
@@ -142,10 +149,12 @@ public class MablStepBuilder extends Builder {
         try {
             environmentVars = build.getEnvironment(listener);
         } catch (IOException e) {
-            outputStream.println(e.getMessage());
+            outputStream.println("There was an error trying to read environment variables.");
+            e.printStackTrace(outputStream);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            outputStream.println(e.getMessage());
+            outputStream.println("There was an interruption during read of environment variables.");
+            e.printStackTrace(outputStream);
         }
 
         return environmentVars;
@@ -157,9 +166,22 @@ public class MablStepBuilder extends Builder {
     @Extension
     @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
+        private boolean collectVars;
 
         public MablStepDescriptor() {
             super.load();
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            JSONObject json = formData.getJSONObject("mabl");
+            collectVars = json.getBoolean("collectVars");
+            save();
+            return super.configure(req, formData);
+        }
+
+        public boolean isCollectVars() {
+            return collectVars;
         }
 
         @Override

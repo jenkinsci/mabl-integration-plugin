@@ -55,6 +55,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final String applicationId;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
+    private final boolean collectVars;
     private final FilePath buildPath;
     private final EnvVars environmentVars;
 
@@ -68,6 +69,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final String applicationId,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
+            final boolean collectVars,
             final FilePath buildPath,
             final EnvVars environmentVars
 
@@ -79,6 +81,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.applicationId = applicationId;
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
+        this.collectVars = collectVars;
         this.buildPath = buildPath;
         this.environmentVars = environmentVars;
     }
@@ -161,9 +164,15 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     }
 
     private CreateDeploymentProperties getDeploymentProperties() {
-        CreateDeploymentProperties properties = Converter.convert(this.environmentVars);
-        properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+        CreateDeploymentProperties properties = Converter.convert(new EnvVars(), outputStream);
+        if(collectVars) {
+            outputStream.print("Send build environment variables is set. Collecting the following information:%n");
+            properties = Converter.convert(this.environmentVars, outputStream);
+        } else {
+            outputStream.print("Send build environment variables is unset. Not collecting any environment information:%n");
+        }
 
+        properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
         return properties;
     }
 
