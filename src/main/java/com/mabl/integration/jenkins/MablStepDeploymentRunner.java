@@ -188,7 +188,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 TestCase testCase = new TestCase(
                         safePlanName(summary),
                         safeJourneyName(summary, journeyResult.id),
-                        getDuration(summary)
+                        getDuration(summary),
+                        journeyResult.appHref
                 );
 
                 testSuite.addToTestCases(testCase).incrementTests();
