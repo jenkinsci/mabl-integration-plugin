@@ -3,7 +3,6 @@ package com.mabl.integration.jenkins;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
-import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
@@ -36,7 +35,6 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
     private static final String EXPECTED_DEPLOYMENT_EVENT_ID = "d1To4-GYeZ4nl-4Ag1JyQg-v";
     private static final String EXPECTED_ORGANIZATION_ID = "K8NWhtPqOyFnyvJTvCP0uw-w";
-    private static final String fakeProperties = "{\"deployment_origin\":\""+MablStepConstants.PLUGIN_USER_AGENT+"\"}";
 
     @Test
     public void createDeploymentAllParametersHappyPathTest() throws IOException, MablSystemError {
@@ -45,13 +43,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = "foo-env-e";
         final String applicationId = "foo-app-a";
 
-
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey,
-                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"properties\":"+fakeProperties+"}"
+                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\"}"
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
@@ -69,7 +66,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey,
-                "{\"environment_id\":\"foo-env-e\",\"properties\":"+fakeProperties+"}"
+                "{\"environment_id\":\"foo-env-e\"}"
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
@@ -87,7 +84,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey,
-                "{\"application_id\":\"foo-app-a\",\"properties\":"+fakeProperties+"}"
+                "{\"application_id\":\"foo-app-a\"}"
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId);
@@ -104,9 +101,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         MablRestApiClient client = null;
         try {
             client = new MablRestApiClientImpl(baseUrl, restApiKey);
-            CreateDeploymentProperties properties = new CreateDeploymentProperties();
-            properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
-            CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId, properties);
+            CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId);
             assertEquals(EXPECTED_DEPLOYMENT_EVENT_ID, result.id);
         } finally {
             if (client != null) {

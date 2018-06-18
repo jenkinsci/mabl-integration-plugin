@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mabl.integration.jenkins.domain.CreateDeploymentPayload;
-import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
@@ -119,13 +118,13 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     @Override
     public CreateDeploymentResult createDeploymentEvent(
             final String environmentId,
-            final String applicationId,
-            final CreateDeploymentProperties properties
-            ) throws IOException, MablSystemError {
+            final String applicationId
+    ) throws IOException, MablSystemError {
+
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
-        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, properties));
+        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId));
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes("UTF-8"));
 
         final HttpPost request = new HttpPost(url);

@@ -4,23 +4,24 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import net.sf.json.JSONObject;
+import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -43,27 +44,32 @@ import static org.apache.commons.lang.StringUtils.trimToNull;
  * mabl custom build step
  */
 @SuppressWarnings("unused") // automatically discovered by Jenkins
-public class MablStepBuilder extends Builder {
+public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     private final String restApiKey;
     private final String environmentId;
     private final String applicationId;
-    private final boolean continueOnPlanFailure;
-    private final boolean continueOnMablError;
+    private boolean continueOnPlanFailure;
+    private boolean continueOnMablError;
 
     @DataBoundConstructor
     public MablStepBuilder(
             final String restApiKey,
             final String environmentId,
-            final String applicationId,
-            final boolean continueOnPlanFailure,
-            final boolean continueOnMablError
-
+            final String applicationId
     ) {
         this.restApiKey = trimToNull(restApiKey);
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
+    }
+
+    @DataBoundSetter
+    public void setContinueOnPlanFailure(boolean continueOnPlanFailure) {
         this.continueOnPlanFailure = continueOnPlanFailure;
+    }
+
+    @DataBoundSetter
+    public void setContinueOnMablError(boolean continueOnMablError) {
         this.continueOnMablError = continueOnMablError;
     }
 
@@ -80,15 +86,20 @@ public class MablStepBuilder extends Builder {
         return applicationId;
     }
 
-    public boolean isCollectVars() {
-        return getDescriptor().collectVars;
+    public boolean isContinueOnPlanFailure() {
+        return this.continueOnPlanFailure;
+    }
+
+    public boolean isContinueOnMablError() {
+        return this.continueOnMablError;
     }
 
     @Override
-    public boolean perform(
-            final AbstractBuild<?, ?> build,
-            final Launcher launcher,
-            final BuildListener listener
+    public void perform(
+            @Nonnull final Run<?, ?> run,
+            @Nonnull FilePath workspace,
+            @Nonnull final Launcher launcher,
+            @Nonnull final TaskListener listener
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
@@ -102,62 +113,47 @@ public class MablStepBuilder extends Builder {
                 applicationId,
                 continueOnPlanFailure,
                 continueOnMablError,
-                isCollectVars(),
-                getOutputFileLocation(build),
-                getEnvironmentVars(build, listener)
+                getOutputFileLocation(workspace)
         );
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
         try {
-            return runnerFuture.get(EXECUTION_TIMEOUT_SECONDS, SECONDS);
-
+            if(runnerFuture.get(EXECUTION_TIMEOUT_SECONDS, SECONDS)) {
+                run.setResult(Result.SUCCESS);
+            } else {
+                run.setResult(Result.FAILURE);
+            }
         } catch (ExecutionException e) {
             outputStream.println("There was an execution error trying to run your journeys in mabl");
             e.printStackTrace(outputStream);
-            return continueOnMablError;
-
+            if(continueOnMablError) {
+                run.setResult(Result.FAILURE);
+            } else {
+                run.setResult(Result.SUCCESS);
+            }
         } catch (TimeoutException e) {
             outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n" +
                     "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
-            return continueOnMablError;
+            if (continueOnMablError) {
+                run.setResult(Result.FAILURE);
+            } else {
+                run.setResult(Result.SUCCESS);
+            }
         }
     }
 
-    @Override
-    public MablStepDescriptor getDescriptor() {
-        return (MablStepDescriptor) super.getDescriptor();
-    }
-
-    private FilePath getOutputFileLocation(AbstractBuild<?, ?> build) {
-        FilePath fp = build.getWorkspace();
-        if (fp == null) {
+    private FilePath getOutputFileLocation(FilePath workspace) {
+        if (workspace == null) {
             return new FilePath(new File(TEST_OUTPUT_XML_FILENAME));
         }
-        if(fp.isRemote()) {
-            fp = new FilePath(fp.getChannel(), fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME);
+        if(workspace.isRemote()) {
+            workspace = new FilePath(workspace.getChannel(), workspace.toString() + File.separator + TEST_OUTPUT_XML_FILENAME);
         } else {
-            fp = new FilePath(new File(fp.toString() + File.separator + TEST_OUTPUT_XML_FILENAME));
+            workspace = new FilePath(new File(workspace.toString() + File.separator + TEST_OUTPUT_XML_FILENAME));
         }
 
-        return fp;
-    }
-
-    private EnvVars getEnvironmentVars(AbstractBuild<?, ?> build, BuildListener listener) {
-        final PrintStream outputStream = listener.getLogger();
-        EnvVars environmentVars = new EnvVars();
-        try {
-            environmentVars = build.getEnvironment(listener);
-        } catch (IOException e) {
-            outputStream.println("There was an error trying to read environment variables.");
-            e.printStackTrace(outputStream);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            outputStream.println("There was an interruption during read of environment variables.");
-            e.printStackTrace(outputStream);
-        }
-
-        return environmentVars;
+        return workspace;
     }
 
     /**
@@ -165,24 +161,7 @@ public class MablStepBuilder extends Builder {
      */
     @Extension
     @Symbol(PLUGIN_SYMBOL)
-    public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
-        private boolean collectVars;
-
-        public MablStepDescriptor() {
-            super.load();
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            JSONObject json = formData.getJSONObject("mabl");
-            collectVars = json.getBoolean("collectVars");
-            save();
-            return super.configure(req, formData);
-        }
-
-        public boolean isCollectVars() {
-            return collectVars;
-        }
+    public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> clazz) {

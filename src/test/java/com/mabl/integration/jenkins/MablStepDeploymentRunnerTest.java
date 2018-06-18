@@ -1,9 +1,7 @@
 package com.mabl.integration.jenkins;
 
-import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
-import hudson.EnvVars;
 import hudson.FilePath;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,8 +16,6 @@ import java.util.ArrayList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,9 +32,7 @@ public class MablStepDeploymentRunnerTest {
     private final String applicationId = "foo-app-a";
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
-    private final EnvVars envVars = new EnvVars();
 
-    private MablStepDeploymentRunner runner;
     private MablRestApiClient client;
     private PrintStream outputStream;
 
@@ -49,7 +43,11 @@ public class MablStepDeploymentRunnerTest {
     public void setup() {
         client = mock(MablRestApiClient.class);
         outputStream = mock(PrintStream.class);
-        runner = new MablStepDeploymentRunner(
+    }
+
+    @Test
+    public void runTestsHappyPath() throws IOException, MablSystemError {
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
                 TEST_POLLING_INTERVAL_MILLISECONDS,
@@ -57,15 +55,11 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 false,
-                true,
-                buildPath,
-                envVars
-        );
-    }
+                buildPath
 
-    @Test
-    public void runTestsHappyPath() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        );
+
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -78,7 +72,18 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsHappyPathManyPollings() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                false,
+                false,
+                buildPath
+        );
+
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -97,7 +102,18 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorOnCreateDeployment() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                false,
+                false,
+                buildPath
+        );
+
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertFalse("failure outcome expected", runner.call());
@@ -107,7 +123,18 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorDeploymentResultsNotFound() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                false,
+                false,
+                buildPath
+        );
+
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenThrow(new MablSystemError("mabl error"));
 
         when(client.getExecutionResults(eventId)).thenReturn(null);
@@ -119,7 +146,18 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsPlanFailure() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                false,
+                false,
+                buildPath
+        );
+
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -140,12 +178,10 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 false,
                 true,
-                true,
-                buildPath,
-                envVars
+                buildPath
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertTrue("failure override expected", runner.call());
@@ -163,12 +199,10 @@ public class MablStepDeploymentRunnerTest {
                 applicationId,
                 true,
                 false,
-                true,
-                buildPath,
-                envVars
+                buildPath
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(environmentId, applicationId))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
