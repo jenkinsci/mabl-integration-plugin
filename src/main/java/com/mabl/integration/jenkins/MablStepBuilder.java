@@ -4,6 +4,7 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -15,11 +16,13 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import net.sf.json.JSONObject;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -86,6 +89,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return applicationId;
     }
 
+    public boolean isCollectVars() {
+        return getDescriptor().isCollectVars();
+    }
+
     public boolean isContinueOnPlanFailure() {
         return this.continueOnPlanFailure;
     }
@@ -113,7 +120,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 applicationId,
                 continueOnPlanFailure,
                 continueOnMablError,
-                getOutputFileLocation(workspace)
+                isCollectVars(),
+                getOutputFileLocation(workspace),
+                getEnvironmentVars(run, listener)
         );
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -143,6 +152,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
+    @Override
+    public MablStepDescriptor getDescriptor() {
+        return (MablStepDescriptor) super.getDescriptor();
+    }
+
     private FilePath getOutputFileLocation(FilePath workspace) {
         if (workspace == null) {
             return new FilePath(new File(TEST_OUTPUT_XML_FILENAME));
@@ -156,12 +170,46 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return workspace;
     }
 
+    private EnvVars getEnvironmentVars(Run<?, ?> build, TaskListener listener) {
+        final PrintStream outputStream = listener.getLogger();
+        EnvVars environmentVars = new EnvVars();
+        try {
+            environmentVars = build.getEnvironment(listener);
+        } catch (IOException e) {
+            outputStream.println("There was an error trying to read environment variables.");
+            e.printStackTrace(outputStream);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            outputStream.println("There was an interruption during read of environment variables.");
+            e.printStackTrace(outputStream);
+        }
+
+        return environmentVars;
+    }
+
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
     @Extension
     @Symbol(PLUGIN_SYMBOL)
-    public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
+        private boolean collectVars;
+
+        public MablStepDescriptor() {
+            super.load();
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            JSONObject json = formData.getJSONObject("mabl");
+            collectVars = json.getBoolean("collectVars");
+            save();
+            return super.configure(req, formData);
+        }
+
+        public boolean isCollectVars() {
+            return collectVars;
+        }
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> clazz) {

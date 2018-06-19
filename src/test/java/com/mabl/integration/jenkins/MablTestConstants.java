@@ -1,5 +1,10 @@
 package com.mabl.integration.jenkins;
 
+import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * mabl custom build step
  *
@@ -171,4 +176,82 @@ class MablTestConstants {
                 "</testsuite>" +
             "</testsuites>";
 
+    static final Map<String, String> BUILD_VARS = new HashMap<String, String> () {
+        {
+            put("JOB_NAME", "MyFakeJobName");
+            put("BUILD_NUMBER", "6");
+            put("RUN_DISPLAY_URL", "http://server/job/FakeJobName/6/display/redirect");
+        }
+    };
+
+    static final Map<String, String> GIT_VARS = new HashMap<String, String>() {
+        {
+            put("GIT_BRANCH", "master");
+            put("GIT_COMMIT", "1234");
+            put("GIT_URL", "git@github.com:fakeOrg/mabl-integration-plugin.git");
+            put("GIT_PREVIOUS_COMMIT", "1233");
+            putAll(BUILD_VARS);
+        }
+    };
+
+    static final Map<String, String> SVN_VARS = new HashMap<String, String>() {
+        {
+            put("SVN_REVISION", "12");
+            put("SVN_URL", "https://svn.fakeDomain.com/int_test_svn");
+            putAll(BUILD_VARS);
+        }
+    };
+
+    static final CreateDeploymentProperties JUST_BUILD_PROPS = new CreateDeploymentProperties() {
+        {
+            setBuildPlanId("MyFakeJobName");
+            setBuildPlanName("MyFakeJobName");
+            setBuildPlanNumber("6");
+            setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
+            setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+        }
+    };
+
+    static final CreateDeploymentProperties GIT_BUILD_PROPS_SSH = new CreateDeploymentProperties() {
+        {
+            setBuildPlanId("MyFakeJobName");
+            setBuildPlanName("MyFakeJobName");
+            setBuildPlanNumber("6");
+            setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
+            setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+            setRepositoryBranchName("master");
+            setRepositoryName("mabl-integration-plugin");
+            setRepositoryRevisionNumber("1234");
+            setRepositoryPreviousRevisionNumber("1233");
+            setRepositoryUrl("git@github.com:fakeOrg/mabl-integration-plugin.git");
+        }
+    };
+
+    static final CreateDeploymentProperties GIT_BUILD_PROPS_HTTPS = new CreateDeploymentProperties() {
+        {
+            setBuildPlanId("MyFakeJobName");
+            setBuildPlanName("MyFakeJobName");
+            setBuildPlanNumber("6");
+            setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
+            setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+            setRepositoryBranchName("master");
+            setRepositoryName("mabl-integration-plugin");
+            setRepositoryRevisionNumber("1234");
+            setRepositoryPreviousRevisionNumber("1233");
+            setRepositoryUrl("https://github.com/fakeOrg/mabl-integration-plugin.git");
+        }
+    };
+
+    static final CreateDeploymentProperties SVN_BUILD_PROPS = new CreateDeploymentProperties() {
+        {
+            setBuildPlanId("MyFakeJobName");
+            setBuildPlanName("MyFakeJobName");
+            setBuildPlanNumber("6");
+            setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
+            setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+            setRepositoryName("int_test_svn");
+            setRepositoryRevisionNumber("12");
+            setRepositoryUrl("https://svn.fakeDomain.com/int_test_svn");
+        }
+    };
 }
