@@ -166,10 +166,10 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private CreateDeploymentProperties getDeploymentProperties() {
         CreateDeploymentProperties properties = Converter.convert(new EnvVars(), outputStream);
         if(collectVars) {
-            outputStream.print("Send build environment variables is set. Collecting the following information:%n");
+            outputStream.print("Send build environment variables is set. Collecting the following information:\n");
             properties = Converter.convert(this.environmentVars, outputStream);
         } else {
-            outputStream.print("Send build environment variables is unset. Not collecting any environment information:%n");
+            outputStream.print("Send build environment variables is unset. Not collecting any environment information:\n");
         }
 
         properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
