@@ -114,9 +114,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void execute() throws MablSystemError, MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
-        outputStream.printf("mabl is creating a deployment event:%n  environment_id: %s %n  application_id: %s%n",
-                environmentId,
-                applicationId
+        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n",
+                environmentId == null ? "empty" : environmentId,
+                applicationId == null ? "empty" : applicationId
         );
 
         try {
