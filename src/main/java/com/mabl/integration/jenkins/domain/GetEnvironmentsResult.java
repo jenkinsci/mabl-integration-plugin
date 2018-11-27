@@ -10,9 +10,9 @@ public class GetEnvironmentsResult implements ApiResult {
 
     @JsonCreator
     public GetEnvironmentsResult(
-            @JsonProperty("environments") final List<Environment> applications
+            @JsonProperty("environments") final List<Environment> environments
     ) {
-        this.environments = applications;
+        this.environments = environments;
     }
 
     @SuppressWarnings("WeakerAccess")

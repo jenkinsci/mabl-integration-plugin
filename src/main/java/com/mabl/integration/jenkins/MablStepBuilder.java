@@ -107,6 +107,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return this.continueOnMablError;
     }
 
+    public boolean isDisableSslVerification() {
+        return this.disableSslVerification;
+    }
+
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
