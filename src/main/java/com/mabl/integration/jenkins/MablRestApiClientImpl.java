@@ -23,18 +23,30 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
@@ -76,19 +88,46 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final String restApiBaseUrl,
             final String restApiKey
     ) {
+        this(restApiBaseUrl, restApiKey, false);
+    }
+    
+    MablRestApiClientImpl(
+            final String restApiBaseUrl,
+            final String restApiKey,
+            final boolean disableSslVerification
+    ) {
 
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
 
-        httpClient = HttpClients.custom()
+        final HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
                 .setServiceUnavailableRetryStrategy(getRetryHandler())
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
                 .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
-                .setDefaultRequestConfig(getDefaultRequestConfig())
-                .build();
+                .setDefaultRequestConfig(getDefaultRequestConfig());
+        
+        if (disableSslVerification) {
+            final SSLContext sslContext;
+            try {
+                sslContext = new SSLContextBuilder()
+                    .loadTrustMaterial(null, new TrustAllStrategy())
+                    .build();
+            } catch (Exception e) {
+                throw new RuntimeException("Error initializing SSL", e);
+            }
+            httpClientBuilder.setSSLContext(sslContext);
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                    .register("https", sslSocketFactory)
+                    .build();
+            httpClientBuilder.setConnectionManager(new PoolingHttpClientConnectionManager(socketFactoryRegistry));
+        }
+        
+        httpClient = httpClientBuilder.build();
     }
 
     private MablRestApiClientRetryHandler getRetryHandler() {
