@@ -5,41 +5,31 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
-import com.mabl.integration.jenkins.domain.ExecutionResult;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.created;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE;
-import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Common Wiremock testing harness
  */
 public abstract class AbstractWiremockTest {
+    private static final int BIND_PORT = 0; // Choose a random available port each time
 
     // Annotation used only for static rules, so we only startup a single Wiremock instance
     @ClassRule
-    public static WireMockClassRule wireMockRule = new WireMockClassRule();
+    public static WireMockClassRule wireMockRule = new WireMockClassRule(BIND_PORT);
 
     // Pass the above instance to all concrete implementations
     @Rule
@@ -140,7 +130,7 @@ public abstract class AbstractWiremockTest {
     }
 
     protected String getBaseUrl() {
-        final int portNumber = wireMockRule.getOptions().portNumber();
+        final int portNumber = wireMockRule.port();
         final String address = wireMockRule.getOptions().bindAddress();
         return String.format("http://%s:%d", address, portNumber);
     }
