@@ -5,8 +5,8 @@ import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class JenkinsModule extends AbstractModule {
@@ -16,19 +16,17 @@ public class JenkinsModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        FileInputStream inputStream = null;
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
         try {
             Properties properties = new Properties();
-            properties.load(getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
+            properties.load(inputStream);
             Names.bindProperties(binder(), properties);
         } catch (IOException e) {
             System.out.println("ERROR: Could not load properties");
             throw new RuntimeException(e);
         } finally {
             try {
-                if(inputStream != null) {
-                    inputStream.close();
-                }
+                inputStream.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
