@@ -28,6 +28,9 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +55,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private final String restApiKey;
     private final String environmentId;
     private final String applicationId;
+    private final List<String> labels;
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
@@ -60,11 +64,13 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public MablStepBuilder(
             final String restApiKey,
             final String environmentId,
-            final String applicationId
+            final String applicationId,
+            final List<String> labels
     ) {
         this.restApiKey = trimToNull(restApiKey);
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
+        this.labels = Optional.ofNullable(labels).orElse(new ArrayList<>());
     }
 
     @DataBoundSetter
@@ -93,6 +99,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     public String getApplicationId() {
         return applicationId;
+    }
+
+    public List<String> getLabels() {
+        return labels;
     }
 
     public boolean isCollectVars() {
@@ -128,6 +138,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS,
                 environmentId,
                 applicationId,
+                labels,
                 continueOnPlanFailure,
                 continueOnMablError,
                 isCollectVars(),

@@ -22,6 +22,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -67,6 +68,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final long pollingIntervalMilliseconds,
             final String environmentId,
             final String applicationId,
+            List<String> labels,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
             final boolean collectVars,
