@@ -54,7 +54,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey,
-                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
+                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
@@ -111,7 +111,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKey,
-                "{\"labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
+                "{\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
