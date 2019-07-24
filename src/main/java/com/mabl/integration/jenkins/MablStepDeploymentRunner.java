@@ -11,6 +11,7 @@ import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
 import hudson.EnvVars;
 import hudson.FilePath;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.xml.bind.JAXBContext;
@@ -121,12 +122,12 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]%n",
                 environmentId == null ? "empty" : environmentId,
                 applicationId == null ? "empty" : applicationId,
-                labels == null ? "empty" : String.join(", ", labels)
+                labels == null ? "empty" : StringUtils.join(labels, ", ")
         );
 
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
-            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, properties);
+            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
             outputStream.printf("Deployment event was created with id [%s] in mabl.%n", deployment.id);
 
             try {

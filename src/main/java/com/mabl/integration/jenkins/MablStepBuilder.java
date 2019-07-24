@@ -29,8 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -70,7 +70,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         this.restApiKey = trimToNull(restApiKey);
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
-        this.labels = Optional.ofNullable(labels).orElse(new ArrayList<>());
+        this.labels = labels != null ? labels : Collections.emptyList();
     }
 
     @DataBoundSetter
