@@ -19,12 +19,7 @@
 
   <f:advanced>
     <f:entry tile="${%Labels}" field="labels">
-      <select name="labels" multiple="multiple" size="5">
-        <j:invokeStatic className="org.jvnet.jenkins.plugins.nodelabelparameter.NodeParameterDefinition" method="getLabels" var="allNodes" />
-        <j:forEach var="aNode" items="${allNodes}" varStatus="loop">
-          <option value="${aNode}">${aNode}</option>
-        </j:forEach>
-      </select>
+      <f:select multiple="multiple" size="5" />
     </f:entry>
     <f:entry title="${%Continue on plan failure(s)}" field="continueOnPlanFailure">
       <f:checkbox default="false" />

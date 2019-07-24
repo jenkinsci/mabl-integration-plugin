@@ -3,6 +3,7 @@ package com.mabl.integration.jenkins;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -314,6 +315,39 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             items.add("Input a valid ApiKey", "");
+            return items;
+        }
+
+
+        public ListBoxModel doFillLabelsItems(@QueryParameter String restApiKey, @QueryParameter boolean disableSslVerification) {
+            if(restApiKey == null || restApiKey.isEmpty()) {
+                ListBoxModel items = new ListBoxModel();
+                items.add("<No Labels Found>", "");
+
+                return items;
+            }
+
+            return getLabelsItems(restApiKey, disableSslVerification);
+        }
+
+        private ListBoxModel getLabelsItems(String formApiKey, boolean disableSslVerification) {
+            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
+            ListBoxModel items = new ListBoxModel();
+            try {
+                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                String organizationId = apiKeyResult.organization_id;
+                GetLabelsResult labelsResult = client.getLabelsResult(organizationId);
+
+                for(GetLabelsResult.Label label : labelsResult.labels) {
+                    items.add(label.name, label.name);
+                }
+
+                return items;
+            } catch (IOException e) {
+            } catch (MablSystemError e) {
+            }
+
+            items.add("<Couldn't Fetch Labels>", "");
             return items;
         }
     }
