@@ -11,7 +11,7 @@ public class CreateDeploymentPayload {
     public CreateDeploymentPayload(String environmentId, String applicationId, List<String> planLabels, CreateDeploymentProperties properties) {
         this.environmentId = environmentId;
         this.applicationId = applicationId;
-        this.planLabels = planLabels;
+        this.planLabels = planLabels == null || planLabels.isEmpty() ? null : planLabels;
         this.properties = properties;
     }
 }
