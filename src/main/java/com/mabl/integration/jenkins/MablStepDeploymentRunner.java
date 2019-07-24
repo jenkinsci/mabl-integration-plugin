@@ -54,6 +54,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private final String environmentId;
     private final String applicationId;
+    private final List<String> labels;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
     private final boolean collectVars;
@@ -68,7 +69,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final long pollingIntervalMilliseconds,
             final String environmentId,
             final String applicationId,
-            List<String> labels,
+            final List<String> labels,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
             final boolean collectVars,
@@ -81,6 +82,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.pollingIntervalMilliseconds = pollingIntervalMilliseconds;
         this.environmentId = environmentId;
         this.applicationId = applicationId;
+        this.labels = labels;
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
         this.collectVars = collectVars;
@@ -116,9 +118,10 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void execute() throws MablSystemError, MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
-        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n",
+        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]%n",
                 environmentId == null ? "empty" : environmentId,
-                applicationId == null ? "empty" : applicationId
+                applicationId == null ? "empty" : applicationId,
+                labels == null ? "empty" : String.join(", ", labels)
         );
 
         try {

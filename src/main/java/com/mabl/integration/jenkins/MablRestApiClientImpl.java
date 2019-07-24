@@ -45,6 +45,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -161,12 +162,13 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     public CreateDeploymentResult createDeploymentEvent(
             final String environmentId,
             final String applicationId,
+            final List<String> labels,
             final CreateDeploymentProperties properties
             ) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
-        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, properties));
+        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, labels, properties));
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes("UTF-8"));
 
         final HttpPost request = new HttpPost(url);

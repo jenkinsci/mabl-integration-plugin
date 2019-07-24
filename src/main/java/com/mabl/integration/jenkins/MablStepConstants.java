@@ -29,7 +29,7 @@ public class MablStepConstants {
     public static final String FORM_API_KEY_LABEL = "API Key";
     public static final String FORM_ENVIRONMENT_ID_LABEL = "Application ID";
     public static final String FORM_APPLICATION_ID_LABEL = "Environment ID";
-
+    public static final String FORM_LABEL_LABEL = "Labels";
 
     /**
      * Dynamically grab the plugin version, so we can't forget to update it on release.
