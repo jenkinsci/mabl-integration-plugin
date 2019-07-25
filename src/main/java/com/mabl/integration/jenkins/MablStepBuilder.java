@@ -71,7 +71,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         this.restApiKey = trimToNull(restApiKey);
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
-        this.labels = labels != null ? labels : Collections.emptyList();
+        this.labels = labels != null ? labels : new ArrayList<String>();
     }
 
     @DataBoundSetter
