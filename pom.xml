@@ -47,7 +47,7 @@
             <email>joe@mabl.com</email>
         </developer>
     </developers>
- 
+
     <scm>
         <connection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</developerConnection>
