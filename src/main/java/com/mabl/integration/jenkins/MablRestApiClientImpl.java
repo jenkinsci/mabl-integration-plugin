@@ -45,7 +45,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -162,7 +162,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     public CreateDeploymentResult createDeploymentEvent(
             final String environmentId,
             final String applicationId,
-            final List<String> labels,
+            final Set<String> labels,
             final CreateDeploymentProperties properties
             ) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls

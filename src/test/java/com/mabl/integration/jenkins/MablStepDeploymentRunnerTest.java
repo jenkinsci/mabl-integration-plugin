@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
@@ -36,7 +38,7 @@ public class MablStepDeploymentRunnerTest {
 
     private final String environmentId = "foo-env-e";
     private final String applicationId = "foo-app-a";
-    private final List<String> labels = Collections.singletonList("foo-label");
+    private final Set<String> labels = Collections.singleton("foo-label");
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
     private final EnvVars envVars = new EnvVars();

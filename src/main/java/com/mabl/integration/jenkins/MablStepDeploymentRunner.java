@@ -55,7 +55,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private final String environmentId;
     private final String applicationId;
-    private final List<String> labels;
+    private final Set<String> labels;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
     private final boolean collectVars;
@@ -70,7 +70,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final long pollingIntervalMilliseconds,
             final String environmentId,
             final String applicationId,
-            final List<String> labels,
+            final Set<String> labels,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
             final boolean collectVars,

@@ -9,14 +9,14 @@ import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 public interface MablRestApiClient {
 
     CreateDeploymentResult createDeploymentEvent(
             String environmentId,
             String applicationId,
-            List<String> labels,
+            Set<String> labels,
             CreateDeploymentProperties properties
     ) throws IOException, MablSystemError;
 

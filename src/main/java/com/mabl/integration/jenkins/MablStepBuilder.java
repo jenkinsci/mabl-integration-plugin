@@ -29,9 +29,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +55,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private final String restApiKey;
     private final String environmentId;
     private final String applicationId;
-    private final List<String> labels;
+    private final Set<String> labels;
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
@@ -66,12 +65,12 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             final String restApiKey,
             final String environmentId,
             final String applicationId,
-            final List<String> labels
+            final Set<String> labels
     ) {
         this.restApiKey = trimToNull(restApiKey);
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
-        this.labels = labels != null ? labels : new ArrayList<String>();
+        this.labels = labels != null ? labels : new HashSet<String>();
     }
 
     @DataBoundSetter
@@ -102,7 +101,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return applicationId;
     }
 
-    public List<String> getLabels() {
+    public Set<String> getLabels() {
         return labels;
     }
 
