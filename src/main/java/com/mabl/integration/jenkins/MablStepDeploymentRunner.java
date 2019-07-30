@@ -11,6 +11,7 @@ import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
 import hudson.EnvVars;
 import hudson.FilePath;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.xml.bind.JAXBContext;
@@ -22,6 +23,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -53,6 +55,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private final String environmentId;
     private final String applicationId;
+    private final Set<String> labels;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
     private final boolean collectVars;
@@ -67,6 +70,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final long pollingIntervalMilliseconds,
             final String environmentId,
             final String applicationId,
+            final Set<String> labels,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
             final boolean collectVars,
@@ -79,6 +83,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.pollingIntervalMilliseconds = pollingIntervalMilliseconds;
         this.environmentId = environmentId;
         this.applicationId = applicationId;
+        this.labels = labels;
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
         this.collectVars = collectVars;
@@ -114,14 +119,15 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void execute() throws MablSystemError, MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
-        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n",
+        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]%n",
                 environmentId == null ? "empty" : environmentId,
-                applicationId == null ? "empty" : applicationId
+                applicationId == null ? "empty" : applicationId,
+                labels == null ? "empty" : StringUtils.join(labels, ", ")
         );
 
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
-            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, properties);
+            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
             outputStream.printf("Deployment event was created with id [%s] in mabl.%n", deployment.id);
 
             try {

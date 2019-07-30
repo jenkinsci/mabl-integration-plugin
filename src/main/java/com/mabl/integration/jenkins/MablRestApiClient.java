@@ -6,14 +6,17 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.domain.GetLabelsResult;
 
 import java.io.IOException;
+import java.util.Set;
 
 public interface MablRestApiClient {
 
     CreateDeploymentResult createDeploymentEvent(
             String environmentId,
             String applicationId,
+            Set<String> labels,
             CreateDeploymentProperties properties
     ) throws IOException, MablSystemError;
 
@@ -62,6 +65,18 @@ public interface MablRestApiClient {
      * @throws MablSystemError on non 200 or 404 response
      */
     GetEnvironmentsResult getEnvironmentsResult(
+            String organizationId
+    ) throws IOException, MablSystemError;
+
+    /**
+     * Attempt to fetch List of Labels for the given organization
+     *
+     * @param organizationId The organizationId for the given ApiKey
+     * @return parsed List<String>, or null on 404
+     * @throws IOException on parsing error
+     * @throws MablSystemError on non 200 or 404 response
+     */
+    GetLabelsResult getLabelsResult(
             String organizationId
     ) throws IOException, MablSystemError;
 

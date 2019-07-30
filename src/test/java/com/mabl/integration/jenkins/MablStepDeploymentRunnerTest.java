@@ -14,6 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
@@ -34,6 +38,7 @@ public class MablStepDeploymentRunnerTest {
 
     private final String environmentId = "foo-env-e";
     private final String applicationId = "foo-app-a";
+    private final Set<String> labels = Collections.singleton("foo-label");
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
     private final EnvVars envVars = new EnvVars();
@@ -55,6 +60,7 @@ public class MablStepDeploymentRunnerTest {
                 TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
+                labels,
                 false,
                 false,
                 true,
@@ -65,7 +71,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsHappyPath() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -78,7 +84,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsHappyPathManyPollings() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -97,7 +103,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorOnCreateDeployment() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertFalse("failure outcome expected", runner.call());
@@ -107,7 +113,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorDeploymentResultsNotFound() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         when(client.getExecutionResults(eventId)).thenReturn(null);
@@ -119,7 +125,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsPlanFailure() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))
@@ -138,6 +144,7 @@ public class MablStepDeploymentRunnerTest {
                 TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
+                labels,
                 false,
                 true,
                 true,
@@ -145,7 +152,7 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertTrue("failure override expected", runner.call());
@@ -161,6 +168,7 @@ public class MablStepDeploymentRunnerTest {
                 TEST_POLLING_INTERVAL_MILLISECONDS,
                 environmentId,
                 applicationId,
+                labels,
                 true,
                 false,
                 true,
@@ -168,7 +176,7 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId));
 
         when(client.getExecutionResults(eventId))

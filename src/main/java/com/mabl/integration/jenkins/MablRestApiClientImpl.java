@@ -14,6 +14,7 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import hudson.remoting.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -44,6 +45,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -77,6 +79,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String GET_ORGANIZATION_ENDPOINT_TEMPLATE = "/apiKeys/%s";
     static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
     static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
+    static final String GET_LABELS_ENDPOINT_TEMPLATE = "/schedule/runPolicy/labels?organization_id=%s";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -159,12 +162,13 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     public CreateDeploymentResult createDeploymentEvent(
             final String environmentId,
             final String applicationId,
+            final Set<String> labels,
             final CreateDeploymentProperties properties
             ) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
-        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, properties));
+        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, labels, properties));
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes("UTF-8"));
 
         final HttpPost request = new HttpPost(url);
@@ -198,6 +202,12 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_ENVIRONMENTS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
+    }
+
+    @Override
+    public GetLabelsResult getLabelsResult(String organizationId) throws IOException, MablSystemError {
+        final String url = restApiBaseUrl + String.format(GET_LABELS_ENDPOINT_TEMPLATE, organizationId);
+        return parseApiResult(httpClient.execute(buildGetRequest(url)), GetLabelsResult.class);
     }
 
     private HttpGet buildGetRequest(String url) throws MablSystemError {

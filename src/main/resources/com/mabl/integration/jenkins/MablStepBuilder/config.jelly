@@ -18,6 +18,9 @@
      method="validateForm" with="restApiKey,applicationId,environmentId" />
 
   <f:advanced>
+    <f:entry title="${%Plan Labels}" field="labels">
+      <f:select multiple="multiple" size="5" />
+    </f:entry>
     <f:entry title="${%Continue on plan failure(s)}" field="continueOnPlanFailure">
       <f:checkbox default="false" />
     </f:entry>
