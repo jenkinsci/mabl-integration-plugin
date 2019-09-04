@@ -243,8 +243,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
                 String journeyFormat = String.format("    Journey [%s] is [%s]", safeJourneyName(summary, journeyResult.id), journeyResult.status);
-                outputStream.printf(journeyResult.status.equalsIgnoreCase("failed") ? String.format(journeyFormat + " at [%s]%n", journeyResult.appHref) :
-                        String.format(journeyFormat + "%n"));
+                if (journeyResult.status.equalsIgnoreCase("failed")) {
+                    outputStream.printf(journeyFormat + " at [%s]%n", journeyResult.appHref);
+                } else {
+                    outputStream.println(journeyFormat);
+                }
             }
         }
     }
