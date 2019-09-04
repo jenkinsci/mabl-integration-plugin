@@ -34,10 +34,7 @@ Overview of how to launch a Jenkins Docker instance with Jenkins, then build the
 for any specific image version before pulling Jenkins image.
 
 ```bash
-# Pull Jenkins image
-docker pull jenkins/jenkins
-
-# Launch Jenkins container
+# Launch Jenkins container and automatically pull the image if not present
 docker run -d -p 9090:8080 --name=jenkins-master jenkins/jenkins
 
 # Run command in the running container
