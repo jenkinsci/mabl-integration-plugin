@@ -37,15 +37,8 @@ for any specific image version before pulling Jenkins image.
 # Pull Jenkins image
 docker pull jenkins/jenkins
 
-# Launch Jenkins
+# Launch Jenkins container
 docker run -d -p 9090:8080 --name=jenkins-master jenkins/jenkins
-
-# Setup your Jenkins instance
-
-# Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
-mvn clean package \
-  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
-  && docker restart jenkins-master
 
 # Run command in the running container
 docker exec -it jenkins-master bash
@@ -53,7 +46,14 @@ docker exec -it jenkins-master bash
 # Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
 cat /var/jenkins_home/secrets/initialAdminPassword
 
+# Setup your Jenkins instance
+
+# Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
+mvn clean package \
+  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
+  && docker restart jenkins-master
 ```
+
 ### Local Machine
 Overview of how to run/debug plugin with Intellij on local machine.
 
@@ -62,7 +62,7 @@ Overview of how to run/debug plugin with Intellij on local machine.
 - Add Maven template
 - Configure your working directory to point to your project path similarly as
 the screenshot below:
-![Screenshot](Intellij-config.png)
+![Screenshot](img/Intellij-config.png)
 - Click OK and then run/debug the plugin
 - Wait until you see
 

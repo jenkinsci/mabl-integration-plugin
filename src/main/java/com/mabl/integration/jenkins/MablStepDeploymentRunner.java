@@ -239,15 +239,12 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
 
         outputStream.println("Running mabl journey(s) status update:");
-        final String journeyFormat = "    Journey [%s] is [%s]";
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                if (journeyResult.status.equalsIgnoreCase("failed")) {
-                    outputStream.printf(journeyFormat + " at [%s]%n", safeJourneyName(summary, journeyResult.id), journeyResult.status, journeyResult.appHref);
-                } else {
-                    outputStream.printf(journeyFormat + "%n", safeJourneyName(summary, journeyResult.id), journeyResult.status);
-                }
+                String journeyFormat = String.format("    Journey [%s] is [%s]", safeJourneyName(summary, journeyResult.id), journeyResult.status);
+                outputStream.printf(journeyResult.status.equalsIgnoreCase("failed") ? String.format(journeyFormat + " at [%s]%n", journeyResult.appHref) :
+                        String.format(journeyFormat + "%n"));
             }
         }
     }
