@@ -27,12 +27,21 @@ You can also install the `.hpi` file from the web UI by visting
 4. Save and run your build
 
 ## Local Development
-
+### Jenkins Docker
 Overview of how to launch a Jenkins Docker instance with Jenkins, then build the plugin and deploy it that instance.
 
+*Note:* Please check [Jenkins Hub](https://hub.docker.com/r/jenkins/jenkins)
+for any specific image version before pulling Jenkins image.
+
 ```bash
-# Launch Jenkins
-docker run -d -p 9090:8080 --name=jenkins-master jenkins
+# Launch Jenkins container and automatically pull the image if not present
+docker run -d -p 9090:8080 --name=jenkins-master jenkins/jenkins
+
+# Run command in the running container
+docker exec -it jenkins-master bash
+
+# Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
+cat /var/jenkins_home/secrets/initialAdminPassword
 
 # Setup your Jenkins instance
 
@@ -41,6 +50,25 @@ mvn clean package \
   && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
   && docker restart jenkins-master
 ```
+
+### Local Machine
+Overview of how to run/debug plugin with Intellij on local machine.
+
+- Open the project in Intellij
+- Look for Edit Configurations under Run
+- Add Maven template
+- Configure your working directory to point to your project path similarly as
+the screenshot below:
+![Screenshot](img/Intellij-config.png)
+- Click OK and then run/debug the plugin
+- Wait until you see
+
+        INFO: Jenkins is fully up and running
+
+- Log into this URL on your web browser
+
+        localhost:8090/jenkins
+Now you can test your plugin.
 
 ## Deployment
 
