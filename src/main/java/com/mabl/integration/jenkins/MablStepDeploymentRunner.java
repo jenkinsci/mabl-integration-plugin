@@ -1,5 +1,6 @@
 package com.mabl.integration.jenkins;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
@@ -242,13 +243,21 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                String journeyFormat = String.format("    Journey [%s] is [%s]", safeJourneyName(summary, journeyResult.id), journeyResult.status);
-                if (journeyResult.status.equalsIgnoreCase("failed")) {
-                    outputStream.printf(journeyFormat + " at [%s]%n", journeyResult.appHref);
-                } else {
-                    outputStream.println(journeyFormat);
-                }
+                String logSummary = String.format("    Journey [%s] is %s",
+                    safeJourneyName(summary, journeyResult.id),
+                    executionResultToString(journeyResult));
+                outputStream.println(logSummary);
             }
+        }
+    }
+
+    static String executionResultToString(ExecutionResult.JourneyExecutionResult journeyResult) {
+        String cleanStatus = Optional.fromNullable(journeyResult.status).or("waiting");
+        String journeyFormat = String.format("[%s]", cleanStatus);
+        if (cleanStatus.equalsIgnoreCase("failed")) {
+            return String.format(journeyFormat + " at [%s]",journeyResult.appHref);
+        } else {
+            return journeyFormat;
         }
     }
 

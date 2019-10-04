@@ -15,13 +15,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -186,6 +185,48 @@ public class MablStepDeploymentRunnerTest {
         assertTrue("failure override expected", runner.call());
 
         verify(client).close();
+    }
+
+    @Test
+    public void executionResultToString_undefinedStatus_isWaiting() {
+        ExecutionResult.JourneyExecutionResult result = new ExecutionResult.JourneyExecutionResult(
+            null,
+            null,
+            null,
+            null,
+            null, // <-- status is null
+            null,
+            false);
+
+        assertEquals("[waiting]", MablStepDeploymentRunner.executionResultToString(result));
+    }
+
+    @Test
+    public void executionResultToString_failed_showsURL() {
+        ExecutionResult.JourneyExecutionResult result = new ExecutionResult.JourneyExecutionResult(
+            null,
+            null,
+            null,
+            "http://appUrl",
+            "failed",
+            null,
+            false);
+
+        assertEquals("[failed] at [http://appUrl]", MablStepDeploymentRunner.executionResultToString(result));
+    }
+
+    @Test
+    public void executionResultToString_completed_showsCompleted() {
+        ExecutionResult.JourneyExecutionResult result = new ExecutionResult.JourneyExecutionResult(
+            null,
+            null,
+            null,
+            null,
+            "completed",
+            null,
+            false);
+
+        assertEquals("[completed]", MablStepDeploymentRunner.executionResultToString(result));
     }
 
     private ExecutionResult createExecutionResult(
