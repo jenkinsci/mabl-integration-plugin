@@ -1,6 +1,5 @@
 package com.mabl.integration.jenkins;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
@@ -252,7 +251,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     }
 
     static String executionResultToString(ExecutionResult.JourneyExecutionResult journeyResult) {
-        String cleanStatus = Optional.fromNullable(journeyResult.status).or("waiting");
+        String cleanStatus = journeyResult.status != null ? journeyResult.status : "waiting";
         String journeyFormat = String.format("[%s]", cleanStatus);
         if (cleanStatus.equalsIgnoreCase("failed")) {
             return String.format(journeyFormat + " at [%s]",journeyResult.appHref);
