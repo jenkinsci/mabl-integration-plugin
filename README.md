@@ -4,10 +4,184 @@
 
 This plugin allows easy launching of [mabl](https://www.mabl.com) journeys as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
-See [**official mabl plugin site**](https://plugins.jenkins.io/mabl-integration) for documentation.
+| View mabl Integration [on the plugin site](https://plugins.jenkins.io/mabl-integration) for more information. |
+|-------------------------------------------------------------------------------------------------------------------------------|
 
-# Plugin Installation
+=================
+
+  * [Plugin Installation](#plugin-installation)
+  * [Features](#features)
+  * [Requirements](#requirements)
+  * [Adding a mabl project step](#adding-a-mabl-project-step)
+  * [Adding a mabl pipeline step](#adding-a-mabl-pipeline-step)
+  * [Environment variable collection](#environment-variable-collection)
+  * [Change log](#change-log)
+  * [Building from source](#building-from-source)
+  * [Local development](#local-development)
+      * [Jenkins docker](#jenkins-docker)
+      * [Local machine](#local-machine)
+  * [Deployment](#deployment)
+
+## Plugin Installation
 Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.580+` server from the *Available Plugins* tab by searing for "mabl".
+
+### Features
+
+-   Launch mabl journeys as a project step
+-   Fail your Jenkins build if the mabl journeys fail
+    -   Optionally continue on failure
+
+### Requirements
+
+-   Minimum Jenkins version *1.580.1*
+-   mabl API key
+    -   See [integration
+        docs](https://help.mabl.com/v1.0/docs/integrating-mabl-with-your-cicd-workflow#section-the-mabl-deployment-events-api)
+        for details  
+          
+
+### Adding a mabl Project Step
+
+Add a *Run mabl journeys* step to your new or existing project.
+
+![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A30%3A23.png?version=1&modificationDate=1523569133000&api=v2)
+
+Configure the API key. Then select environment, and application from the
+drop-down. At least one of environment and application must be
+supplied.  All matching plans and their journeys will be run during this
+step. The step will block until the tests are complete/failed, or one
+hour has elapsed.
+
+![](https://wiki.jenkins.io/download/attachments/138453951/Screen%20Shot%202018-05-16%20at%204.57.48%20PM.png?version=1&modificationDate=1526662692000&api=v2)
+
+You make continue on failure using the advanced configurations.
+
+-   Filter by plan labels to run only plans tagged with the selected
+    labels. (You can select multiple labels using shift/ctrl click.)
+
+![](https://wiki.jenkins.io/download/attachments/138453951/Screen%20Shot%202019-07-30%20at%202.35.43%20PM.png?version=1&modificationDate=1564513140000&api=v2)
+
+-   Continue if your plan/journeys fail
+-   Continue if there is an unexpected error in the mabl API
+
+![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A35%3A57.png?version=1&modificationDate=1523569132000&api=v2)
+
+### Adding a mabl Pipeline Step
+
+In a pipeline step, select 'Configure'. In the pipeline script, insert a
+pipeline step for mabl. This can be written by hand or created via the
+'Pipeline Syntax' tool. Here is an example output:
+
+-   mabl: The pipeline function to be called. - Required
+-   applicationId: Selects the application to run deployments
+    against (one of environmentId or applicationId is required)
+-   continueOnMablError: Continue if there is an unexpected error in the
+    mabl API
+-   continueOnPlanFailure: Continue if your plan/journeys fail
+-   environmentId: Selects the environment to run deployments against
+    (one of environmentId or applicationId is required)
+-   restApiKey: The apiKey of the desired deployment workspace -
+    Required  
+      
+
+**Pipeline Step Setup**
+
+``` syntaxhighlighter-pre
+mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKey: 'REST-API-KEY'
+```
+
+OR something like this:
+
+**Pipeline Step Setup**
+
+``` syntaxhighlighter-pre
+node {
+   stage('mabl') {
+       node {
+           step([$class: 'MablStepBuilder', restApiKey: 'REST-API-KEY', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
+       }
+   }
+}
+```
+
+###  Environment Variable Collection
+
+The mabl plugin will optionally collect build and repository information
+to send along with mabl deployments. This will give more information and
+insights into testing environment state for journey runs. We will not
+collect sensitive information like passwords or API keys.
+
+To enable this feature:
+
+-   Go to the 'Manage Jenkins' page from the 'Dashboard'
+-   Go to the 'Configure System' page
+-   Find the 'mabl' section and check the 'Send build environment
+    variables to mabl' checkbox
+
+![](https://wiki.jenkins.io/download/attachments/138453951/Jenkins%20Send%20build%20Variables%20Checkbox.png?version=1&modificationDate=1529420356000&api=v2){.confluence-embedded-image
+.confluence-content-image-border width="600"}
+
+Now you'll see the environment and build information collected in the
+output log of future runs that use a mabl plugin step.
+
+**Example Variable Collections**
+
+``` syntaxhighlighter-pre
+Send build environment variables is set. Collecting the following information:
+  'GIT_BRANCH' => 'origin/master'
+  'GIT_COMMIT' => 'a246e0c756791965bdb6fc9caa1a36775422fcec'
+  'GIT_URL' => 'git@github.com:example/my_repository.git'
+  'GIT_PREVIOUS_COMMIT' => 'a246e0c73a691935bdb6fc9caa1a36775422fce5'
+  'JOB_NAME' => 'mabl integration'
+  'BUILD_NUMBER' => '47'
+  'RUN_DISPLAY_URL' => 'http://127.0.0.1:9090/job/mabl%20integration/47/display/redirect'
+```
+
+### Change Log
+
+#### v0.0.16 (04 October 2019)
+
+-   Fix bug when displaying status for multi-stage plans.
+
+#### v0.0.15 (05 September 2019)
+
+-   The output of failed run with link is now available
+
+#### v0.0.13 (30 July 2019)
+
+-   Support for plan label filtering in the mabl build step
+
+#### v0.0.10 (08 June 2018)
+
+-   The mabl plugin is now available to use a pipeline step
+-   Optionally allow mabl to collect environment information to enhance
+    deployment journey insights
+
+#### v0.0.9 (08 June 2018)
+
+-   The output of mabl tests are now available as junit XML in the
+    workspace directory for reports and download  
+
+#### v0.0.8 (18 May 2018)
+
+-   Environment and Application drop downs automatically populated from
+    API key
+
+#### v0.0.7 (17 May 2018)
+
+-   More resilient to failures
+
+#### v0.0.6 (18 April 2018)
+
+-   Advanced form validation support added
+
+#### v0.0.5 (13 April 2018)
+
+-   Support for Windows console output and encodings
+
+#### v0.0.4 (12 April 2018)
+
+-   Initial release
 
 ## Building from Source
 
@@ -18,13 +192,6 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 You can also install the `.hpi` file from the web UI by visting
 **Jenkins > Manage Jenkins > Manager Plugins > Advanced > Upload Plugin**.
-
-## Creating a mabl Build Step
-
-1. Create or edit a Jenkins project
-2. Select **Run mabl journeys** from the **Add build step** drop down list
-3. Copy your API key, `environment_id`, and `application_id` from the [API Settings Page](https://help.mabl.com/v1.0/docs/triggering-tests-via-the-api)
-4. Save and run your build
 
 ## Local Development
 ### Jenkins Docker
