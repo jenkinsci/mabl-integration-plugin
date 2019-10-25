@@ -17,7 +17,7 @@
 
     <name>mabl</name>
     <description>Launch mabl journeys from CI builds</description>
-    <url>https://wiki.jenkins.io/display/JENKINS/mabl+Integration</url>
+    <url>https://github.com/jenkinsci/mabl-integration-plugin</url>
 
     <properties>
         <!-- Last Jenkins LTS release -->
