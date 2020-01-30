@@ -17,6 +17,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import net.sf.json.JSONObject;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
@@ -52,7 +53,7 @@ import static org.apache.commons.lang.StringUtils.trimToNull;
 @SuppressWarnings("unused") // automatically discovered by Jenkins
 public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
-    private final String restApiKey;
+    private final Secret restApiKey;
     private final String environmentId;
     private final String applicationId;
     private final Set<String> labels;
@@ -67,7 +68,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             final String applicationId,
             final Set<String> labels
     ) {
-        this.restApiKey = trimToNull(restApiKey);
+        this.restApiKey = Secret.fromString(trimToNull(restApiKey));
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
         this.labels = labels != null ? labels : new HashSet<String>();
@@ -90,7 +91,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     // Accessors to be used by Jelly UI templates
     public String getRestApiKey() {
-        return restApiKey;
+        return restApiKey.getPlainText();
     }
 
     public String getEnvironmentId() {
@@ -130,7 +131,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
-        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, restApiKey, disableSslVerification);
+        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, getRestApiKey(), disableSslVerification);
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
@@ -155,7 +156,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.FAILURE);
             }
         } catch (ExecutionException e) {
-            outputStream.println("There was an execution error trying to run your journeys in mabl");
+            outputStream.println("There was an execution error trying to run your tests in mabl");
             e.printStackTrace(outputStream);
             if(continueOnMablError) {
                 run.setResult(Result.FAILURE);
@@ -163,8 +164,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             }
         } catch (TimeoutException e) {
-            outputStream.printf("Oh dear. Your journeys exceeded the max plugin runtime limit of %d seconds.%n" +
-                    "We've aborted this Jenkins step, but your journeys may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
+            outputStream.printf("Oh dear. Your tests exceeded the max plugin runtime limit of %d seconds.%n" +
+                    "We've aborted this Jenkins step, but your tests may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
             if (continueOnMablError) {
                 run.setResult(Result.FAILURE);
             } else {
@@ -183,9 +184,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return new FilePath(new File(TEST_OUTPUT_XML_FILENAME));
         }
         if(workspace.isRemote()) {
-            workspace = new FilePath(workspace.getChannel(), workspace.toString() + File.separator + TEST_OUTPUT_XML_FILENAME);
+            workspace = new FilePath(workspace.getChannel(), workspace + File.separator + TEST_OUTPUT_XML_FILENAME);
         } else {
-            workspace = new FilePath(new File(workspace.toString() + File.separator + TEST_OUTPUT_XML_FILENAME));
+            workspace = new FilePath(new File(workspace + File.separator + TEST_OUTPUT_XML_FILENAME));
         }
 
         return workspace;
@@ -277,7 +278,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
                 return items;
             } catch (IOException e) {
+                // ignore
             } catch (MablSystemError e) {
+                // ignore
             }
 
             items.add("Input a valid ApiKey", "");
@@ -310,7 +313,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
                 return items;
             } catch (IOException e) {
+                // ignore
             } catch (MablSystemError e) {
+                // ignore
             }
 
             items.add("Input a valid ApiKey", "");
@@ -343,7 +348,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
                 return items;
             } catch (IOException e) {
+                // ignore
             } catch (MablSystemError e) {
+                // ignore
             }
 
             items.add("<Couldn't Fetch Labels>", "");

@@ -19,11 +19,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -112,7 +110,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             return continueOnMablError;
         }
         finally {
-            outputStream.print("mabl journey execution step complete.\n\n");
+            outputStream.print("mabl test execution step complete.\n\n");
         }
     }
 
@@ -160,7 +158,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             }
 
         } catch (IOException e) {
-            throw new MablSystemError("Oh no!. There was an API error trying to run journeys in mabl.", e);
+            throw new MablSystemError("Oh no!. There was an API error trying to run tests in mabl.", e);
 
         } finally {
             if (client != null) {
@@ -238,11 +236,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
 
-        outputStream.println("Running mabl journey(s) status update:");
+        outputStream.println("Running mabl test(s) status update:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
-                String logSummary = String.format("    Journey [%s] is %s",
+                String logSummary = String.format("    Test [%s] is %s",
                     safeJourneyName(summary, journeyResult.id),
                     executionResultToString(journeyResult));
                 outputStream.println(logSummary);
@@ -278,8 +276,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private TestSuite getTestSuite(final ExecutionResult.ExecutionSummary summary) {
         Date startDate = new Date(summary.startTime);
-        Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        ((SimpleDateFormat) format).setTimeZone(TimeZone.getTimeZone("UTC"));
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = format.format(startDate);
         return new TestSuite(safePlanName(summary), getDuration(summary), timestamp);
     }

@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import hudson.model.Run;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +18,11 @@ public class JenkinsModule extends AbstractModule {
     @Override
     protected void configure() {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
+        if (inputStream == null) {
+            throw new RuntimeException("ERROR: failed to load configuration");
+        }
+
+        RuntimeException exception = null;
         try {
             Properties properties = new Properties();
             properties.load(inputStream);
@@ -28,8 +34,12 @@ public class JenkinsModule extends AbstractModule {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                exception = new RuntimeException(e);
             }
+        }
+
+        if (exception != null) {
+            throw exception;
         }
     }
 
