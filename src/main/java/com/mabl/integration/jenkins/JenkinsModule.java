@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import hudson.model.Run;
 
 import java.io.IOException;
 import java.io.InputStream;
