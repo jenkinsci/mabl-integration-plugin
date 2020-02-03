@@ -2,7 +2,7 @@
 # mabl Jenkins Plugin
 [![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/mabl-integration-plugin/master)](https://ci.jenkins.io/job/Plugins/job/mabl-integration-plugin/job/master/)
 
-This plugin allows easy launching of [mabl](https://www.mabl.com) journeys as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
+This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
 | View mabl Integration [on the plugin site](https://plugins.jenkins.io/mabl-integration) for more information. |
 |-------------------------------------------------------------------------------------------------------------------------------|
@@ -23,12 +23,12 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) journeys as a 
   * [Deployment](#deployment)
 
 ## Plugin Installation
-Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.580+` server from the *Available Plugins* tab by searing for "mabl".
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.580+` server from the *Available Plugins* tab by searching for "mabl".
 
 ### Features
 
--   Launch mabl journeys as a project step
--   Fail your Jenkins build if the mabl journeys fail
+-   Launch mabl tests as a project step
+-   Fail your Jenkins build if the mabl tests fail
     -   Optionally continue on failure
 
 ### Requirements
@@ -42,13 +42,13 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Adding a mabl Project Step
 
-Add a *Run mabl journeys* step to your new or existing project.
+Add a *Run mabl tests* step to your new or existing project.
 
 ![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A30%3A23.png?version=1&modificationDate=1523569133000&api=v2)
 
 Configure the API key. Then select environment, and application from the
 drop-down. At least one of environment and application must be
-supplied.  All matching plans and their journeys will be run during this
+supplied.  All matching plans and their tests will be run during this
 step. The step will block until the tests are complete/failed, or one
 hour has elapsed.
 
@@ -61,7 +61,7 @@ You make continue on failure using the advanced configurations.
 
 ![](https://wiki.jenkins.io/download/attachments/138453951/Screen%20Shot%202019-07-30%20at%202.35.43%20PM.png?version=1&modificationDate=1564513140000&api=v2)
 
--   Continue if your plan/journeys fail
+-   Continue if your plan/tests fail
 -   Continue if there is an unexpected error in the mabl API
 
 ![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A35%3A57.png?version=1&modificationDate=1523569132000&api=v2)
@@ -77,7 +77,7 @@ pipeline step for mabl. This can be written by hand or created via the
     against (one of environmentId or applicationId is required)
 -   continueOnMablError: Continue if there is an unexpected error in the
     mabl API
--   continueOnPlanFailure: Continue if your plan/journeys fail
+-   continueOnPlanFailure: Continue if your plan/tests fail
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
 -   restApiKey: The apiKey of the desired deployment workspace -
@@ -108,8 +108,8 @@ node {
 
 The mabl plugin will optionally collect build and repository information
 to send along with mabl deployments. This will give more information and
-insights into testing environment state for journey runs. We will not
-collect sensitive information like passwords or API keys.
+insights into testing environment state for test runs. We will not
+collect sensitive information such as passwords or API keys.
 
 To enable this feature:
 
@@ -121,7 +121,7 @@ To enable this feature:
 ![](https://wiki.jenkins.io/download/attachments/138453951/Jenkins%20Send%20build%20Variables%20Checkbox.png?version=1&modificationDate=1529420356000&api=v2){.confluence-embedded-image
 .confluence-content-image-border width="600"}
 
-Now you'll see the environment and build information collected in the
+Now you will see the environment and build information collected in the
 output log of future runs that use a mabl plugin step.
 
 **Example Variable Collections**
@@ -138,6 +138,11 @@ Send build environment variables is set. Collecting the following information:
 ```
 
 ### Change Log
+
+#### v0.0.17 (29 January 2020)
+-   API key is now encrypted in configuration file
+-   Updated messages to replace journey with test
+
 
 #### v0.0.16 (04 October 2019)
 
