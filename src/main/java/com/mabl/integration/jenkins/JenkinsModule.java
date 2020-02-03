@@ -33,12 +33,8 @@ public class JenkinsModule extends AbstractModule {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                exception = new RuntimeException(e);
+                throw new RuntimeException(e);
             }
-        }
-
-        if (exception != null) {
-            throw exception;
         }
     }
 
