@@ -21,7 +21,6 @@ public class JenkinsModule extends AbstractModule {
             throw new RuntimeException("ERROR: failed to load configuration");
         }
 
-        RuntimeException exception = null;
         try {
             Properties properties = new Properties();
             properties.load(inputStream);
