@@ -164,7 +164,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             }
         } catch (TimeoutException e) {
-            outputStream.printf("Oh dear. Your tests exceeded the max plugin runtime limit of %d seconds.%n" +
+            outputStream.printf("Your tests exceeded the maximum plugin runtime limit of %d seconds.%n" +
                     "We've aborted this Jenkins step, but your tests may still be running in mabl.", EXECUTION_TIMEOUT_SECONDS);
             if (continueOnMablError) {
                 run.setResult(Result.FAILURE);
@@ -202,7 +202,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             e.printStackTrace(outputStream);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            outputStream.println("There was an interruption during read of environment variables.");
+            outputStream.println("There was an interruption while reading environment variables.");
             e.printStackTrace(outputStream);
         }
 
@@ -283,14 +283,14 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 // ignore
             }
 
-            items.add("Input a valid ApiKey", "");
+            items.add("Input a valid API key", "");
             return items;
         }
 
         public ListBoxModel doFillEnvironmentIdItems(@QueryParameter String restApiKey, @QueryParameter boolean disableSslVerification) {
             if(restApiKey == null || restApiKey.isEmpty()) {
                 ListBoxModel items = new ListBoxModel();
-                items.add("Input an Api Key", "");
+                items.add("Input an API key", "");
 
                 return items;
             }
@@ -318,7 +318,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 // ignore
             }
 
-            items.add("Input a valid ApiKey", "");
+            items.add("Input a valid API key", "");
             return items;
         }
 

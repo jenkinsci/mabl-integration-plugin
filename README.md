@@ -4,11 +4,6 @@
 
 This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
-| View mabl Integration [on the plugin site](https://plugins.jenkins.io/mabl-integration) for more information. |
-|-------------------------------------------------------------------------------------------------------------------------------|
-
-=================
-
   * [Plugin Installation](#plugin-installation)
   * [Features](#features)
   * [Requirements](#requirements)
@@ -44,27 +39,28 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 Add a *Run mabl tests* step to your new or existing project.
 
-![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A30%3A23.png?version=1&modificationDate=1523569133000&api=v2)
+![](img/run-mabl-tests.png)
 
-Configure the API key. Then select environment, and application from the
+*Configure the API key*. Then select environment, and application from the
 drop-down. At least one of environment and application must be
 supplied.  All matching plans and their tests will be run during this
 step. The step will block until the tests are complete/failed, or one
 hour has elapsed.
 
-![](https://wiki.jenkins.io/download/attachments/138453951/Screen%20Shot%202018-05-16%20at%204.57.48%20PM.png?version=1&modificationDate=1526662692000&api=v2)
+![](img/config-env.png)
 
-You make continue on failure using the advanced configurations.
+The *Advanced...* button opens up additional options:
 
 -   Filter by plan labels to run only plans tagged with the selected
     labels. (You can select multiple labels using shift/ctrl click.)
 
-![](https://wiki.jenkins.io/download/attachments/138453951/Screen%20Shot%202019-07-30%20at%202.35.43%20PM.png?version=1&modificationDate=1564513140000&api=v2)
+![](img/config-label.png)
 
--   Continue if your plan/tests fail
--   Continue if there is an unexpected error in the mabl API
+-   Continue execution if your plan/tests fail
+-   Continue execution if there is an unexpected error in the mabl API
+-   Disable SSL verification
 
-![](https://wiki.jenkins.io/download/attachments/138453951/image2018-4-12%2017%3A35%3A57.png?version=1&modificationDate=1523569132000&api=v2)
+![](img/config-advanced.png)
 
 ### Adding a mabl Pipeline Step
 
@@ -138,6 +134,10 @@ Send build environment variables is set. Collecting the following information:
 ```
 
 ### Change Log
+
+#### v0.0.18 (4 February 2020)
+-   Screenshot and documentation updates
+-   Updates to dependencies
 
 #### v0.0.17 (29 January 2020)
 -   API key is now encrypted in configuration file
@@ -249,6 +249,6 @@ Before making a new plugin release, ensure code is in high quality, fully tested
 1. Update your `~/.m2/settings.xml` according to the [Jenkins docs](https://wiki.jenkins.io/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkins-ci.org).
 2. Setup and run a GitHub [ssh agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent).
 3. Run `mvn release:prepare release:perform -B` from the HEAD of master
-4. Run `mvn deploy` on sucess of above step.
+4. Run `mvn deploy` on success of above step.
 
 Wait ~8 hours for plugin to become GA across all Jenkins instances under the "Available Plugins" listing.

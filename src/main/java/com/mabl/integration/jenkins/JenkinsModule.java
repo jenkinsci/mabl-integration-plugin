@@ -26,7 +26,7 @@ public class JenkinsModule extends AbstractModule {
             properties.load(inputStream);
             Names.bindProperties(binder(), properties);
         } catch (IOException e) {
-            System.out.println("ERROR: Could not load properties");
+            System.out.println("ERROR: could not load properties");
             throw new RuntimeException(e);
         } finally {
             try {

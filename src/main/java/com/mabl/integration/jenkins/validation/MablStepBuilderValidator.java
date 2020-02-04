@@ -44,11 +44,11 @@ public class MablStepBuilderValidator {
             }
             // applicationId pasted into environmentId field
             if (environmentIdClean != null && environmentIdClean.endsWith("-a")) {
-                return error("Invalid %s value. Contains an  %s", FORM_ENVIRONMENT_ID_LABEL, FORM_APPLICATION_ID_LABEL);
+                return error("Invalid %s value. Contains an %s", FORM_ENVIRONMENT_ID_LABEL, FORM_APPLICATION_ID_LABEL);
             }
             // environmentId pasted into applicationId field
             if (applicationIdClean != null && applicationIdClean.endsWith("-e")) {
-                return error("Invalid %s value. Contains an  %s", FORM_APPLICATION_ID_LABEL, FORM_ENVIRONMENT_ID_LABEL);
+                return error("Invalid %s value. Contains an %s", FORM_APPLICATION_ID_LABEL, FORM_ENVIRONMENT_ID_LABEL);
             }
             // We need one of these
             if (environmentIdClean == null && applicationIdClean == null) {
