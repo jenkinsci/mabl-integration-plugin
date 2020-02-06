@@ -114,8 +114,7 @@ To enable this feature:
 -   Find the 'mabl' section and check the 'Send build environment
     variables to mabl' checkbox
 
-![](https://wiki.jenkins.io/download/attachments/138453951/Jenkins%20Send%20build%20Variables%20Checkbox.png?version=1&modificationDate=1529420356000&api=v2){.confluence-embedded-image
-.confluence-content-image-border width="600"}
+![](https://wiki.jenkins.io/download/attachments/138453951/Jenkins%20Send%20build%20Variables%20Checkbox.png?version=1&modificationDate=1529420356000&api=v2)
 
 Now you will see the environment and build information collected in the
 output log of future runs that use a mabl plugin step.
