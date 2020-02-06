@@ -138,7 +138,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
                     if (executionResult == null) {
                         // No such id - this shouldn't happen
-                        throw new MablSystemError(String.format("Oh snap! No deployment event found for id [%s] in mabl.", deployment.id));
+                        throw new MablSystemError(String.format("No deployment event found for id [%s] in mabl.", deployment.id));
                     }
 
                     printAllJourneyExecutionStatuses(executionResult);
@@ -158,7 +158,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             }
 
         } catch (IOException e) {
-            throw new MablSystemError("Oh no!. There was an API error trying to run tests in mabl.", e);
+            throw new MablSystemError("There was an API error trying to run tests in mabl.", e);
 
         } finally {
             if (client != null) {
@@ -203,7 +203,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void printFinalStatuses(final ExecutionResult result) throws MablSystemError {
         ArrayList<TestSuite> suites = new ArrayList<TestSuite>();
 
-        outputStream.println("The final Plan states in mabl:");
+        outputStream.println("The final plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             TestSuite testSuite = getTestSuite(summary);
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
