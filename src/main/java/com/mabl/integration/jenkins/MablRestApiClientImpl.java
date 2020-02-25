@@ -16,7 +16,6 @@ import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import hudson.remoting.Base64;
-import hudson.util.Secret;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -86,18 +85,18 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
     private final CloseableHttpClient httpClient;
     private final String restApiBaseUrl;
-    private final Secret restApiKey;
+    private final String restApiKey;
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
-            final Secret restApiKey
+            final String restApiKey
     ) {
         this(restApiBaseUrl, restApiKey, false);
     }
     
     MablRestApiClientImpl(
             final String restApiBaseUrl,
-            final Secret restApiKey,
+            final String restApiKey,
             final boolean disableSslVerification
     ) {
 
@@ -140,11 +139,11 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     }
 
     private CredentialsProvider getApiCredentialsProvider(
-            final Secret restApiKey
+            final String restApiKey
     ) {
         final CredentialsProvider provider = new BasicCredentialsProvider();
         final UsernamePasswordCredentials creds =
-                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, restApiKey.getPlainText());
+                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, restApiKey);
 
         provider.setCredentials(AuthScope.ANY, creds);
 
@@ -152,9 +151,9 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     }
 
     private Header getBasicAuthHeader(
-            final Secret restApiKey
+            final String restApiKey
     ) {
-        final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey.getPlainText())
+        final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey)
                 .getBytes(Charset.forName("UTF-8")));
         return new BasicHeader("Authorization", "Basic " + encoded);
     }
@@ -188,8 +187,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     }
 
     @Override
-    public GetApiKeyResult getApiKeyResult(Secret formApiKey) throws IOException, MablSystemError {
-        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey.getPlainText());
+    public GetApiKeyResult getApiKeyResult(String formApiKey) throws IOException, MablSystemError {
+        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 

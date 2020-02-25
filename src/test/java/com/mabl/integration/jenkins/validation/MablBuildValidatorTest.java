@@ -1,7 +1,6 @@
 package com.mabl.integration.jenkins.validation;
 
 import hudson.util.FormValidation;
-import hudson.util.Secret;
 import org.junit.Test;
 
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
@@ -22,7 +21,7 @@ public class MablBuildValidatorTest {
     public void validateGoodAllFieldsForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 "sample-environment-id",
                 "sample-application-id"
         );
@@ -34,7 +33,7 @@ public class MablBuildValidatorTest {
     public void validateGoodEnvironmentOnlyForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 "sample-environment-id",
                 null
         );
@@ -46,7 +45,7 @@ public class MablBuildValidatorTest {
     public void validateGoodApplicationOnlyForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 null,
                 "sample-application-id"
         );
@@ -58,7 +57,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 null,
                 null
         );
@@ -74,7 +73,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 "sample-a",
                 null
         );
@@ -90,7 +89,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoApplicationIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 null,
                 "sample-e"
         );
@@ -106,7 +105,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationWhiteSpaceForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key",
                 "  ",
                 "\t"
         );
@@ -132,4 +131,17 @@ public class MablBuildValidatorTest {
                 actual.getMessage().contains(FORM_API_KEY_LABEL));
     }
 
+    @Test
+    public void validateBadNoRestApiKeyWithWhitespaceForm() {
+
+        final FormValidation actual = validateForm(
+                "\t\n ",
+                null,
+                null
+        );
+
+        assertEquals(ERROR, actual.kind);
+        assertTrue("rest API key label expected",
+                actual.getMessage().contains(FORM_API_KEY_LABEL));
+    }
 }
