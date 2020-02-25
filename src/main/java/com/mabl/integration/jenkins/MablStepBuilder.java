@@ -221,8 +221,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
         private boolean collectVars;
-        private Secret restApiKey;
-        private Set<String> labels;
 
         public MablStepDescriptor() {
             super.load();
