@@ -20,6 +20,14 @@
   <f:advanced>
     <f:entry title="${%Plan Labels}" field="labels">
       <f:select multiple="multiple" size="5" />
+      <f:prepareDatabinding/>
+      ${descriptor.calcFillSettings(field,attrs)}
+      <j:if test="${instance[attrs.field].size() > 0}">
+        <f:description>
+          Currently configured labels:
+          <j:forEach var="label" items="${instance[attrs.field]}" indexVar="counter"><j:if test="${counter > 0}">,</j:if>${label}</j:forEach>
+        </f:description>
+      </j:if>
     </f:entry>
     <f:entry title="${%Continue on plan failure(s)}" field="continueOnPlanFailure">
       <f:checkbox default="false" />
