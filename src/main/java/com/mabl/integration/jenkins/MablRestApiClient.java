@@ -7,6 +7,7 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
+import hudson.util.Secret;
 
 import java.io.IOException;
 import java.util.Set;
@@ -41,7 +42,7 @@ public interface MablRestApiClient {
      * @throws MablSystemError on non 200 or 404 response
      */
     GetApiKeyResult getApiKeyResult(
-            String restApiKey
+            Secret restApiKey
     ) throws IOException, MablSystemError;
 
     /**
