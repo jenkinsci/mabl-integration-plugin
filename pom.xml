@@ -25,7 +25,7 @@
         <jenkins-test-harness.version>1.580.1</jenkins-test-harness.version>
         <release.skipTests>false</release.skipTests>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
+        <findbugs-maven-plugin.version>3.0.2</findbugs-maven-plugin.version>
         <concurrency>1</concurrency>
         <java.level>6</java.level>
         <hpi-plugin.version>1.120</hpi-plugin.version>
@@ -121,7 +121,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${findbugs-maven-plugin.version}</version>
+                <version>3.0.5</version>
             </plugin>
         </plugins>
     </build>
