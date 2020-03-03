@@ -9,9 +9,11 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import hudson.util.Secret;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Set;
 
@@ -30,6 +32,7 @@ import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for REST API calls
@@ -127,7 +130,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, restApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(restApiKey));
             CreateDeploymentProperties properties = new CreateDeploymentProperties();
             properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
             CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
@@ -158,7 +161,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
             ExecutionResult result = client.getExecutionResults(eventId);
             assertEquals("succeeded", result.executions.get(0).status);
             assertTrue("expected success", result.executions.get(0).success);
@@ -188,7 +191,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
             ExecutionResult result = client.getExecutionResults(eventId);
             assertNull(result);
         } finally {
@@ -217,8 +220,8 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
-            GetApiKeyResult result = client.getApiKeyResult(fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
+            GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKey));
             assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
         } finally {
             if (client != null) {
@@ -246,7 +249,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
             GetApplicationsResult result = client.getApplicationsResult(organization_id);
             assertEquals(2, result.applications.size());
         } finally {
@@ -274,7 +277,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, fakeRestApiKey);
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
             GetEnvironmentsResult result = client.getEnvironmentsResult(organization_id);
             assertEquals(1, result.environments.size());
         } finally {
@@ -340,5 +343,17 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON))
         );
+    }
+
+    private Secret mockSecret(String value) {
+        try {
+            final Constructor<?> c = Class.forName("hudson.util.Secret").getDeclaredConstructor(String.class);
+            c.setAccessible(true);
+            return (Secret)c.newInstance(value);
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        return null;
     }
 }
