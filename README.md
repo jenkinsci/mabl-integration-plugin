@@ -134,6 +134,11 @@ Send build environment variables is set. Collecting the following information:
 
 ### Change Log
 
+#### v0.0.19 (3 March 2020)
+-   Security fixes for handling API key
+-   Fixed POM to use Findbugs version variable
+-   Improved the plan label form by displaying the currently configured values
+
 #### v0.0.18 (4 February 2020)
 -   Screenshot and documentation updates
 -   Updates to dependencies

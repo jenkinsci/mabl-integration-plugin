@@ -258,8 +258,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillApplicationIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-
-            if(restApiKey == null || restApiKey.getPlainText() == null || restApiKey.getPlainText().isEmpty()) {
+            if (isSecretEmpty(restApiKey)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("Input an API Key", "");
 
@@ -294,7 +293,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillEnvironmentIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if(restApiKey == null || restApiKey.getPlainText() == null || restApiKey.getPlainText().isEmpty()) {
+            if (isSecretEmpty(restApiKey)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("Input an API key", "");
 
@@ -329,7 +328,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillLabelsItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if(restApiKey == null || restApiKey.getPlainText() == null || restApiKey.getPlainText().isEmpty()) {
+            if (isSecretEmpty(restApiKey)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("<No Labels Found>", "");
 
@@ -360,6 +359,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
             items.add("<Couldn't Fetch Labels>", "");
             return items;
+        }
+
+        private static boolean isSecretEmpty(final Secret secret) {
+            return secret == null || secret.getPlainText() == null || secret.getPlainText().isEmpty();
         }
     }
 
