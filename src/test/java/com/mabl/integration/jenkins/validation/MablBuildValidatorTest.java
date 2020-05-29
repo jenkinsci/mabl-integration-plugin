@@ -22,7 +22,7 @@ public class MablBuildValidatorTest {
     public void validateGoodAllFieldsForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 "sample-environment-id",
                 "sample-application-id"
         );
@@ -34,7 +34,7 @@ public class MablBuildValidatorTest {
     public void validateGoodEnvironmentOnlyForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 "sample-environment-id",
                 null
         );
@@ -46,7 +46,7 @@ public class MablBuildValidatorTest {
     public void validateGoodApplicationOnlyForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 null,
                 "sample-application-id"
         );
@@ -58,7 +58,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 null,
                 null
         );
@@ -74,7 +74,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 "sample-a",
                 null
         );
@@ -90,7 +90,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoApplicationIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 null,
                 "sample-e"
         );
@@ -106,7 +106,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationWhiteSpaceForm() {
 
         final FormValidation actual = validateForm(
-                Secret.fromString("sample-key"),
+                "sample-key-name",
                 "  ",
                 "\t"
         );

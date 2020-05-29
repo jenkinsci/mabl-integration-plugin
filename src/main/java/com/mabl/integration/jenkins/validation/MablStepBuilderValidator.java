@@ -25,14 +25,14 @@ public class MablStepBuilderValidator {
      * @return validation result
      */
     public static FormValidation validateForm(
-            Secret restApiKey,
+            String restApiKey,
             String environmentId,
             String applicationId
     ) {
         try {
 
             // TODO MOVE into validator class when we add remote validation
-            final String restApiKeyClean = trimToNull(restApiKey == null ? null : restApiKey.getPlainText());
+            final String restApiKeyClean = trimToNull(restApiKey);
             final String applicationIdClean = trimToNull(applicationId);
             final String environmentIdClean = trimToNull(environmentId);
 

@@ -1,5 +1,9 @@
 package com.mabl.integration.jenkins;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
@@ -10,9 +14,11 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -20,7 +26,9 @@ import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -30,8 +38,9 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,6 +48,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
+import static com.cloudbees.plugins.credentials.CredentialsProvider.*;
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
@@ -58,7 +68,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return "MABL Step Builder " + this.hashCode();
     }
 
-    private final Secret restApiKey;
+    private final String restApiKeyName;
     private final String environmentId;
     private final String applicationId;
     private final Set<String> labels;
@@ -68,12 +78,12 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
     public MablStepBuilder(
-            final Secret restApiKey,
+            final String restApiKeyName,
             final String environmentId,
             final String applicationId,
             final Set<String> labels
     ) {
-        this.restApiKey = restApiKey;
+        this.restApiKeyName = restApiKeyName;
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
         this.labels = labels != null ? labels : new HashSet<String>();
@@ -95,8 +105,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     }
 
     // Accessors to be used by Jelly UI templates
-    public Secret getRestApiKey() {
-        return restApiKey;
+    public String getRestApiKeyName() {
+        return restApiKeyName;
     }
 
     public String getEnvironmentId() {
@@ -136,7 +146,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
-        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, getRestApiKey(), disableSslVerification);
+        final MablRestApiClient client = new MablRestApiClientImpl(
+                MABL_REST_API_BASE_URL,
+                getRestApiSecret(getRestApiKeyName()),
+                disableSslVerification
+        );
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
@@ -214,6 +228,19 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return environmentVars;
     }
 
+    static Secret getRestApiSecret(final String restApiKey) {
+        Secret secretKey = null;
+        List<UsernamePasswordCredentials> passwordCreds =
+                CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class, (Item)null, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+        for (UsernamePasswordCredentials cred : passwordCreds) {
+            if (restApiKey.equals(cred.getUsername())) {
+                secretKey = cred.getPassword();
+                break;
+            }
+        }
+        return secretKey;
+    }
+
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
@@ -250,22 +277,55 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
 
         public FormValidation doValidateForm(
-                @QueryParameter("restApiKey") final Secret restApiKey,
+                @QueryParameter("restApiKeyName") final String restApiKeyName,
                 @QueryParameter("environmentId") final String environmentId,
                 @QueryParameter("applicationId") final String applicationId
         ) {
-            return MablStepBuilderValidator.validateForm(restApiKey, environmentId, applicationId);
+            return MablStepBuilderValidator.validateForm(restApiKeyName, environmentId, applicationId);
         }
 
-        public ListBoxModel doFillApplicationIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
+        public ListBoxModel doFillRestApiKeyNameItems(
+                @AncestorInPath Item item,
+                @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (credentialsId != null) {
+                result.add(credentialsId);
+            }
+            List<UsernamePasswordCredentials> passwordCreds =
+                    lookupCredentials(UsernamePasswordCredentials.class, item, ACL.SYSTEM,
+                            Collections.<DomainRequirement>emptyList());
+            for (UsernamePasswordCredentials cred : passwordCreds) {
+                result.add(cred.getUsername());
+            }
+            return result;
+        }
+
+        public FormValidation doCheckRestApiKeyNames(
+                @AncestorInPath Item item, // (2)
+                @QueryParameter String value // (1)
+        ) {
+            if (item == null || StringUtils.isBlank(value)) {
+                    return FormValidation.warning("Provide a credentials ID");
+            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(USE_ITEM)) {
+                return FormValidation.warning("Insufficient permissions");
+            }
+
+            if (value.startsWith("${") && value.endsWith("}")) {
+                return FormValidation.warning("Cannot validate expression based credentials");
+            }
+
+            return FormValidation.ok();
+        }
+
+        public ListBoxModel doFillApplicationIdItems(@QueryParameter String restApiKeyName, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyName)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("Input an API Key", "");
 
                 return items;
             }
-
-            return getApplicationIdItems(restApiKey, disableSslVerification);
+            Secret secretKey = getRestApiSecret(restApiKeyName);
+            return secretKey != null ? getApplicationIdItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getApplicationIdItems(Secret formApiKey, boolean disableSslVerification) {
@@ -292,15 +352,15 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return items;
         }
 
-        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
+        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter String restApiKeyName, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyName)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("Input an API key", "");
-
                 return items;
             }
 
-            return getEnvironmentIdItems(restApiKey, disableSslVerification);
+            Secret secretKey = getRestApiSecret(restApiKeyName);
+            return secretKey != null ? getEnvironmentIdItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getEnvironmentIdItems(Secret formApiKey, boolean disableSslVerification) {
@@ -327,15 +387,16 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return items;
         }
 
-        public ListBoxModel doFillLabelsItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
+        public ListBoxModel doFillLabelsItems(@QueryParameter String restApiKeyName, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyName)) {
                 ListBoxModel items = new ListBoxModel();
                 items.add("<No Labels Found>", "");
 
                 return items;
             }
 
-            return getLabelsItems(restApiKey, disableSslVerification);
+            Secret secretKey = getRestApiSecret(restApiKeyName);
+            return secretKey != null ? getLabelsItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getLabelsItems(Secret formApiKey, boolean disableSslVerification) {
@@ -346,7 +407,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 String organizationId = apiKeyResult.organization_id;
                 GetLabelsResult labelsResult = client.getLabelsResult(organizationId);
 
-                for(GetLabelsResult.Label label : labelsResult.labels) {
+                for (GetLabelsResult.Label label : labelsResult.labels) {
                     items.add(label.name, label.name);
                 }
 
@@ -359,10 +420,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
             items.add("<Couldn't Fetch Labels>", "");
             return items;
-        }
-
-        private static boolean isSecretEmpty(final Secret secret) {
-            return secret == null || secret.getPlainText() == null || secret.getPlainText().isEmpty();
         }
     }
 
