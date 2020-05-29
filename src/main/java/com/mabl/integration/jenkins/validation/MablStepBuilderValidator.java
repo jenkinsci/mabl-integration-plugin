@@ -1,7 +1,6 @@
 package com.mabl.integration.jenkins.validation;
 
 import hudson.util.FormValidation;
-import hudson.util.Secret;
 
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_APPLICATION_ID_LABEL;
@@ -19,20 +18,20 @@ public class MablStepBuilderValidator {
     /**
      * Validate form
      *
-     * @param restApiKey    prospective key
+     * @param restApiKeyName prospective key name
      * @param environmentId prospective environment identifier
      * @param applicationId prospective application identifier
      * @return validation result
      */
     public static FormValidation validateForm(
-            String restApiKey,
+            String restApiKeyName,
             String environmentId,
             String applicationId
     ) {
         try {
 
             // TODO MOVE into validator class when we add remote validation
-            final String restApiKeyClean = trimToNull(restApiKey);
+            final String restApiKeyClean = trimToNull(restApiKeyName);
             final String applicationIdClean = trimToNull(applicationId);
             final String environmentIdClean = trimToNull(environmentId);
 

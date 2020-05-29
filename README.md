@@ -18,7 +18,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Deployment](#deployment)
 
 ## Plugin Installation
-Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.580+` server from the *Available Plugins* tab by searching for "mabl".
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.625+` server from the *Available Plugins* tab by searching for "mabl".
 
 ### Features
 
@@ -28,11 +28,21 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Requirements
 
--   Minimum Jenkins version *1.580.1*
+-   Minimum Jenkins version: *1.625.1*
+-   Minimum Java runtime version: *7*
 -   mabl API key
     -   See [integration
         docs](https://help.mabl.com/v1.0/docs/integrating-mabl-with-your-cicd-workflow#section-the-mabl-deployment-events-api)
         for details  
+
+### Create a Jenkins credential for the mabl API key
+
+-   Add a new credential accessible to the Jenkins job using the Username with password
+    credential kind
+-   Set the username to a value such as *mabl-rest-api-key* (any value is acceptable)
+-   Set the password to be the API key
+
+![](img/config-api-key.png)
           
 
 ### Adding a mabl Project Step
@@ -41,9 +51,9 @@ Add a *Run mabl tests* step to your new or existing project.
 
 ![](img/run-mabl-tests.png)
 
-*Configure the API key*. Then select environment, and application from the
-drop-down. At least one of environment and application must be
-supplied.  All matching plans and their tests will be run during this
+*Select the API key from the drop-down list*. Then select environment, and
+application from the drop-down. At least one of environment and application
+must be supplied.  All matching plans and their tests will be run during this
 step. The step will block until the tests are complete/failed, or one
 hour has elapsed.
 
@@ -133,6 +143,12 @@ Send build environment variables is set. Collecting the following information:
 ```
 
 ### Change Log
+
+#### v0.0.20 (29 May 2020)
+-   Moved API key to credentials plugin. Existing users must update their configuration manually.
+-   Minimum Java runtime requirement is now Java 7
+-   Minimum supported Jenkins version is 1.625.1
+-   Fixed incompatibility with Pipeline jobs
 
 #### v0.0.19 (3 March 2020)
 -   Security fixes for handling API key

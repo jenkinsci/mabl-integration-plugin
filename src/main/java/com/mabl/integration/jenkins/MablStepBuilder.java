@@ -297,7 +297,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             for (UsernamePasswordCredentials cred : passwordCreds) {
                 result.add(cred.getUsername());
             }
-            return result;
+            return result.withEmptySelection();
         }
 
         public FormValidation doCheckRestApiKeyNames(

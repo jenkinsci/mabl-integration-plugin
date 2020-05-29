@@ -46,6 +46,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -112,7 +113,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
                 .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
                 .setDefaultRequestConfig(getDefaultRequestConfig());
-        
+
         if (disableSslVerification) {
             final SSLContext sslContext;
             try {
