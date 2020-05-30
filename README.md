@@ -88,7 +88,10 @@ pipeline step for mabl. This can be written by hand or created via the
     (one of environmentId or applicationId is required)
 -   restApiKeyName: The name of the API key secret of the desired deployment workspace -
     Required  
-      
+
+*Note* that if you want to select specific plan labels, then use the 
+`labels: ['label1','label2',...,'labeln'].toSet()` syntax in your pipeline step. The Generate Pipeline
+Script page in Jenkins does not append `toSet()`.
 
 **Pipeline Step Setup**
 
