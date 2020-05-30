@@ -86,14 +86,14 @@ pipeline step for mabl. This can be written by hand or created via the
 -   continueOnPlanFailure: Continue if your plan/tests fail
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
--   restApiKey: The apiKey of the desired deployment workspace -
+-   restApiKeyName: The name of the API key secret of the desired deployment workspace -
     Required  
       
 
 **Pipeline Step Setup**
 
 ``` syntaxhighlighter-pre
-mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKey: 'REST-API-KEY'
+mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyName: 'REST-API-KEY-NAME'
 ```
 
 OR something like this:
@@ -103,8 +103,8 @@ OR something like this:
 ``` syntaxhighlighter-pre
 node {
    stage('mabl') {
-       node {
-           step([$class: 'MablStepBuilder', restApiKey: 'REST-API-KEY', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
+       steps {
+           step([$class: 'MablStepBuilder', restApiKeyName: 'REST-API-KEY', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
        }
    }
 }
@@ -149,6 +149,7 @@ Send build environment variables is set. Collecting the following information:
 -   Minimum Java runtime requirement is now Java 7
 -   Minimum supported Jenkins version is 1.625.1
 -   Fixed incompatibility with Pipeline jobs
+-   Replaced FindBugs plugin with SpotBugs
 
 #### v0.0.19 (3 March 2020)
 -   Security fixes for handling API key

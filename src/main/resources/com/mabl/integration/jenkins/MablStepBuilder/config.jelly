@@ -15,7 +15,7 @@
 
   <f:validateButton
      title="${%Validate}" progress="${%Validating...}"
-     method="validateForm" with="restApiKey,applicationId,environmentId" />
+     method="validateForm" with="restApiKeyName,applicationId,environmentId" />
 
   <f:advanced>
     <f:entry title="${%Plan Labels}" field="labels">

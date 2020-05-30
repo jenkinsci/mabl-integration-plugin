@@ -22,6 +22,7 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -185,7 +186,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         boolean isComplete = true;
 
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
-            isComplete &= COMPLETE_STATUSES.contains(summary.status.toLowerCase());
+            isComplete &= COMPLETE_STATUSES.contains(summary.status.toLowerCase(Locale.US));
         }
         return isComplete;
     }

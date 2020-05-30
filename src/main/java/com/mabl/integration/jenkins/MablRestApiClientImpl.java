@@ -46,7 +46,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -232,7 +231,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         switch (statusCode) {
             case SC_OK: // fall through case
             case SC_CREATED:
-                return resultClass.cast(objectMapper.reader(resultClass).readValue(response.getEntity().getContent()));
+                return resultClass.cast(objectMapper.readerFor(resultClass).readValue(response.getEntity().getContent()));
             case SC_NOT_FOUND:
                 return null;
             default:
