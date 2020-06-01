@@ -301,8 +301,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         public FormValidation doCheckRestApiKeyNames(
-                @AncestorInPath Item item, // (2)
-                @QueryParameter String value // (1)
+                @AncestorInPath Item item,
+                @QueryParameter String value
         ) {
             if (item == null || StringUtils.isBlank(value)) {
                     return FormValidation.warning("Provide a credentials ID");
