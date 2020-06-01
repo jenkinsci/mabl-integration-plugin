@@ -213,17 +213,14 @@ for any specific image version before pulling Jenkins image.
 # Launch Jenkins container and automatically pull the image if not present
 docker run -d -p 9090:8080 --name=jenkins-master jenkins/jenkins
 
-# Run command in the running container
-docker exec -it jenkins-master bash
-
 # Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
-cat /var/jenkins_home/secrets/initialAdminPassword
+docker exec -it jenkins-master bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
 
 # Setup your Jenkins instance
 
 # Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
 mvn clean package \
-  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/ \
+  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/plugins/ \
   && docker restart jenkins-master
 ```
 
