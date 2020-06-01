@@ -390,7 +390,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         public ListBoxModel doFillLabelsItems(@QueryParameter String restApiKeyName, @QueryParameter boolean disableSslVerification) {
             if (StringUtils.isBlank(restApiKeyName)) {
                 ListBoxModel items = new ListBoxModel();
-                items.add("<No Labels Found>", "");
+                items.add("Input a valid API key", "");
 
                 return items;
             }
