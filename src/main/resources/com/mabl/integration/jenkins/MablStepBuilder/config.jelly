@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-  <f:entry title="${%API Key Credential}" field="restApiKeyName">
+  <f:entry title="${%ID of API Key Secret}" field="restApiKeyId">
       <c:select includeUser="true"/>
   </f:entry>
 
@@ -15,7 +15,7 @@
 
   <f:validateButton
      title="${%Validate}" progress="${%Validating...}"
-     method="validateForm" with="restApiKeyName,applicationId,environmentId" />
+     method="validateForm" with="restApiKeyId,applicationId,environmentId" />
 
   <f:advanced>
     <f:entry title="${%Plan Labels}" field="labels">
