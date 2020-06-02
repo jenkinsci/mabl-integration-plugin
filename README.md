@@ -39,7 +39,8 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 ### Create a Jenkins credential for the mabl API key
 
 -   Add a new credential accessible to the Jenkins job using the Secret text
-    credential kind
+    credential kind. The scope of the credential must be Global. The credential
+    may be placed in any of the credential domains.
 -   Set the secret to to the mabl API key
 -   Set the ID of the credential to a value of your choosing
 
@@ -155,7 +156,8 @@ Note that
 * Jenkins versions 1.x are no longer supported
 * Minimum required Java version is Java 8
 * Jobs with mabl steps will have to be _manually_ updated
-  1. Create a Secret text kind credential to store the mabl API key
+  1. Create a Secret text kind credential to store the mabl API key. The scope of the credential must be set to Global.
+     The credential may be placed in any of the credential domains.
   1. Make sure that you set the ID of the credentials
   1. Update the mabl step in each affected job 
 
