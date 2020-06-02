@@ -88,7 +88,7 @@ pipeline step for mabl. This can be written by hand or created via the
 -   continueOnPlanFailure: Continue if your plan/tests fail
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
--   restApiKeyName: The name of the API key secret of the desired deployment workspace -
+-   restApiKeyId: The id of the API key secret of the desired deployment workspace -
     Required  
 
 *Note* that if you want to select specific plan labels, then use the 
@@ -99,7 +99,7 @@ for example: `labels: null`
 **Pipeline Step Setup**
 
 ``` syntaxhighlighter-pre
-mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyName: 'REST-API-KEY-NAME'
+mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyId: 'REST-API-KEY-ID'
 ```
 
 OR something like this:
@@ -110,7 +110,7 @@ OR something like this:
 node {
    stage('mabl') {
        steps {
-           step([$class: 'MablStepBuilder', restApiKeyName: 'REST-API-KEY', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
+           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
        }
    }
 }
@@ -165,7 +165,7 @@ Note that
 
 #### v0.0.21 (2 June 2020)
 -   Raised minimum version to 2.121.3
--   Switched to use Secret text credential kind for storing REST API key
+-   Switched to use Secret text credential kind for storing mabl API key
 
 #### v0.0.20 (29 May 2020)
 -   Moved API key to credentials plugin. Existing users must update their configuration manually.
