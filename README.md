@@ -10,6 +10,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Adding a mabl project step](#adding-a-mabl-project-step)
   * [Adding a mabl pipeline step](#adding-a-mabl-pipeline-step)
   * [Environment variable collection](#environment-variable-collection)
+  * [Upgrading from previous versions](#upgrade)
   * [Change log](#change-log)
   * [Building from source](#building-from-source)
   * [Local development](#local-development)
@@ -18,7 +19,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Deployment](#deployment)
 
 ## Plugin Installation
-Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v1.625+` server from the *Available Plugins* tab by searching for "mabl".
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v2.121+` server from the *Available Plugins* tab by searching for "mabl".
 
 ### Features
 
@@ -28,8 +29,8 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Requirements
 
--   Minimum Jenkins version: *1.625.1*
--   Minimum Java runtime version: *7*
+-   Minimum Jenkins version: *2.121.3*
+-   Minimum Java runtime version: *8*
 -   mabl API key
     -   See [integration
         docs](https://help.mabl.com/v1.0/docs/integrating-mabl-with-your-cicd-workflow#section-the-mabl-deployment-events-api)
@@ -37,10 +38,10 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Create a Jenkins credential for the mabl API key
 
--   Add a new credential accessible to the Jenkins job using the Username with password
+-   Add a new credential accessible to the Jenkins job using the Secret text
     credential kind
--   Set the username to a value such as *mabl-rest-api-key* (any value is acceptable)
--   Set the password to be the API key
+-   Set the secret to to the mabl API key
+-   Set the ID of the credential to a value of your choosing
 
 ![](img/config-api-key.png)
           
@@ -91,7 +92,8 @@ pipeline step for mabl. This can be written by hand or created via the
 
 *Note* that if you want to select specific plan labels, then use the 
 `labels: ['label1','label2',...,'labeln'].toSet()` syntax in your pipeline step. The Generate Pipeline
-Script page in Jenkins does not append `toSet()`.
+Script page in Jenkins does not append `toSet()`. If you do not use labels, then set the value to null,
+for example: `labels: null`
 
 **Pipeline Step Setup**
 
@@ -145,7 +147,23 @@ Send build environment variables is set. Collecting the following information:
   'RUN_DISPLAY_URL' => 'http://127.0.0.1:9090/job/mabl%20integration/47/display/redirect'
 ```
 
+### Upgrading from previous versions
+
+#### Upgrading from pre-0.0.20 versions
+
+Note that
+* Jenkins versions 1.x are no longer supported
+* Minimum required Java version is Java 8
+* Jobs with mabl steps will have to be _manually_ updated
+  1. Create a Secret text kind credential to store the mabl API key
+  1. Make sure that you set the ID of the credentials
+  1. Update the mabl step in each affected job 
+
 ### Change Log
+
+#### v0.0.21 (2 June 2020)
+-   Raised minimum version to 2.121.3
+-   Switched to use Secret text credential kind for storing REST API key
 
 #### v0.0.20 (29 May 2020)
 -   Moved API key to credentials plugin. Existing users must update their configuration manually.

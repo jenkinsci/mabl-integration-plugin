@@ -2,7 +2,7 @@ package com.mabl.integration.jenkins;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
@@ -230,11 +230,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     static Secret getRestApiSecret(final String restApiKey) {
         Secret secretKey = null;
-        List<UsernamePasswordCredentials> passwordCreds =
-                CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class, (Item)null, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
-        for (UsernamePasswordCredentials cred : passwordCreds) {
-            if (restApiKey.equals(cred.getUsername())) {
-                secretKey = cred.getPassword();
+        List<StringCredentials> stringCredentials =
+                CredentialsProvider.lookupCredentials(StringCredentials.class, (Item)null, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+        for (StringCredentials cred : stringCredentials) {
+            if (restApiKey.equals(cred.getId())) {
+                secretKey = cred.getSecret();
                 break;
             }
         }
@@ -291,13 +291,13 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             if (credentialsId != null) {
                 result.add(credentialsId);
             }
-            List<UsernamePasswordCredentials> passwordCreds =
-                    lookupCredentials(UsernamePasswordCredentials.class, item, ACL.SYSTEM,
+            List<StringCredentials> passwordCreds =
+                    lookupCredentials(StringCredentials.class, item, ACL.SYSTEM,
                             Collections.<DomainRequirement>emptyList());
-            for (UsernamePasswordCredentials cred : passwordCreds) {
-                result.add(cred.getUsername());
+            for (StringCredentials cred : passwordCreds) {
+                result.add(cred.getId());
             }
-            return result.withEmptySelection();
+            return result.includeEmptyValue();
         }
 
         public FormValidation doCheckRestApiKeyNames(
