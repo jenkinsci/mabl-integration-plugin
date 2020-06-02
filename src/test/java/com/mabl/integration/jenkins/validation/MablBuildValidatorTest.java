@@ -22,7 +22,7 @@ public class MablBuildValidatorTest {
     public void validateGoodAllFieldsForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 "sample-environment-id",
                 "sample-application-id"
         );
@@ -34,7 +34,7 @@ public class MablBuildValidatorTest {
     public void validateGoodEnvironmentOnlyForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 "sample-environment-id",
                 null
         );
@@ -46,7 +46,7 @@ public class MablBuildValidatorTest {
     public void validateGoodApplicationOnlyForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 null,
                 "sample-application-id"
         );
@@ -58,7 +58,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 null,
                 null
         );
@@ -74,7 +74,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 "sample-a",
                 null
         );
@@ -90,7 +90,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoApplicationIdInWrongFieldApplicationForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 null,
                 "sample-e"
         );
@@ -106,7 +106,7 @@ public class MablBuildValidatorTest {
     public void validateBadNoEnvironmentOrApplicationWhiteSpaceForm() {
 
         final FormValidation actual = validateForm(
-                "sample-key-name",
+                "sample-key-id",
                 "  ",
                 "\t"
         );
