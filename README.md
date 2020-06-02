@@ -96,21 +96,22 @@ pipeline step for mabl. This can be written by hand or created via the
 Script page in Jenkins does not append `toSet()`. If you do not use labels, then set the value to null,
 for example: `labels: null`
 
-**Pipeline Step Setup**
+The following sections shows how to use the integration plugin in either a declarative or in a scripted
+pipeline.
+
+#### Declarative Pipeline
 
 ``` syntaxhighlighter-pre
-mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyId: 'REST-API-KEY-ID'
+mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyId: 'REST-API-KEY-ID', labels: null
 ```
 
-OR something like this:
-
-**Pipeline Step Setup**
+#### Scripted Pipeline
 
 ``` syntaxhighlighter-pre
 node {
    stage('mabl') {
        steps {
-           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
+           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a', labels: null])
        }
    }
 }
