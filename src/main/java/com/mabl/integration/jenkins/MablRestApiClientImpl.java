@@ -112,7 +112,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
                 .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
                 .setDefaultRequestConfig(getDefaultRequestConfig());
-        
+
         if (disableSslVerification) {
             final SSLContext sslContext;
             try {
@@ -231,7 +231,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         switch (statusCode) {
             case SC_OK: // fall through case
             case SC_CREATED:
-                return resultClass.cast(objectMapper.reader(resultClass).readValue(response.getEntity().getContent()));
+                return resultClass.cast(objectMapper.readerFor(resultClass).readValue(response.getEntity().getContent()));
             case SC_NOT_FOUND:
                 return null;
             default:

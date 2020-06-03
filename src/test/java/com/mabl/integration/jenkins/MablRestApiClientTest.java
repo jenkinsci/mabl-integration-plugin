@@ -46,7 +46,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void createDeploymentAllParametersHappyPathTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = "foo-env-e";
         final String applicationId = "foo-app-a";
         final Set<String> labels = Collections.singleton("foo-label");
@@ -55,17 +55,17 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey,
+                fakeRestApiKeyId,
                 "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
     }
 
     @Test
     public void createDeploymentOnlyEnvironmentHappyPathTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = "foo-env-e";
         final String applicationId = null;
         final Set<String> labels = null;
@@ -74,17 +74,17 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey,
+                fakeRestApiKeyId,
                 "{\"environment_id\":\"foo-env-e\",\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
     }
 
     @Test
     public void createDeploymentOnlyApplicationHappyPathTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = null;
         final String applicationId = "foo-app-a";
         final Set<String> labels = null;
@@ -93,17 +93,17 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey,
+                fakeRestApiKeyId,
                 "{\"application_id\":\"foo-app-a\",\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
     }
 
     @Test
     public void createDeploymentOnlyLabelsHappyPathTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = null;
         final String applicationId = null;
         final Set<String> labels = Collections.singleton("foo-label");
@@ -112,11 +112,11 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey,
+                fakeRestApiKeyId,
                 "{\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKey, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
     }
 
     private void assertSuccessfulCreateDeploymentRequest(
@@ -147,7 +147,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void getExecutionResultHappyPathTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String eventId = "fake-event-id";
 
         registerGetMapping(
@@ -155,13 +155,13 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 ok(),
                 MablTestConstants.EXECUTION_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey
+                fakeRestApiKeyId
         );
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
             ExecutionResult result = client.getExecutionResults(eventId);
             assertEquals("succeeded", result.executions.get(0).status);
             assertTrue("expected success", result.executions.get(0).success);
@@ -177,7 +177,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void getExecutionResultNotFoundTest() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "pa$$\\/\\/orD";
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String eventId = "fake-event-id";
 
         registerGetMapping(
@@ -185,13 +185,13 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 notFound(),
                 MablTestConstants.EXECUTION_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey
+                fakeRestApiKeyId
         );
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
             ExecutionResult result = client.getExecutionResults(eventId);
             assertNull(result);
         } finally {
@@ -206,22 +206,22 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void getApiKeyObjectFromApiKey() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "fakeApiKeyValue";
+        final String fakeRestApiKeyId = "fakeApiKeyValue";
 
         registerGetMapping(
-                String.format(MablRestApiClientImpl.GET_ORGANIZATION_ENDPOINT_TEMPLATE,fakeRestApiKey),
+                String.format(MablRestApiClientImpl.GET_ORGANIZATION_ENDPOINT_TEMPLATE,fakeRestApiKeyId),
                 ok(),
                 MablTestConstants.APIKEY_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
-                fakeRestApiKey
+                fakeRestApiKeyId
         );
 
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
-            GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKeyId));
             assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
         } finally {
             if (client != null) {
@@ -233,12 +233,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void getApplicationsReturnsTwoResults() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "fakeApiKeyValue";
+        final String fakeRestApiKeyId = "fakeApiKeyValue";
         final String organization_id = "fakeOrganizationId";
 
         WireMock.stubFor(get(urlPathEqualTo("/applications"))
             .withQueryParam("organization_id", equalTo(organization_id))
-                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKey)
+                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKeyId)
                 .withHeader("user-agent", new EqualToPattern(MablStepConstants.PLUGIN_USER_AGENT))
             .willReturn(ok()
                 .withHeader("Content-Type", "application/json")
@@ -249,7 +249,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
             GetApplicationsResult result = client.getApplicationsResult(organization_id);
             assertEquals(2, result.applications.size());
         } finally {
@@ -262,12 +262,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     @Test
     public void getEnvironmentsReturnsOneResult() throws IOException, MablSystemError {
 
-        final String fakeRestApiKey = "fakeApiKeyValue";
+        final String fakeRestApiKeyId = "fakeApiKeyValue";
         final String organization_id = "fakeOrganizationId";
 
         WireMock.stubFor(get(urlPathEqualTo("/environments"))
                 .withQueryParam("organization_id", equalTo(organization_id))
-                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKey)
+                .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKeyId)
                 .withHeader("user-agent", new EqualToPattern(MablStepConstants.PLUGIN_USER_AGENT))
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
@@ -277,7 +277,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
             GetEnvironmentsResult result = client.getEnvironmentsResult(organization_id);
             assertEquals(1, result.environments.size());
         } finally {

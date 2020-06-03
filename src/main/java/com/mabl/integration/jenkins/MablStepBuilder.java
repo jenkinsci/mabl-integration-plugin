@@ -1,5 +1,8 @@
 package com.mabl.integration.jenkins;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
@@ -10,9 +13,11 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -20,7 +25,9 @@ import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -30,15 +37,18 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
+import static com.cloudbees.plugins.credentials.CredentialsProvider.*;
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
@@ -58,7 +68,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return "MABL Step Builder " + this.hashCode();
     }
 
-    private final Secret restApiKey;
+    private final String restApiKeyId;
     private final String environmentId;
     private final String applicationId;
     private final Set<String> labels;
@@ -68,15 +78,15 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
     public MablStepBuilder(
-            final Secret restApiKey,
+            final String restApiKeyId,
             final String environmentId,
             final String applicationId,
             final Set<String> labels
     ) {
-        this.restApiKey = restApiKey;
+        this.restApiKeyId = restApiKeyId;
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
-        this.labels = labels != null ? labels : new HashSet<String>();
+        this.labels = labels != null ? labels : new HashSet<>();
     }
 
     @DataBoundSetter
@@ -95,8 +105,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     }
 
     // Accessors to be used by Jelly UI templates
-    public Secret getRestApiKey() {
-        return restApiKey;
+    public String getRestApiKeyId() {
+        return restApiKeyId;
     }
 
     public String getEnvironmentId() {
@@ -136,7 +146,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
-        final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, getRestApiKey(), disableSslVerification);
+        final MablRestApiClient client = new MablRestApiClientImpl(
+                MABL_REST_API_BASE_URL,
+                getRestApiSecret(getRestApiKeyId()),
+                disableSslVerification
+        );
 
         final MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
@@ -214,12 +228,26 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return environmentVars;
     }
 
+    static Secret getRestApiSecret(final String restApiKeyId) {
+        Secret secretKey = null;
+        List<StringCredentials> stringCredentials =
+                CredentialsProvider.lookupCredentials(StringCredentials.class, (Item)null, ACL.SYSTEM, Collections.emptyList());
+        for (StringCredentials cred : stringCredentials) {
+            if (restApiKeyId.equals(cred.getId())) {
+                secretKey = cred.getSecret();
+                break;
+            }
+        }
+        return secretKey;
+    }
+
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
     @Extension
     @Symbol(PLUGIN_SYMBOL)
     public static class MablStepDescriptor extends BuildStepDescriptor<Builder> {
+        private static final Logger LOGGER = Logger.getLogger(MablStepDescriptor.class.getName());
         private boolean collectVars;
 
         public MablStepDescriptor() {
@@ -244,70 +272,104 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return BUILD_STEP_DISPLAY_NAME;
         }
 
 
         public FormValidation doValidateForm(
-                @QueryParameter("restApiKey") final Secret restApiKey,
+                @QueryParameter("restApiKeyId") final String restApiKeyId,
                 @QueryParameter("environmentId") final String environmentId,
                 @QueryParameter("applicationId") final String applicationId
         ) {
-            return MablStepBuilderValidator.validateForm(restApiKey, environmentId, applicationId);
+            return MablStepBuilderValidator.validateForm(restApiKeyId, environmentId, applicationId);
         }
 
-        public ListBoxModel doFillApplicationIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
-                ListBoxModel items = new ListBoxModel();
-                items.add("Input an API Key", "");
+        public ListBoxModel doFillRestApiKeyIdItems(
+                @AncestorInPath Item item,
+                @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (credentialsId != null) {
+                result.add(credentialsId);
+            }
+            List<StringCredentials> creds =
+                    lookupCredentials(StringCredentials.class, item, ACL.SYSTEM,
+                            Collections.emptyList());
+            for (StringCredentials cred : creds) {
+                result.add(cred.getId());
+            }
+            return result.includeEmptyValue();
+        }
 
-                return items;
+        public FormValidation doCheckRestApiKeyIds(
+                @AncestorInPath Item item,
+                @QueryParameter String value
+        ) {
+            if (item == null || StringUtils.isBlank(value)) {
+                    return FormValidation.warning("Provide a credentials ID");
+            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(USE_ITEM)) {
+                return FormValidation.warning("Insufficient permissions");
             }
 
-            return getApplicationIdItems(restApiKey, disableSslVerification);
+            if (value.startsWith("${") && value.endsWith("}")) {
+                return FormValidation.warning("Cannot validate expression based credentials");
+            }
+
+            return FormValidation.ok();
+        }
+
+        public ListBoxModel doFillApplicationIdItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyId)) {
+                return getSelectValidApiKeyListBoxModel();
+            }
+            Secret secretKey = getRestApiSecret(restApiKeyId);
+            return secretKey != null ? getApplicationIdItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getApplicationIdItems(Secret formApiKey, boolean disableSslVerification) {
             final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
-            ListBoxModel items = new ListBoxModel();
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                if (apiKeyResult == null) {
+                    return getSelectValidApiKeyListBoxModel();
+                }
+
+                ListBoxModel items = new ListBoxModel();
                 String organizationId = apiKeyResult.organization_id;
                 GetApplicationsResult applicationsResult = client.getApplicationsResult(organizationId);
 
-                items.add("","");
-                for(GetApplicationsResult.Application application : applicationsResult.applications) {
+                items.add("", "");
+                for (GetApplicationsResult.Application application : applicationsResult.applications) {
                     items.add(application.name, application.id);
                 }
 
                 return items;
-            } catch (IOException e) {
-                // ignore
-            } catch (MablSystemError e) {
-                // ignore
+            } catch (IOException | MablSystemError e)  {
+                LOGGER.warning("Failed to retrieve application IDs: " + e.getLocalizedMessage());
             }
 
-            items.add("Input a valid API key", "");
-            return items;
+            return getSelectValidApiKeyListBoxModel();
         }
 
-        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
-                ListBoxModel items = new ListBoxModel();
-                items.add("Input an API key", "");
-
-                return items;
+        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyId)) {
+                return getSelectValidApiKeyListBoxModel();
             }
 
-            return getEnvironmentIdItems(restApiKey, disableSslVerification);
+            Secret secretKey = getRestApiSecret(restApiKeyId);
+            return secretKey != null ? getEnvironmentIdItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getEnvironmentIdItems(Secret formApiKey, boolean disableSslVerification) {
             final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
-            ListBoxModel items = new ListBoxModel();
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                if (apiKeyResult == null) {
+                    return getSelectValidApiKeyListBoxModel();
+                }
+
+                ListBoxModel items = new ListBoxModel();
                 String organizationId = apiKeyResult.organization_id;
                 GetEnvironmentsResult environmentsResult = client.getEnvironmentsResult(organizationId);
 
@@ -317,52 +379,50 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 return items;
-            } catch (IOException e) {
-                // ignore
-            } catch (MablSystemError e) {
-                // ignore
+            } catch (IOException | MablSystemError e) {
+                LOGGER.warning("Failed to retrieve environment IDs: " + e.getLocalizedMessage());
             }
 
-            items.add("Input a valid API key", "");
-            return items;
+            return getSelectValidApiKeyListBoxModel();
         }
 
-        public ListBoxModel doFillLabelsItems(@QueryParameter Secret restApiKey, @QueryParameter boolean disableSslVerification) {
-            if (isSecretEmpty(restApiKey)) {
-                ListBoxModel items = new ListBoxModel();
-                items.add("<No Labels Found>", "");
-
-                return items;
+        public ListBoxModel doFillLabelsItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
+            if (StringUtils.isBlank(restApiKeyId)) {
+                return getSelectValidApiKeyListBoxModel();
             }
 
-            return getLabelsItems(restApiKey, disableSslVerification);
+            Secret secretKey = getRestApiSecret(restApiKeyId);
+            return secretKey != null ? getLabelsItems(secretKey, disableSslVerification) : new ListBoxModel();
         }
 
         private ListBoxModel getLabelsItems(Secret formApiKey, boolean disableSslVerification) {
             final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
-            ListBoxModel items = new ListBoxModel();
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                if (apiKeyResult == null) {
+                   return getSelectValidApiKeyListBoxModel();
+                }
+
+                ListBoxModel items = new ListBoxModel();
                 String organizationId = apiKeyResult.organization_id;
                 GetLabelsResult labelsResult = client.getLabelsResult(organizationId);
 
-                for(GetLabelsResult.Label label : labelsResult.labels) {
+                for (GetLabelsResult.Label label : labelsResult.labels) {
                     items.add(label.name, label.name);
                 }
 
                 return items;
-            } catch (IOException e) {
-                // ignore
-            } catch (MablSystemError e) {
-                // ignore
+            } catch (IOException | MablSystemError e) {
+                LOGGER.warning("Failed to retrieve plan labels: " + e.getLocalizedMessage());
             }
 
-            items.add("<Couldn't Fetch Labels>", "");
-            return items;
+            return getSelectValidApiKeyListBoxModel();
         }
 
-        private static boolean isSecretEmpty(final Secret secret) {
-            return secret == null || secret.getPlainText() == null || secret.getPlainText().isEmpty();
+        private static ListBoxModel getSelectValidApiKeyListBoxModel() {
+            final ListBoxModel listBoxModel = new ListBoxModel();
+            listBoxModel.add("Select a valid API key");
+            return listBoxModel;
         }
     }
 
