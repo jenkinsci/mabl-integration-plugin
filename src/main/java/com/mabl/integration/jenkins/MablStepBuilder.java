@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +72,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private final String restApiKeyId;
     private final String environmentId;
     private final String applicationId;
-    private final Set<String> labels;
+    private Set<String> labels = Collections.emptySet();
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
@@ -80,13 +81,20 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public MablStepBuilder(
             final String restApiKeyId,
             final String environmentId,
-            final String applicationId,
-            final Set<String> labels
+            final String applicationId
     ) {
         this.restApiKeyId = restApiKeyId;
         this.environmentId = trimToNull(environmentId);
         this.applicationId = trimToNull(applicationId);
-        this.labels = labels != null ? labels : new HashSet<>();
+    }
+
+    @DataBoundSetter
+    public void setLabels(Collection<String> labels) {
+        if (labels != null && !labels.isEmpty()) {
+            this.labels = new HashSet<>(labels);
+        } else {
+            this.labels = Collections.emptySet();
+        }
     }
 
     @DataBoundSetter
