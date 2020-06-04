@@ -164,6 +164,9 @@ Note that
 
 ### Change Log
 
+#### v0.0.21 (5 June 2020)
+-   Fix for a benign exception visible in the Jenkins logs
+
 #### v0.0.21 (2 June 2020)
 -   Raised minimum version to 2.121.3
 -   Switched to use Secret text credential kind for storing mabl API key
