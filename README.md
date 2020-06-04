@@ -164,7 +164,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.21 (5 June 2020)
+#### v0.0.22 (5 June 2020)
 -   Fix for a benign exception visible in the Jenkins logs
 
 #### v0.0.21 (2 June 2020)
