@@ -13,7 +13,7 @@
     <groupId>com.mabl.integration.jenkins</groupId>
     <artifactId>mabl-integration</artifactId>
     <packaging>hpi</packaging>
-    <version>0.0.22-SNAPSHOT</version>
+    <version>0.0.22</version>
 
     <name>mabl</name>
     <description>Launch mabl journeys from CI builds</description>
@@ -49,7 +49,7 @@
         <connection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/mabl-integration-plugin</url>
-        <tag>HEAD</tag>
+        <tag>mabl-integration-0.0.22</tag>
     </scm>
 
     <repositories>
