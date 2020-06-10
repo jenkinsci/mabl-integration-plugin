@@ -28,6 +28,7 @@
         <release.skipTests>false</release.skipTests>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <concurrency>1</concurrency>
+        <hpi.compatibleSinceVersion>0.0.20</hpi.compatibleSinceVersion>
     </properties>
 
     <licenses>
