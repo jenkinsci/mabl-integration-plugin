@@ -164,6 +164,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.24 (9 June 2020)
+-   Adjusted labels in configuration
+-   Set compatibility version
+
 #### v0.0.23 (4 June 2020)
 -   Adjusted minimum version to 2.164.3
 

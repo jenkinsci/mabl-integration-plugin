@@ -1,15 +1,15 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-  <f:entry title="${%ID of API Key Secret}" field="restApiKeyId">
+  <f:entry title="${%API Key Secret}" field="restApiKeyId">
       <c:select includeUser="true"/>
   </f:entry>
 
-  <f:entry title="${%Application ID}" field="applicationId">
+  <f:entry title="${%Application}" field="applicationId">
     <f:select />
   </f:entry>
 
-  <f:entry title="${%Environment ID}" field="environmentId">
+  <f:entry title="${%Environment}" field="environmentId">
     <f:select />
   </f:entry>
 
