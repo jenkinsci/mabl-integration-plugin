@@ -164,6 +164,9 @@ Note that
 
 ### Change Log
 
+#### v0.0.26 (18 June 2020)
+-   Updated Jackson dependencies to 2.11.0
+
 #### v0.0.25 (15 June 2020)
 -   Adjusted labels in configuration
 -   Set compatibility version
