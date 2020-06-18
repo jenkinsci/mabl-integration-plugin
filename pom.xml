@@ -13,7 +13,7 @@
     <groupId>com.mabl.integration.jenkins</groupId>
     <artifactId>mabl-integration</artifactId>
     <packaging>hpi</packaging>
-    <version>0.0.26-SNAPSHOT</version>
+    <version>0.0.26</version>
 
     <name>mabl</name>
     <description>Launch mabl journeys from CI builds</description>
