@@ -127,7 +127,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
             final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
-            outputStream.printf("Deployment event was created with id [%s] in mabl.%n", deployment.id);
+            outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
+                    client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
 
             try {
 
@@ -192,13 +193,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     }
 
     private boolean allPlansSuccess(final ExecutionResult result) {
-
-        boolean isSuccess = true;
-
-        for (ExecutionResult.ExecutionSummary summary : result.executions) {
-            isSuccess &= summary.success;
-        }
-        return isSuccess;
+        Boolean success = result.eventStatus.getSucceeded();
+        return success != null && success;
     }
 
     private void printFinalStatuses(final ExecutionResult result) throws MablSystemError {
@@ -284,7 +280,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     }
 
     private long getDuration(ExecutionResult.ExecutionSummary summary) {
-        return TimeUnit.SECONDS.convert( (summary.stopTime - summary.startTime), TimeUnit.MILLISECONDS);
+        return summary.stopTime != null ?
+                TimeUnit.SECONDS.convert( (summary.stopTime - summary.startTime), TimeUnit.MILLISECONDS) : 0;
     }
 
     private void printException(final Exception exception) {

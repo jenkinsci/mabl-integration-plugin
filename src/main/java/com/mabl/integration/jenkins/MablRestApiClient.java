@@ -81,5 +81,12 @@ public interface MablRestApiClient {
             String organizationId
     ) throws IOException, MablSystemError;
 
+    /**
+     * Returns the base URL of the mabl app.
+     *
+     * @return the base URL of the mabl app.
+     */
+    String getAppBaseUrl();
+
     void close();
 }

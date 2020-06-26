@@ -1,7 +1,9 @@
 package com.mabl.integration.jenkins.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import java.util.List;
 
@@ -11,12 +13,15 @@ import java.util.List;
 
 public class ExecutionResult implements ApiResult {
     public List<ExecutionSummary> executions;
+    public EventStatus eventStatus;
 
     @JsonCreator
     public ExecutionResult(
-            @JsonProperty("executions") final List<ExecutionSummary> executions
+            @JsonProperty("executions") final List<ExecutionSummary> executions,
+            @JsonProperty("event_status") final EventStatus eventStatus
     ) {
         this.executions = executions;
+        this.eventStatus = eventStatus;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -132,4 +137,35 @@ public class ExecutionResult implements ApiResult {
             this.id = id;
         }
     }
+
+    @SuppressWarnings("WeakerAccess")
+    public static final class EventStatus {
+        public Boolean succeeded;
+        public Boolean succeededFirstAttempt;
+
+        public EventStatus(
+        ) {
+        }
+
+        @JsonGetter("succeeded")
+        public Boolean getSucceeded() {
+            return succeeded;
+        }
+
+        @JsonGetter("succeeded_first_attempt")
+        public Boolean getSucceededFirstAttempt() {
+            return succeededFirstAttempt;
+        }
+
+        @JsonSetter("succeeded")
+        public void setSucceeded(Boolean succeeded) {
+            this.succeeded = succeeded;
+        }
+
+        @JsonSetter("succeeded_first_attempt")
+        public void setSucceededFirstAttempt(Boolean succeededFirstAttempt) {
+            this.succeededFirstAttempt = succeededFirstAttempt;
+        }
+    }
+
 }
