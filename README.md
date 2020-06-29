@@ -164,7 +164,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.27 (TBD)
+#### v0.0.27 (29 June 2020)
 -   Any plan with the retry option enabled used to fail the build when the first attempt failed even when the
     retry succeeded
 -   Fixed an issue when a stopped plan run caused a null pointer exception
