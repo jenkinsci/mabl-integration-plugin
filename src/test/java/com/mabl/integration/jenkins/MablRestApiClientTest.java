@@ -41,6 +41,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
     private static final String EXPECTED_DEPLOYMENT_EVENT_ID = "d1To4-GYeZ4nl-4Ag1JyQg-v";
     private static final String EXPECTED_ORGANIZATION_ID = "K8NWhtPqOyFnyvJTvCP0uw-w";
+    private static final String MABL_APP_BASE_URL = "https://app.mabl.com";
     private static final String fakeProperties = "{\"deployment_origin\":\""+MablStepConstants.PLUGIN_USER_AGENT+"\"}";
 
     @Test
@@ -130,7 +131,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(restApiKey));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(restApiKey), MABL_APP_BASE_URL);
             CreateDeploymentProperties properties = new CreateDeploymentProperties();
             properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
             CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
@@ -161,7 +162,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             ExecutionResult result = client.getExecutionResults(eventId);
             assertEquals("succeeded", result.executions.get(0).status);
             assertTrue("expected success", result.executions.get(0).success);
@@ -191,7 +192,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             ExecutionResult result = client.getExecutionResults(eventId);
             assertNull(result);
         } finally {
@@ -220,7 +221,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKeyId));
             assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
         } finally {
@@ -249,7 +250,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             GetApplicationsResult result = client.getApplicationsResult(organization_id);
             assertEquals(2, result.applications.size());
         } finally {
@@ -277,7 +278,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
         MablRestApiClient client = null;
         try {
-            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId));
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             GetEnvironmentsResult result = client.getEnvironmentsResult(organization_id);
             assertEquals(1, result.environments.size());
         } finally {

@@ -164,6 +164,12 @@ Note that
 
 ### Change Log
 
+#### v0.0.27 (29 June 2020)
+-   Any plan with the retry option enabled used to fail the build when the first attempt failed even when the
+    retry succeeded
+-   Fixed an issue when a stopped plan run caused a null pointer exception
+-   Updated the test output to include a link to the deployment event in the mabl app
+ 
 #### v0.0.26 (18 June 2020)
 -   Updated Jackson dependencies to 2.11.0
 

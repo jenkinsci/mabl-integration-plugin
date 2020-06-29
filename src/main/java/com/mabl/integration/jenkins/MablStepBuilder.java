@@ -53,6 +53,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.*;
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
+import static com.mabl.integration.jenkins.MablStepConstants.MABL_APP_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FILENAME;
@@ -157,6 +158,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         final MablRestApiClient client = new MablRestApiClientImpl(
                 MABL_REST_API_BASE_URL,
                 getRestApiSecret(getRestApiKeyId()),
+                MABL_APP_BASE_URL,
                 disableSslVerification
         );
 
@@ -336,7 +338,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         private ListBoxModel getApplicationIdItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
+            final MablRestApiClient client = new MablRestApiClientImpl(
+                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
                 if (apiKeyResult == null) {
@@ -370,7 +373,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         private ListBoxModel getEnvironmentIdItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
+            final MablRestApiClient client = new MablRestApiClientImpl(
+                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
                 if (apiKeyResult == null) {
@@ -404,7 +408,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         private ListBoxModel getLabelsItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(MABL_REST_API_BASE_URL, formApiKey, disableSslVerification);
+            final MablRestApiClient client = new MablRestApiClientImpl(
+                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
             try {
                 GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
                 if (apiKeyResult == null) {

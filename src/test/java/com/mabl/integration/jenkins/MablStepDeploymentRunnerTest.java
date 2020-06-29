@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
@@ -71,7 +72,7 @@ public class MablStepDeploymentRunnerTest {
     @Test
     public void runTestsHappyPath() throws IOException, MablSystemError {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
-                .thenReturn(new CreateDeploymentResult(eventId));
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
                 .thenReturn(createExecutionResult("succeeded", true));
@@ -84,7 +85,7 @@ public class MablStepDeploymentRunnerTest {
     @Test
     public void runTestsHappyPathManyPollings() throws IOException, MablSystemError {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
-                .thenReturn(new CreateDeploymentResult(eventId));
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
                 .thenReturn(createExecutionResult("queued", true))
@@ -125,7 +126,7 @@ public class MablStepDeploymentRunnerTest {
     @Test
     public void runTestsPlanFailure() throws IOException, MablSystemError {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
-                .thenReturn(new CreateDeploymentResult(eventId));
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
                 .thenReturn(createExecutionResult("failed", false));
@@ -176,13 +177,67 @@ public class MablStepDeploymentRunnerTest {
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
-                .thenReturn(new CreateDeploymentResult(eventId));
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
                 .thenReturn(createExecutionResult("queued", true))
                 .thenReturn(createExecutionResult("terminated", false));
 
         assertTrue("failure override expected", runner.call());
+
+        verify(client).close();
+    }
+
+    @Test
+    public void planWithRetrySuccess() throws IOException, MablSystemError {
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                labels,
+                false,
+                false,
+                true,
+                buildPath,
+                envVars
+        );
+
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
+
+        when(client.getExecutionResults(eventId))
+                .thenReturn(createExecutionResultWithRetry(true));
+
+        assertTrue("success expected on successful retry", runner.call());
+
+        verify(client).close();
+    }
+
+    @Test
+    public void planWithRetryFailure() throws IOException, MablSystemError {
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                labels,
+                false,
+                false,
+                true,
+                buildPath,
+                envVars
+        );
+
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
+
+        when(client.getExecutionResults(eventId))
+                .thenReturn(createExecutionResultWithRetry(false));
+
+        assertFalse("failure expected", runner.call());
 
         verify(client).close();
     }
@@ -232,7 +287,10 @@ public class MablStepDeploymentRunnerTest {
     private ExecutionResult createExecutionResult(
             final String status,
             final boolean success
-    ) {
+    )
+    {
+        ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
+        eventStatus.setSucceeded(success);
         return new ExecutionResult(
                 singletonList(
                         new ExecutionResult.ExecutionSummary
@@ -240,8 +298,37 @@ public class MablStepDeploymentRunnerTest {
                                         success, 0L, 0L,
                                         null,
                                         null,
-                                        new ArrayList<ExecutionResult.JourneySummary>(),
-                                        new ArrayList<ExecutionResult.JourneyExecutionResult>()
-                                )));
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
+                                )),
+                eventStatus);
+    }
+
+    private ExecutionResult createExecutionResultWithRetry(
+            final boolean success
+    )
+    {
+        ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
+        eventStatus.setSucceeded(success);
+        eventStatus.setSucceededFirstAttempt(false);
+        return new ExecutionResult(
+                Arrays.asList(
+                        new ExecutionResult.ExecutionSummary
+                                ("failed", "first attempt failed",
+                                        success, 0L, 0L,
+                                        null,
+                                        null,
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
+                                ),
+                        new ExecutionResult.ExecutionSummary
+                                ("completed", "retry succeeded",
+                                        success, 0L, 0L,
+                                        null,
+                                        null,
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
+                                )),
+                eventStatus);
     }
 }

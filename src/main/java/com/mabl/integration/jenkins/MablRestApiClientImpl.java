@@ -45,7 +45,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -87,22 +87,26 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private final CloseableHttpClient httpClient;
     private final String restApiBaseUrl;
     private final Secret restApiKey;
+    private final String appBaseUrl;
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
-            final Secret restApiKey
+            final Secret restApiKey,
+            final String appBaseUrl
     ) {
-        this(restApiBaseUrl, restApiKey, false);
+        this(restApiBaseUrl, restApiKey, appBaseUrl,false);
     }
     
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
+            final String appBaseUrl,
             final boolean disableSslVerification
     ) {
 
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
+        this.appBaseUrl = appBaseUrl;
 
         final HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
@@ -155,7 +159,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final Secret restApiKey
     ) {
         final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey.getPlainText())
-                .getBytes(Charset.forName("UTF-8")));
+                .getBytes(StandardCharsets.UTF_8));
         return new BasicHeader("Authorization", "Basic " + encoded);
     }
 
@@ -170,7 +174,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
         final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, labels, properties));
-        final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes("UTF-8"));
+        final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes(StandardCharsets.UTF_8));
 
         final HttpPost request = new HttpPost(url);
 
@@ -209,6 +213,11 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     public GetLabelsResult getLabelsResult(String organizationId) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + String.format(GET_LABELS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetLabelsResult.class);
+    }
+
+    @Override
+    public String getAppBaseUrl() {
+        return appBaseUrl;
     }
 
     private HttpGet buildGetRequest(String url) throws MablSystemError {
