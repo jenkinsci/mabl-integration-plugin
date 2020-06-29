@@ -208,7 +208,7 @@ public class MablStepDeploymentRunnerTest {
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
-                .thenReturn(createExecutionResultWithRetry(true, true));
+                .thenReturn(createExecutionResultWithRetry(true));
 
         assertTrue("success expected on successful retry", runner.call());
 
@@ -235,7 +235,7 @@ public class MablStepDeploymentRunnerTest {
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
-                .thenReturn(createExecutionResultWithRetry(false, false));
+                .thenReturn(createExecutionResultWithRetry(false));
 
         assertFalse("failure expected", runner.call());
 
@@ -298,42 +298,37 @@ public class MablStepDeploymentRunnerTest {
                                         success, 0L, 0L,
                                         null,
                                         null,
-                                        new ArrayList<ExecutionResult.JourneySummary>(),
-                                        new ArrayList<ExecutionResult.JourneyExecutionResult>()
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
                                 )),
                 eventStatus);
     }
 
     private ExecutionResult createExecutionResultWithRetry(
-            final boolean success,
-            final boolean successFirstAttempt
+            final boolean success
     )
     {
-        if (successFirstAttempt) {
-            return createExecutionResult("completed", success);
-        } else {
-            ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
-            eventStatus.setSucceeded(success);
-            eventStatus.setSucceededFirstAttempt(false);
-            return new ExecutionResult(
-                    Arrays.asList(
-                            new ExecutionResult.ExecutionSummary
-                                    ("failed", "first attempt failed",
-                                            success, 0L, 0L,
-                                            null,
-                                            null,
-                                            new ArrayList<ExecutionResult.JourneySummary>(),
-                                            new ArrayList<ExecutionResult.JourneyExecutionResult>()
-                                    ),
-                            new ExecutionResult.ExecutionSummary
-                                    ("completed", "retry succeeded",
-                                            success, 0L, 0L,
-                                            null,
-                                            null,
-                                            new ArrayList<ExecutionResult.JourneySummary>(),
-                                            new ArrayList<ExecutionResult.JourneyExecutionResult>()
-                                    )),
-                    eventStatus);
-        }
+        ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
+        eventStatus.setSucceeded(success);
+        eventStatus.setSucceededFirstAttempt(false);
+        return new ExecutionResult(
+                Arrays.asList(
+                        new ExecutionResult.ExecutionSummary
+                                ("failed", "first attempt failed",
+                                        success, 0L, 0L,
+                                        null,
+                                        null,
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
+                                ),
+                        new ExecutionResult.ExecutionSummary
+                                ("completed", "retry succeeded",
+                                        success, 0L, 0L,
+                                        null,
+                                        null,
+                                        new ArrayList<>(),
+                                        new ArrayList<>()
+                                )),
+                eventStatus);
     }
 }

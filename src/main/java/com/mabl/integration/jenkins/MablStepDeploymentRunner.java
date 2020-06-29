@@ -194,7 +194,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private boolean allPlansSuccess(final ExecutionResult result) {
         Boolean success = result.eventStatus.getSucceeded();
-        return success != null && success;
+        return Boolean.TRUE.equals(success);
     }
 
     private void printFinalStatuses(final ExecutionResult result) throws MablSystemError {
