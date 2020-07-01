@@ -71,7 +71,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     static final String REST_API_USERNAME_PLACEHOLDER = "key";
@@ -168,12 +168,14 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final String environmentId,
             final String applicationId,
             final Set<String> labels,
+            final String mablBranch,
             final CreateDeploymentProperties properties
             ) throws IOException, MablSystemError {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
-        final String jsonPayload = objectMapper.writeValueAsString(new CreateDeploymentPayload(environmentId, applicationId, labels, properties));
+        final String jsonPayload = objectMapper.writeValueAsString(
+                new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties));
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes(StandardCharsets.UTF_8));
 
         final HttpPost request = new HttpPost(url);

@@ -18,6 +18,7 @@ public interface MablRestApiClient {
             String environmentId,
             String applicationId,
             Set<String> labels,
+            String mablBranch,
             CreateDeploymentProperties properties
     ) throws IOException, MablSystemError;
 

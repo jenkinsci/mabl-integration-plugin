@@ -55,6 +55,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final String environmentId;
     private final String applicationId;
     private final Set<String> labels;
+    private final String mablBranch;
     private final boolean continueOnPlanFailure;
     private final boolean continueOnMablError;
     private final boolean collectVars;
@@ -70,6 +71,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final String environmentId,
             final String applicationId,
             final Set<String> labels,
+            final String mablBranch,
             final boolean continueOnPlanFailure,
             final boolean continueOnMablError,
             final boolean collectVars,
@@ -83,6 +85,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.environmentId = environmentId;
         this.applicationId = applicationId;
         this.labels = labels;
+        this.mablBranch = mablBranch;
         this.continueOnPlanFailure = continueOnPlanFailure;
         this.continueOnMablError = continueOnMablError;
         this.collectVars = collectVars;
@@ -118,15 +121,17 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void execute() throws MablSystemError, MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
-        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]%n",
+        outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]  branch: [%s]%n",
                 environmentId == null ? "empty" : environmentId,
                 applicationId == null ? "empty" : applicationId,
-                labels == null ? "empty" : StringUtils.join(labels, ", ")
+                labels == null ? "empty" : StringUtils.join(labels, ", "),
+                mablBranch == null ? "master" : mablBranch
         );
 
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
-            final CreateDeploymentResult deployment = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
+            final CreateDeploymentResult deployment =
+                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
             outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
                     client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
 
@@ -198,7 +203,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     }
 
     private void printFinalStatuses(final ExecutionResult result) throws MablSystemError {
-        ArrayList<TestSuite> suites = new ArrayList<TestSuite>();
+        ArrayList<TestSuite> suites = new ArrayList<>();
 
         outputStream.println("The final plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
