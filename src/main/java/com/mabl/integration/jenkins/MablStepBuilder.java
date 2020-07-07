@@ -74,6 +74,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private final String environmentId;
     private final String applicationId;
     private Set<String> labels = Collections.emptySet();
+    private String mablBranch;
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
@@ -96,6 +97,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         } else {
             this.labels = Collections.emptySet();
         }
+    }
+
+    @DataBoundSetter
+    public void setMablBranch(String mablBranch) {
+        this.mablBranch = mablBranch;
     }
 
     @DataBoundSetter
@@ -129,6 +135,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public Set<String> getLabels() {
         return labels;
     }
+
+    public String getMablBranch() { return mablBranch; }
 
     public boolean isCollectVars() {
         return getDescriptor().isCollectVars();
@@ -169,6 +177,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 environmentId,
                 applicationId,
                 labels,
+                mablBranch,
                 continueOnPlanFailure,
                 continueOnMablError,
                 isCollectVars(),

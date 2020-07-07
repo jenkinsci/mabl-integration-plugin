@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ public class MablStepDeploymentRunnerTest {
 
     private final String environmentId = "foo-env-e";
     private final String applicationId = "foo-app-a";
+    private final String mablBranch = "my-development-branch";
     private final Set<String> labels = Collections.singleton("foo-label");
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
@@ -61,6 +63,7 @@ public class MablStepDeploymentRunnerTest {
                 environmentId,
                 applicationId,
                 labels,
+                null,
                 false,
                 false,
                 true,
@@ -71,7 +74,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsHappyPath() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
@@ -84,7 +87,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsHappyPathManyPollings() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
@@ -103,7 +106,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorOnCreateDeployment() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertFalse("failure outcome expected", runner.call());
@@ -113,7 +116,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsMablErrorDeploymentResultsNotFound() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         when(client.getExecutionResults(eventId)).thenReturn(null);
@@ -125,7 +128,7 @@ public class MablStepDeploymentRunnerTest {
 
     @Test
     public void runTestsPlanFailure() throws IOException, MablSystemError {
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
@@ -145,6 +148,7 @@ public class MablStepDeploymentRunnerTest {
                 environmentId,
                 applicationId,
                 labels,
+                null,
                 false,
                 true,
                 true,
@@ -152,7 +156,7 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemError("mabl error"));
 
         assertTrue("failure override expected", runner.call());
@@ -169,6 +173,7 @@ public class MablStepDeploymentRunnerTest {
                 environmentId,
                 applicationId,
                 labels,
+                null,
                 true,
                 false,
                 true,
@@ -176,7 +181,7 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
@@ -197,6 +202,7 @@ public class MablStepDeploymentRunnerTest {
                 environmentId,
                 applicationId,
                 labels,
+                null,
                 false,
                 false,
                 true,
@@ -204,7 +210,7 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
@@ -224,6 +230,7 @@ public class MablStepDeploymentRunnerTest {
                 environmentId,
                 applicationId,
                 labels,
+                null,
                 false,
                 false,
                 true,
@@ -231,13 +238,44 @@ public class MablStepDeploymentRunnerTest {
                 envVars
         );
 
-        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), any(CreateDeploymentProperties.class)))
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
         when(client.getExecutionResults(eventId))
                 .thenReturn(createExecutionResultWithRetry(false));
 
         assertFalse("failure expected", runner.call());
+
+        verify(client).close();
+    }
+
+    @Test
+    public void planWithMablBranch() throws IOException, MablSystemError {
+        MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                labels,
+                mablBranch,
+                false,
+                false,
+                true,
+                buildPath,
+                envVars
+        );
+
+        final CreateDeploymentResult createDeploymentResult = new CreateDeploymentResult(eventId, "workspace-w");
+        createDeploymentResult.setMablBranch(mablBranch);
+
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), eq(mablBranch), any(CreateDeploymentProperties.class)))
+                .thenReturn(createDeploymentResult);
+
+        when(client.getExecutionResults(eventId))
+                .thenReturn(createExecutionResult("completed", true));
+
+        assertTrue("successful outcome expected", runner.call());
 
         verify(client).close();
     }

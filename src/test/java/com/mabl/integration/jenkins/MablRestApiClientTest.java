@@ -126,7 +126,16 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             final String applicationId,
             final Set<String> labels
     ) throws IOException, MablSystemError {
+        assertSuccessfulCreateDeploymentRequest(restApiKey, environmentId, applicationId, labels, null);
+    }
 
+    private void assertSuccessfulCreateDeploymentRequest(
+            final String restApiKey,
+            final String environmentId,
+            final String applicationId,
+            final Set<String> labels,
+            final String mablBranch
+    ) throws IOException, MablSystemError {
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
@@ -134,7 +143,8 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             client = new MablRestApiClientImpl(baseUrl, mockSecret(restApiKey), MABL_APP_BASE_URL);
             CreateDeploymentProperties properties = new CreateDeploymentProperties();
             properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
-            CreateDeploymentResult result = client.createDeploymentEvent(environmentId, applicationId, labels, properties);
+            CreateDeploymentResult result =
+                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
             assertEquals(EXPECTED_DEPLOYMENT_EVENT_ID, result.id);
         } finally {
             if (client != null) {

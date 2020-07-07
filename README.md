@@ -10,7 +10,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Adding a mabl project step](#adding-a-mabl-project-step)
   * [Adding a mabl pipeline step](#adding-a-mabl-pipeline-step)
   * [Environment variable collection](#environment-variable-collection)
-  * [Upgrading from previous versions](#upgrade)
+  * [Upgrading from previous versions](#upgrading-from-previous-versions)
   * [Change log](#change-log)
   * [Building from source](#building-from-source)
   * [Local development](#local-development)
@@ -68,6 +68,7 @@ The *Advanced...* button opens up additional options:
 
 ![](img/config-label.png)
 
+-   Specify the test branch of your mabl tests
 -   Continue execution if your plan/tests fail
 -   Continue execution if there is an unexpected error in the mabl API
 -   Disable SSL verification
@@ -78,9 +79,8 @@ The *Advanced...* button opens up additional options:
 
 In a pipeline step, select 'Configure'. In the pipeline script, insert a
 pipeline step for mabl. This can be written by hand or created via the
-'Pipeline Syntax' tool. Here is an example output:
+'Pipeline Syntax' tool. The available parameters are:
 
--   mabl: The pipeline function to be called. - Required
 -   applicationId: Selects the application to run deployments
     against (one of environmentId or applicationId is required)
 -   continueOnMablError: Continue if there is an unexpected error in the
@@ -89,7 +89,11 @@ pipeline step for mabl. This can be written by hand or created via the
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
 -   restApiKeyId: The id of the API key secret of the desired deployment workspace -
-    Required  
+    Required
+-   labels: if specified, only plans with (any of the) labels will be triggered
+-   mablBranch: if specified, then tests from the specified branch will be executed.
+    You may also want to use a Jenkins
+    [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
 
 *Note* that if you want to select specific plan labels, then use the 
 `labels: ['label1','label2',...,'labeln'].toSet()` syntax in your pipeline step. The Generate Pipeline
@@ -163,6 +167,10 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.29 (7 July 2020)
+-   Added a configuration option to execute mabl tests in a branch
+-   Updated mockito core dependency and marked it for test scope only
 
 #### v0.0.28 (29 June 2020)
 -   Any plan with the retry option enabled used to fail the build when the first attempt failed even when the
