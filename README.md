@@ -10,7 +10,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Adding a mabl project step](#adding-a-mabl-project-step)
   * [Adding a mabl pipeline step](#adding-a-mabl-pipeline-step)
   * [Environment variable collection](#environment-variable-collection)
-  * [Upgrading from previous versions](#upgrade)
+  * [Upgrading from previous versions](#upgrading-from-previous-versions)
   * [Change log](#change-log)
   * [Building from source](#building-from-source)
   * [Local development](#local-development)
@@ -168,7 +168,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.29 (1 July 2020)
+#### v0.0.29 (7 July 2020)
 -   Added a configuration option to execute mabl tests in a branch
 -   Updated mockito core dependency and marked it for test scope only
 

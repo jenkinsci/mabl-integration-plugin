@@ -29,7 +29,7 @@
         </f:description>
       </j:if>
     </f:entry>
-    <f:entry title="${%Test branch}" field="mablBranch">
+    <f:entry title="${%mabl branch}" field="mablBranch">
       <f:textbox/>
     </f:entry>
     <f:entry title="${%Continue on plan failure(s)}" field="continueOnPlanFailure">
