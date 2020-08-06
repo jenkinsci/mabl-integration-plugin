@@ -90,15 +90,11 @@ pipeline step for mabl. This can be written by hand or created via the
     (one of environmentId or applicationId is required)
 -   restApiKeyId: The id of the API key secret of the desired deployment workspace -
     Required
--   labels: if specified, only plans with (any of the) labels will be triggered
+-   labels: if specified, only plans with (any of the) labels will be triggered.
+    If multiple labels are provided, separate them with commas.
 -   mablBranch: if specified, then tests from the specified branch will be executed.
     You may also want to use a Jenkins
     [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
-
-*Note* that if you want to select specific plan labels, then use the 
-`labels: ['label1','label2',...,'labeln'].toSet()` syntax in your pipeline step. The Generate Pipeline
-Script page in Jenkins does not append `toSet()`. If you do not use labels, then set the value to null,
-for example: `labels: null`
 
 The following sections shows how to use the integration plugin in either a declarative or in a scripted
 pipeline.
@@ -106,7 +102,7 @@ pipeline.
 #### Declarative Pipeline
 
 ``` syntaxhighlighter-pre
-mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyId: 'REST-API-KEY-ID', labels: null
+mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure: true, environmentId: 'ENV-ID-e', restApiKeyId: 'REST-API-KEY-ID'
 ```
 
 #### Scripted Pipeline
@@ -115,7 +111,7 @@ mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure
 node {
    stage('mabl') {
        steps {
-           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a', labels: null])
+           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
        }
    }
 }
@@ -144,7 +140,7 @@ output log of future runs that use a mabl plugin step.
 
 ``` syntaxhighlighter-pre
 Send build environment variables is set. Collecting the following information:
-  'GIT_BRANCH' => 'origin/master'
+  'GIT_BRANCH' => 'origin/main'
   'GIT_COMMIT' => 'a246e0c756791965bdb6fc9caa1a36775422fcec'
   'GIT_URL' => 'git@github.com:example/my_repository.git'
   'GIT_PREVIOUS_COMMIT' => 'a246e0c73a691935bdb6fc9caa1a36775422fce5'
@@ -154,6 +150,11 @@ Send build environment variables is set. Collecting the following information:
 ```
 
 ### Upgrading from previous versions
+
+#### Upgrading from pre-0.0.29 versions
+
+Note that the format of the labels configuration setting has changed. When editing an existing job with labels
+configured, make sure that you update the value to be a comma-separated list of values.
 
 #### Upgrading from pre-0.0.20 versions
 
@@ -167,6 +168,17 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.30 (TBD)
+-   Updated JUnit report to include information about test case IDs in
+    both the properties section of the TestSuite tag as well as in the non-standard
+    properties section of the TestCase tag following the format used by the
+    [XRay application](https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports)
+-   Updated JUnit report to include information about the number of skipped tests. The report
+    file now also includes an empty Skipped element inside the corresponding TestCase-s.
+-   Changed label configuration to use a single text box to avoid a problem related to inadvertently
+    clearing out existing values on save
+-   Updated mockito, wiremock, jackson, maven-hpi-plugin and spotbugs dependencies
 
 #### v0.0.29 (7 July 2020)
 -   Added a configuration option to execute mabl tests in a branch
@@ -280,17 +292,17 @@ for any specific image version before pulling Jenkins image.
 
 ```bash
 # Launch Jenkins container and automatically pull the image if not present
-docker run -d -p 9090:8080 --name=jenkins-master jenkins/jenkins
+docker run -d -p 9090:8080 --name=jenkins-host jenkins/jenkins
 
 # Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
-docker exec -it jenkins-master bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
+docker exec -it jenkins-host bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
 
 # Setup your Jenkins instance
 
 # Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
 mvn clean package \
-  && docker cp target/mabl-integration.hpi jenkins-master:/var/jenkins_home/plugins/ \
-  && docker restart jenkins-master
+  && docker cp target/mabl-integration.hpi jenkins-host:/var/jenkins_home/plugins/ \
+  && docker restart jenkins-host
 ```
 
 ### Local Machine
@@ -318,7 +330,7 @@ Before making a new plugin release, ensure code is in high quality, fully tested
 
 1. Update your `~/.m2/settings.xml` according to the [Jenkins docs](https://wiki.jenkins.io/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkins-ci.org).
 2. Setup and run a GitHub [ssh agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent).
-3. Run `mvn release:prepare release:perform -B` from the HEAD of master
+3. Run `mvn release:prepare release:perform -B` from the HEAD of main
 4. Run `mvn deploy` on success of above step.
 
 Wait ~8 hours for plugin to become GA across all Jenkins instances under the "Available Plugins" listing.

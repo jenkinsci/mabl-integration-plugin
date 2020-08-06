@@ -6,7 +6,6 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
-import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import com.mabl.integration.jenkins.validation.MablStepBuilderValidator;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -37,11 +36,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,7 +69,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private final String restApiKeyId;
     private final String environmentId;
     private final String applicationId;
-    private Set<String> labels = Collections.emptySet();
+    private String labels;
     private String mablBranch;
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
@@ -91,12 +87,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setLabels(Collection<String> labels) {
-        if (labels != null && !labels.isEmpty()) {
-            this.labels = new HashSet<>(labels);
-        } else {
-            this.labels = Collections.emptySet();
-        }
+    public void setLabels(String labels) {
+        this.labels = labels;
     }
 
     @DataBoundSetter
@@ -132,7 +124,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return applicationId;
     }
 
-    public Set<String> getLabels() {
+    public String getLabels() {
         return labels;
     }
 
@@ -365,7 +357,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 return items;
-            } catch (IOException | MablSystemError e)  {
+            } catch (IOException | MablSystemException e)  {
                 LOGGER.warning("Failed to retrieve application IDs: " + e.getLocalizedMessage());
             }
 
@@ -400,42 +392,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 return items;
-            } catch (IOException | MablSystemError e) {
+            } catch (IOException | MablSystemException e) {
                 LOGGER.warning("Failed to retrieve environment IDs: " + e.getLocalizedMessage());
-            }
-
-            return getSelectValidApiKeyListBoxModel();
-        }
-
-        public ListBoxModel doFillLabelsItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
-            if (StringUtils.isBlank(restApiKeyId)) {
-                return getSelectValidApiKeyListBoxModel();
-            }
-
-            Secret secretKey = getRestApiSecret(restApiKeyId);
-            return secretKey != null ? getLabelsItems(secretKey, disableSslVerification) : new ListBoxModel();
-        }
-
-        private ListBoxModel getLabelsItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(
-                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
-            try {
-                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
-                if (apiKeyResult == null) {
-                   return getSelectValidApiKeyListBoxModel();
-                }
-
-                ListBoxModel items = new ListBoxModel();
-                String organizationId = apiKeyResult.organization_id;
-                GetLabelsResult labelsResult = client.getLabelsResult(organizationId);
-
-                for (GetLabelsResult.Label label : labelsResult.labels) {
-                    items.add(label.name, label.name);
-                }
-
-                return items;
-            } catch (IOException | MablSystemError e) {
-                LOGGER.warning("Failed to retrieve plan labels: " + e.getLocalizedMessage());
             }
 
             return getSelectValidApiKeyListBoxModel();

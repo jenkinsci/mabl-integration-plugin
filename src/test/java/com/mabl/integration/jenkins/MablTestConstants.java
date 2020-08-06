@@ -161,10 +161,10 @@ class MablTestConstants {
     static final String TEST_SUITES_XML = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
             "<testsuites xmlns:xlink=\"http://www.w3.org/1999/xlink\">" +
-                "<testsuite name=\"Empty Test Suite\" tests=\"0\" errors=\"0\" failures=\"0\" time=\"0\" timestamp=\"2013-05-24T10:23:58\">" +
+                "<testsuite name=\"Empty Test Suite\" tests=\"0\" errors=\"0\" failures=\"0\" skipped=\"0\" time=\"0\" timestamp=\"2013-05-24T10:23:58\">" +
                     "<properties/>" +
                 "</testsuite>" +
-                "<testsuite name=\"Full Test Suite\" tests=\"2\" errors=\"0\" failures=\"1\" time=\"33\" timestamp=\"2013-05-24T10:23:58\">" +
+                "<testsuite name=\"Full Test Suite\" tests=\"2\" errors=\"0\" failures=\"1\" skipped=\"0\" time=\"33\" timestamp=\"2013-05-24T10:23:58\">" +
                     "<properties>" +
                         "<property name=\"environment\" value=\"my env-e\"/>" +
                         "<property name=\"application\" value=\"my app-a\"/>" +
@@ -186,7 +186,7 @@ class MablTestConstants {
 
     static final Map<String, String> GIT_VARS = new HashMap<String, String>() {
         {
-            put("GIT_BRANCH", "master");
+            put("GIT_BRANCH", "main");
             put("GIT_COMMIT", "1234");
             put("GIT_URL", "git@github.com:fakeOrg/mabl-integration-plugin.git");
             put("GIT_PREVIOUS_COMMIT", "1233");
@@ -219,7 +219,7 @@ class MablTestConstants {
             setBuildPlanNumber("6");
             setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
             setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
-            setRepositoryBranchName("master");
+            setRepositoryBranchName("main");
             setRepositoryName("mabl-integration-plugin");
             setRepositoryRevisionNumber("1234");
             setRepositoryPreviousRevisionNumber("1233");
@@ -234,7 +234,7 @@ class MablTestConstants {
             setBuildPlanNumber("6");
             setBuildPlanResultUrl("http://server/job/FakeJobName/6/display/redirect");
             setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
-            setRepositoryBranchName("master");
+            setRepositoryBranchName("main");
             setRepositoryName("mabl-integration-plugin");
             setRepositoryRevisionNumber("1234");
             setRepositoryPreviousRevisionNumber("1233");
