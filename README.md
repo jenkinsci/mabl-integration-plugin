@@ -177,6 +177,7 @@ Note that
 -   Updated JUnit report to include information about the number of skipped tests. The report
     file now also includes an empty Skipped element inside the corresponding TestCase-s.
 -   Fixed code to properly populate the execution time for tests
+-   Updated code to use main instead of master
 -   Changed label configuration to use a single text box to avoid a problem related to inadvertently
     clearing out existing values on save
 -   Updated mockito, wiremock, jackson, maven-hpi-plugin and spotbugs dependencies
