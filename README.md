@@ -65,9 +65,6 @@ The *Advanced...* button opens up additional options:
 
 -   Filter by plan labels to run only plans tagged with the selected
     labels. (You can select multiple labels using shift/ctrl click.)
-
-![](img/config-label.png)
-
 -   Specify the test branch of your mabl tests
 -   Continue execution if your plan/tests fail
 -   Continue execution if there is an unexpected error in the mabl API
