@@ -35,15 +35,13 @@ public interface MablRestApiClient {
     ) throws IOException, MablSystemException;
 
     /**
-     * Attempt to fetch full ApiKey Obj from ApiKey String
+     * Attempt to fetch full ApiKey Obj
      *
-     * @param restApiKey restApiKey
      * @return parsed ApiKey, or null on 404
      * @throws IOException on parsing error
      * @throws MablSystemException on non 200 or 404 response
      */
     GetApiKeyResult getApiKeyResult(
-            Secret restApiKey
     ) throws IOException, MablSystemException;
 
     /**

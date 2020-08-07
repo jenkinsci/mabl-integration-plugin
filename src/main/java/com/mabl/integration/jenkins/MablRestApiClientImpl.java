@@ -195,8 +195,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     }
 
     @Override
-    public GetApiKeyResult getApiKeyResult(Secret formApiKey) throws IOException, MablSystemException {
-        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, formApiKey.getPlainText());
+    public GetApiKeyResult getApiKeyResult() throws IOException, MablSystemException {
+        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, restApiKey.getPlainText());
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 

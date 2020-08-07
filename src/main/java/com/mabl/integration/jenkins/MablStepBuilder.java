@@ -49,8 +49,8 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.*;
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
-import static com.mabl.integration.jenkins.MablStepConstants.MABL_APP_BASE_URL;
-import static com.mabl.integration.jenkins.MablStepConstants.MABL_REST_API_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_APP_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FILENAME;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -74,6 +74,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
+    private String apiBaseUrl = DEFAULT_MABL_API_BASE_URL;
+    private String appBaseUrl = DEFAULT_MABL_APP_BASE_URL;
 
     @DataBoundConstructor
     public MablStepBuilder(
@@ -111,6 +113,16 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         this.disableSslVerification = disableSslVerification;
     }
 
+    @DataBoundSetter
+    public void setApiBaseUrl(String apiBaseUrl) {
+        this.apiBaseUrl = apiBaseUrl;
+    }
+
+    @DataBoundSetter
+    public void setAppBaseUrl(String appBaseUrl) {
+        this.appBaseUrl = appBaseUrl;
+    }
+
     // Accessors to be used by Jelly UI templates
     public String getRestApiKeyId() {
         return restApiKeyId;
@@ -146,6 +158,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return this.disableSslVerification;
     }
 
+    public String getApiBaseUrl() { return this.apiBaseUrl; }
+
+    public String getAppBaseUrl() { return this.appBaseUrl; }
+
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
@@ -156,9 +172,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
         final PrintStream outputStream = listener.getLogger();
         final MablRestApiClient client = new MablRestApiClientImpl(
-                MABL_REST_API_BASE_URL,
+                apiBaseUrl,
                 getRestApiSecret(getRestApiKeyId()),
-                MABL_APP_BASE_URL,
+                appBaseUrl,
                 disableSslVerification
         );
 
@@ -330,19 +346,27 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        public ListBoxModel doFillApplicationIdItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
+        public ListBoxModel doFillApplicationIdItems(
+                @QueryParameter String restApiKeyId,
+                @QueryParameter boolean disableSslVerification,
+                @QueryParameter String apiBaseUrl,
+                @QueryParameter String appBaseUrl) {
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
             Secret secretKey = getRestApiSecret(restApiKeyId);
-            return secretKey != null ? getApplicationIdItems(secretKey, disableSslVerification) : new ListBoxModel();
+            if (secretKey != null) {
+                final MablRestApiClient client =
+                        createMablRestApiClient(secretKey, disableSslVerification, apiBaseUrl, appBaseUrl);
+                return getApplicationIdItems(client);
+            }
+            return new ListBoxModel();
         }
 
-        private ListBoxModel getApplicationIdItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(
-                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
+        private ListBoxModel getApplicationIdItems(
+                final MablRestApiClient client) {
             try {
-                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                GetApiKeyResult apiKeyResult = client.getApiKeyResult();
                 if (apiKeyResult == null) {
                     return getSelectValidApiKeyListBoxModel();
                 }
@@ -364,20 +388,27 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return getSelectValidApiKeyListBoxModel();
         }
 
-        public ListBoxModel doFillEnvironmentIdItems(@QueryParameter String restApiKeyId, @QueryParameter boolean disableSslVerification) {
+        public ListBoxModel doFillEnvironmentIdItems(
+                @QueryParameter String restApiKeyId,
+                @QueryParameter boolean disableSslVerification,
+                @QueryParameter String apiBaseUrl,
+                @QueryParameter String appBaseUrl) {
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
 
-            Secret secretKey = getRestApiSecret(restApiKeyId);
-            return secretKey != null ? getEnvironmentIdItems(secretKey, disableSslVerification) : new ListBoxModel();
+            final Secret secretKey = getRestApiSecret(restApiKeyId);
+            if (secretKey != null) {
+                final MablRestApiClient client =
+                        createMablRestApiClient(secretKey, disableSslVerification, apiBaseUrl, appBaseUrl);
+                return getEnvironmentIdItems(client);
+            }
+            return new ListBoxModel();
         }
 
-        private ListBoxModel getEnvironmentIdItems(Secret formApiKey, boolean disableSslVerification) {
-            final MablRestApiClient client = new MablRestApiClientImpl(
-                    MABL_REST_API_BASE_URL, formApiKey, MABL_APP_BASE_URL, disableSslVerification);
+        private ListBoxModel getEnvironmentIdItems(final MablRestApiClient client) {
             try {
-                GetApiKeyResult apiKeyResult = client.getApiKeyResult(formApiKey);
+                GetApiKeyResult apiKeyResult = client.getApiKeyResult();
                 if (apiKeyResult == null) {
                     return getSelectValidApiKeyListBoxModel();
                 }
@@ -403,6 +434,18 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             final ListBoxModel listBoxModel = new ListBoxModel();
             listBoxModel.add("Select a valid API key");
             return listBoxModel;
+        }
+
+        private static MablRestApiClient createMablRestApiClient(
+                final Secret key,
+                final boolean disableSslVerification,
+                final String apiBaseUrl,
+                final String appBaseUrl) {
+            return new MablRestApiClientImpl(
+                    StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
+                    key,
+                    StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
+                    disableSslVerification);
         }
     }
 

@@ -230,7 +230,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         MablRestApiClient client = null;
         try {
             client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
-            GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKeyId));
+            GetApiKeyResult result = client.getApiKeyResult();
             assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
         } finally {
             if (client != null) {

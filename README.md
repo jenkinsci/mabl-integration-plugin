@@ -178,6 +178,7 @@ Note that
 -   Changed label configuration to use a single text box to avoid a problem related to inadvertently
     clearing out existing values on save
 -   Updated mockito, wiremock, jackson, maven-hpi-plugin and spotbugs dependencies
+-   Enabled using alternate mabl endpoints for internal testing purpose
 
 #### v0.0.29 (7 July 2020)
 -   Added a configuration option to execute mabl tests in a branch

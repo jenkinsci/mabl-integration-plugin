@@ -34,4 +34,10 @@
       <f:checkbox default="false" />
     </f:entry>
   </f:advanced>
+  <f:invisibleEntry>
+    <f:textbox field="apiBaseUrl"/>
+  </f:invisibleEntry>
+  <f:invisibleEntry>
+    <f:textbox field="appBaseUrl"/>
+  </f:invisibleEntry>
 </j:jelly>
