@@ -1,9 +1,10 @@
 package com.mabl.integration.jenkins.domain;
 
-import org.springframework.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 public class CreateDeploymentPayload {
     final String environmentId;
@@ -15,9 +16,9 @@ public class CreateDeploymentPayload {
     public CreateDeploymentPayload(String environmentId, String applicationId, String planLabels, String mablBranch, CreateDeploymentProperties properties) {
         this.environmentId = environmentId;
         this.applicationId = applicationId;
-        this.planLabels = planLabels == null || planLabels.length() == 0 ? null :
-                Arrays.asList(StringUtils.commaDelimitedListToStringArray(planLabels));
-        this.sourceControlTag = mablBranch == null || mablBranch.length() == 0 ? null : mablBranch;
+        this.planLabels = isBlank(planLabels) ? null :
+                Arrays.asList(commaDelimitedListToStringArray(planLabels));
+        this.sourceControlTag = isBlank(mablBranch) ? null : mablBranch;
         this.properties = properties;
     }
 }

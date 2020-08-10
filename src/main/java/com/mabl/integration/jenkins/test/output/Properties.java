@@ -7,15 +7,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @XmlRootElement(name = "properties")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Properties {
 
     @XmlElement(name = "property")
-    private Collection<Property> properties;
+    private List<Property> properties;
 
-    public Properties(Collection<Property> properties) {
+    public Properties(List<Property> properties) {
         this.properties = properties;
     }
 
