@@ -149,12 +149,15 @@ public class ExecutionResult implements ApiResult {
     @SuppressWarnings("WeakerAccess")
     public static class PlanExecutionResult {
         public final String id;
+        public final boolean isRetry;
 
         @JsonCreator
         public PlanExecutionResult(
-                @JsonProperty("id") final String id
+                @JsonProperty("id") final String id,
+                @JsonProperty("is_retry") final boolean isRetry
         ) {
             this.id = id;
+            this.isRetry = isRetry;
         }
     }
 

@@ -1,14 +1,12 @@
 package com.mabl.integration.jenkins.test.output;
 
-import org.jaxen.pantry.Test;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @XmlRootElement(name="testsuite")
@@ -40,7 +38,7 @@ public class TestSuite {
     private Properties properties;
 
     @XmlElement(name = "testcase")
-    private Collection<TestCase> testCases;
+    private List<TestCase> testCases;
 
     public TestSuite(String name, long time, String timestamp, Properties properties) {
         this.name = name;
@@ -115,7 +113,7 @@ public class TestSuite {
         return this.timestamp;
     }
 
-    public List<TestCase> getTestCases() { return new ArrayList<>(testCases); }
+    public List<TestCase> getTestCases() { return Collections.unmodifiableList(testCases); }
 
     public Properties getProperties() {
         return this.properties;

@@ -80,7 +80,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void runTestsHappyPath() throws IOException, MablSystemException {
+    public void runTestsHappyPath() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
@@ -93,7 +93,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void runTestsHappyPathManyPollings() throws IOException, MablSystemException {
+    public void runTestsHappyPathManyPollings() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
@@ -112,7 +112,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void runTestsMablErrorOnCreateDeployment() throws IOException, MablSystemException {
+    public void runTestsMablErrorOnCreateDeployment() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemException("mabl error"));
 
@@ -122,7 +122,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void runTestsMablErrorDeploymentResultsNotFound() throws IOException, MablSystemException {
+    public void runTestsMablErrorDeploymentResultsNotFound() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenThrow(new MablSystemException("mabl error"));
 
@@ -134,7 +134,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void runTestsPlanFailure() throws IOException, MablSystemException {
+    public void runTestsPlanFailure() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
 
@@ -147,7 +147,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void continueOnMablError() throws IOException, MablSystemException {
+    public void continueOnMablError() throws IOException {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
@@ -172,7 +172,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void continueOnPlanFailure() throws IOException, MablSystemException {
+    public void continueOnPlanFailure() throws IOException {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
@@ -201,7 +201,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void planWithRetrySuccess() throws IOException, MablSystemException {
+    public void planWithRetrySuccess() throws IOException {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
@@ -229,7 +229,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void planWithRetryFailure() throws IOException, MablSystemException {
+    public void planWithRetryFailure() throws IOException {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
@@ -257,7 +257,7 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
-    public void planWithMablBranch() throws IOException, MablSystemException {
+    public void planWithMablBranch() throws IOException {
         MablStepDeploymentRunner runner = new MablStepDeploymentRunner(
                 client,
                 outputStream,
@@ -529,8 +529,8 @@ public class MablStepDeploymentRunnerTest {
                         new ExecutionResult.ExecutionSummary
                                 (status, "all is well",
                                         success, 0L, 0L,
-                                        null,
-                                        null,
+                                        new ExecutionResult.PlanSummary("plan-id", "Plan name"),
+                                        new ExecutionResult.PlanExecutionResult("plan-id", true),
                                         new ArrayList<>(),
                                         new ArrayList<>()
                                 )),
@@ -549,7 +549,7 @@ public class MablStepDeploymentRunnerTest {
                         new ExecutionResult.ExecutionSummary
                                 ("failed", "first attempt failed",
                                         success, 0L, 0L,
-                                        null,
+                                        new ExecutionResult.PlanSummary("plan-id", "Plan name"),
                                         null,
                                         new ArrayList<>(),
                                         new ArrayList<>()
@@ -557,7 +557,7 @@ public class MablStepDeploymentRunnerTest {
                         new ExecutionResult.ExecutionSummary
                                 ("completed", "retry succeeded",
                                         success, 0L, 0L,
-                                        null,
+                                        new ExecutionResult.PlanSummary("plan-id", "Plan name"),
                                         null,
                                         new ArrayList<>(),
                                         new ArrayList<>()

@@ -20,7 +20,7 @@ public interface MablRestApiClient {
             String labels,
             String mablBranch,
             CreateDeploymentProperties properties
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Attempt to fetch results for given deployment event
@@ -28,21 +28,19 @@ public interface MablRestApiClient {
      * @param eventId deployment event identifier
      * @return partially parsed download, or null on 404
      * @throws IOException on parsing error
-     * @throws MablSystemException on non 200 or 404 response
      */
     ExecutionResult getExecutionResults(
             String eventId
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Attempt to fetch full ApiKey Obj
      *
      * @return parsed ApiKey, or null on 404
      * @throws IOException on parsing error
-     * @throws MablSystemException on non 200 or 404 response
      */
     GetApiKeyResult getApiKeyResult(
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Attempt to fetch List of Applications for the given organization
@@ -50,11 +48,10 @@ public interface MablRestApiClient {
      * @param organizationId The organizationId for the given ApiKey
      * @return parsed List<Application>, or null on 404
      * @throws IOException on parsing error
-     * @throws MablSystemException on non 200 or 404 response
      */
     GetApplicationsResult getApplicationsResult(
             String organizationId
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Attempt to fetch List of Environments for the given organization
@@ -62,11 +59,10 @@ public interface MablRestApiClient {
      * @param organizationId The organizationId for the given ApiKey
      * @return parsed List<Environment>, or null on 404
      * @throws IOException on parsing error
-     * @throws MablSystemException on non 200 or 404 response
      */
     GetEnvironmentsResult getEnvironmentsResult(
             String organizationId
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Attempt to fetch List of Labels for the given organization
@@ -74,11 +70,10 @@ public interface MablRestApiClient {
      * @param organizationId The organizationId for the given ApiKey
      * @return parsed List<String>, or null on 404
      * @throws IOException on parsing error
-     * @throws MablSystemException on non 200 or 404 response
      */
     GetLabelsResult getLabelsResult(
             String organizationId
-    ) throws IOException, MablSystemException;
+    ) throws IOException;
 
     /**
      * Returns the base URL of the mabl app.

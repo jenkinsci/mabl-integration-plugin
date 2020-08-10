@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -114,7 +115,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
         } catch (Exception e) {
             outputStream.printf("Unexpected %s exception%n", PLUGIN_NAME);
-            e.printStackTrace(outputStream);
+            e.printStackTrace();
             return continueOnMablError;
         }
         finally {
@@ -122,14 +123,14 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
     }
 
-    private void execute() throws MablSystemException, MablPlanExecutionFailure {
+    private void execute() throws MablPlanExecutionFailure {
         // TODO descriptive error messages on 401/403
         // TODO retry on 50x errors (proxy, redeploy)
         outputStream.printf("mabl is creating a deployment event:%n  environment_id: [%s]%n  application_id: [%s]%n  labels: [%s]  branch: [%s]%n",
                 environmentId == null ? "empty" : environmentId,
                 applicationId == null ? "empty" : applicationId,
                 labels == null ? "empty" : labels,
-                mablBranch == null ? "main" : mablBranch
+                mablBranch == null ? "master" : mablBranch
         );
 
         try {
@@ -206,13 +207,15 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         return Boolean.TRUE.equals(success);
     }
 
-    private void printFinalStatuses(final ExecutionResult result) throws MablSystemException {
+    private void printFinalStatuses(final ExecutionResult result) {
         final List<TestSuite> suites = new ArrayList<>();
 
         outputStream.println("The final plan states in mabl:");
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
             final String successState = summary.success ? "SUCCESSFUL" : "FAILED";
-            outputStream.printf("  Plan [%s] is %s in state [%s]%n", safePlanName(summary), successState, summary.status);
+            outputStream.printf("  %sPlan [%s] is %s in state [%s]%n",
+                    (summary.planExecution != null && summary.planExecution.isRetry) ? "RETRY: " : "",
+                    safePlanName(summary), successState, summary.status);
             suites.add(createTestSuite(summary));
         }
 
@@ -222,8 +225,20 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private void printAllJourneyExecutionStatuses(final ExecutionResult result) {
 
         outputStream.println("Running mabl test(s) status update:");
+        Map<String, ExecutionResult.ExecutionSummary> summariesToPrint = new TreeMap<>();
+
+        // Filter out out statuses for plans that already failed and will be retried
         for (ExecutionResult.ExecutionSummary summary : result.executions) {
-            outputStream.printf("  Plan [%s] is [%s]%n", safePlanName(summary), summary.status);
+            ExecutionResult.ExecutionSummary existing = summariesToPrint.get(summary.plan.id);
+            if (existing == null || existing.planExecution == null || !existing.planExecution.isRetry) {
+                summariesToPrint.put(summary.plan.id, summary);
+            }
+        }
+
+        for (ExecutionResult.ExecutionSummary summary : summariesToPrint.values()) {
+            outputStream.printf("  %sPlan [%s] is [%s]%n",
+                    (summary.planExecution != null && summary.planExecution.isRetry) ? "RETRY: " : "",
+                    safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
                 outputStream.printf("    Test [%s] is %s%n",
                     safeJourneyName(summary, journeyResult.id),
@@ -242,7 +257,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
     }
 
-    private void outputTestSuiteXml(TestSuites testSuites) throws MablSystemException {
+    private void outputTestSuiteXml(TestSuites testSuites) {
         try {
             JAXBContext context = JAXBContext.newInstance(TestSuites.class);
             Marshaller marshaller = context.createMarshaller();

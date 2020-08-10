@@ -171,7 +171,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final String labels,
             final String mablBranch,
             final CreateDeploymentProperties properties
-            ) throws IOException, MablSystemException {
+            ) throws IOException {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
@@ -189,31 +189,31 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     }
 
     @Override
-    public ExecutionResult getExecutionResults(String eventId) throws IOException, MablSystemException {
+    public ExecutionResult getExecutionResults(String eventId) throws IOException {
         final String url = restApiBaseUrl + String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), ExecutionResult.class);
     }
 
     @Override
-    public GetApiKeyResult getApiKeyResult() throws IOException, MablSystemException {
+    public GetApiKeyResult getApiKeyResult() throws IOException {
         final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, restApiKey.getPlainText());
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
     @Override
-    public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException, MablSystemException {
+    public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException {
         final String url = restApiBaseUrl + String.format(GET_APPLICATIONS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApplicationsResult.class);
     }
 
     @Override
-    public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException, MablSystemException {
+    public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException {
         final String url = restApiBaseUrl + String.format(GET_ENVIRONMENTS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetEnvironmentsResult.class);
     }
 
     @Override
-    public GetLabelsResult getLabelsResult(String organizationId) throws IOException, MablSystemException {
+    public GetLabelsResult getLabelsResult(String organizationId) throws IOException {
         final String url = restApiBaseUrl + String.format(GET_LABELS_ENDPOINT_TEMPLATE, organizationId);
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetLabelsResult.class);
     }
@@ -223,7 +223,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         return appBaseUrl;
     }
 
-    private HttpGet buildGetRequest(String url) throws MablSystemException {
+    private HttpGet buildGetRequest(String url) {
         try {
             final HttpGet request = new HttpGet(url);
             request.addHeader(getBasicAuthHeader(restApiKey));
@@ -236,7 +236,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private <ApiResult> ApiResult parseApiResult(
             final HttpResponse response,
             Class<ApiResult> resultClass
-    ) throws IOException, MablSystemException {
+    ) throws IOException {
 
         final int statusCode = response.getStatusLine().getStatusCode();
 

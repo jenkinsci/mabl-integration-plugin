@@ -179,6 +179,7 @@ Note that
     clearing out existing values on save
 -   Updated mockito, wiremock, jackson, maven-hpi-plugin and spotbugs dependencies
 -   Enabled using alternate mabl endpoints for internal testing purpose
+-   Updated test output to indicate when a plan is retried
 
 #### v0.0.29 (7 July 2020)
 -   Added a configuration option to execute mabl tests in a branch
@@ -292,17 +293,17 @@ for any specific image version before pulling Jenkins image.
 
 ```bash
 # Launch Jenkins container and automatically pull the image if not present
-docker run -d -p 9090:8080 --name=jenkins-host jenkins/jenkins
+docker run -d -p 9090:8080 --name=jenkins jenkins/jenkins
 
 # Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
-docker exec -it jenkins-host bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
+docker exec -it jenkins bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
 
 # Setup your Jenkins instance
 
 # Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
 mvn clean package \
-  && docker cp target/mabl-integration.hpi jenkins-host:/var/jenkins_home/plugins/ \
-  && docker restart jenkins-host
+  && docker cp target/mabl-integration.hpi jenkins:/var/jenkins_home/plugins/ \
+  && docker restart jenkins
 ```
 
 ### Local Machine

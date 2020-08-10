@@ -4,7 +4,7 @@ package com.mabl.integration.jenkins;
  * Non test related failure
  *
  */
-class MablSystemException extends Exception {
+class MablSystemException extends RuntimeException {
 
     public MablSystemException(String message) {
         super(message);
