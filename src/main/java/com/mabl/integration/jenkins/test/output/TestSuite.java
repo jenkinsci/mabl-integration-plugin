@@ -6,7 +6,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @XmlRootElement(name="testsuite")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -24,6 +25,9 @@ public class TestSuite {
     @XmlAttribute(name = "failures")
     private int failures;
 
+    @XmlAttribute(name = "skipped")
+    private int skipped;
+
     @XmlAttribute(name = "time")
     private long time;
 
@@ -34,21 +38,21 @@ public class TestSuite {
     private Properties properties;
 
     @XmlElement(name = "testcase")
-    private Collection<TestCase> testCases;
+    private List<TestCase> testCases;
 
     public TestSuite(String name, long time, String timestamp, Properties properties) {
         this.name = name;
         this.time = time;
         this.timestamp = timestamp;
         this.properties = properties;
-        this.testCases = new ArrayList<TestCase>();
+        this.testCases = new ArrayList<>();
     }
 
     public TestSuite(String name, long time, String timestamp) {
         this.name = name;
         this.time = time;
         this.timestamp = timestamp;
-        this.testCases = new ArrayList<TestCase>();
+        this.testCases = new ArrayList<>();
     }
 
     public TestSuite() {
@@ -60,19 +64,27 @@ public class TestSuite {
         return this;
     }
 
-    public TestSuite incrementTests() {
+    public void incrementTests() {
         this.tests++;
-        return this;
     }
 
-    public TestSuite incrementErrors() {
+    public void incrementErrors() {
         this.errors++;
-        return this;
     }
 
-    public TestSuite incrementFailures() {
+    public void incrementFailures() {
         this.failures++;
-        return this;
+    }
+
+    public void incrementSkipped() {
+        this.skipped++;
+    }
+
+    public void addProperty(final String name, final String value) {
+        if (properties == null) {
+            properties = new Properties();
+        }
+        properties.addProperty(name, value);
     }
 
     public String getName() {
@@ -91,6 +103,8 @@ public class TestSuite {
         return this.failures;
     }
 
+    public int getSkipped() { return this.skipped; }
+
     public long getTime() {
         return this.time;
     }
@@ -98,6 +112,8 @@ public class TestSuite {
     public String getTimestamp() {
         return this.timestamp;
     }
+
+    public List<TestCase> getTestCases() { return Collections.unmodifiableList(testCases); }
 
     public Properties getProperties() {
         return this.properties;

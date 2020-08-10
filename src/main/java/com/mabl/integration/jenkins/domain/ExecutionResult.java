@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.common.collect.ImmutableCollection;
 
 import java.util.List;
 
@@ -96,6 +97,16 @@ public class ExecutionResult implements ApiResult {
         }
     }
 
+    public static class TestCaseID {
+        public final String caseID;
+
+        @JsonCreator
+        public TestCaseID(@JsonProperty("id") final String caseID) {
+            this.caseID = caseID;
+        }
+
+    }
+
     @SuppressWarnings("WeakerAccess")
     public static class JourneyExecutionResult {
         public final String id;
@@ -105,6 +116,9 @@ public class ExecutionResult implements ApiResult {
         public final String status;
         public final String statusCause;
         public final boolean success;
+        public final Long startTime;
+        public final Long stopTime;
+        public final List<TestCaseID> testCases;
 
         @JsonCreator
         public JourneyExecutionResult(
@@ -114,8 +128,11 @@ public class ExecutionResult implements ApiResult {
                 @JsonProperty("app_href") final String appHref,
                 @JsonProperty("status") final String status,
                 @JsonProperty("statusCause") final String statusCause,
-                @JsonProperty("success") final boolean success
-        ) {
+                @JsonProperty("success") final boolean success,
+                @JsonProperty("start_time") final Long startTime,
+                @JsonProperty("stop_time") final Long stopTime,
+                @JsonProperty("test_cases") final List<TestCaseID> testCases
+                ) {
             this.id = id;
             this.executionId = executionId;
             this.href = href;
@@ -123,18 +140,24 @@ public class ExecutionResult implements ApiResult {
             this.status = status;
             this.statusCause = statusCause;
             this.success = success;
+            this.startTime = startTime;
+            this.stopTime = stopTime;
+            this.testCases = testCases;
         }
     }
 
     @SuppressWarnings("WeakerAccess")
     public static class PlanExecutionResult {
         public final String id;
+        public final boolean isRetry;
 
         @JsonCreator
         public PlanExecutionResult(
-                @JsonProperty("id") final String id
+                @JsonProperty("id") final String id,
+                @JsonProperty("is_retry") final boolean isRetry
         ) {
             this.id = id;
+            this.isRetry = isRetry;
         }
     }
 

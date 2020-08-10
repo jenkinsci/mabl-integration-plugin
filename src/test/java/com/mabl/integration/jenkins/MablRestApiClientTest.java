@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
-import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -45,12 +43,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     private static final String fakeProperties = "{\"deployment_origin\":\""+MablStepConstants.PLUGIN_USER_AGENT+"\"}";
 
     @Test
-    public void createDeploymentAllParametersHappyPathTest() throws IOException, MablSystemError {
+    public void createDeploymentAllParametersHappyPathTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = "foo-env-e";
         final String applicationId = "foo-app-a";
-        final Set<String> labels = Collections.singleton("foo-label");
+        final String labels = "foo-label";
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -64,12 +62,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void createDeploymentOnlyEnvironmentHappyPathTest() throws IOException, MablSystemError {
+    public void createDeploymentOnlyEnvironmentHappyPathTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = "foo-env-e";
         final String applicationId = null;
-        final Set<String> labels = null;
+        final String labels = null;
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -83,12 +81,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void createDeploymentOnlyApplicationHappyPathTest() throws IOException, MablSystemError {
+    public void createDeploymentOnlyApplicationHappyPathTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = null;
         final String applicationId = "foo-app-a";
-        final Set<String> labels = null;
+        final String labels = null;
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -102,12 +100,12 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void createDeploymentOnlyLabelsHappyPathTest() throws IOException, MablSystemError {
+    public void createDeploymentOnlyLabelsHappyPathTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String environmentId = null;
         final String applicationId = null;
-        final Set<String> labels = Collections.singleton("foo-label");
+        final String labels = "foo-label";
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -124,8 +122,8 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             final String restApiKey,
             final String environmentId,
             final String applicationId,
-            final Set<String> labels
-    ) throws IOException, MablSystemError {
+            final String labels
+    ) throws IOException {
         assertSuccessfulCreateDeploymentRequest(restApiKey, environmentId, applicationId, labels, null);
     }
 
@@ -133,9 +131,9 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             final String restApiKey,
             final String environmentId,
             final String applicationId,
-            final Set<String> labels,
+            final String labels,
             final String mablBranch
-    ) throws IOException, MablSystemError {
+    ) throws IOException {
         final String baseUrl = getBaseUrl();
 
         MablRestApiClient client = null;
@@ -156,7 +154,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void getExecutionResultHappyPathTest() throws IOException, MablSystemError {
+    public void getExecutionResultHappyPathTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String eventId = "fake-event-id";
@@ -186,7 +184,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void getExecutionResultNotFoundTest() throws IOException, MablSystemError {
+    public void getExecutionResultNotFoundTest() throws IOException {
 
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
         final String eventId = "fake-event-id";
@@ -215,7 +213,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void getApiKeyObjectFromApiKey() throws IOException, MablSystemError {
+    public void getApiKeyObjectFromApiKey() throws IOException {
 
         final String fakeRestApiKeyId = "fakeApiKeyValue";
 
@@ -232,7 +230,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         MablRestApiClient client = null;
         try {
             client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
-            GetApiKeyResult result = client.getApiKeyResult(mockSecret(fakeRestApiKeyId));
+            GetApiKeyResult result = client.getApiKeyResult();
             assertEquals(EXPECTED_ORGANIZATION_ID, result.organization_id);
         } finally {
             if (client != null) {
@@ -242,7 +240,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void getApplicationsReturnsTwoResults() throws IOException, MablSystemError {
+    public void getApplicationsReturnsTwoResults() throws IOException {
 
         final String fakeRestApiKeyId = "fakeApiKeyValue";
         final String organization_id = "fakeOrganizationId";
@@ -271,7 +269,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void getEnvironmentsReturnsOneResult() throws IOException, MablSystemError {
+    public void getEnvironmentsReturnsOneResult() throws IOException {
 
         final String fakeRestApiKeyId = "fakeApiKeyValue";
         final String organization_id = "fakeOrganizationId";
@@ -300,28 +298,28 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
 
 
 
-    @Test(expected = MablSystemError.class)
-    public void apiClientDoesntRetryOn503() throws IOException, MablSystemError {
+    @Test(expected = MablSystemException.class)
+    public void apiClientDoesntRetryOn503() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "503", 503, 1);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", Collections.singleton("foo-label"));
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
     }
 
     @Test
-    public void apiClientRetriesOn501() throws IOException, MablSystemError {
+    public void apiClientRetriesOn501() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 1);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", Collections.singleton("foo-label"));
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
     }
 
     @Test
-    public void apiClientRetriesOn501MaxtimesSuccess() throws IOException, MablSystemError {
+    public void apiClientRetriesOn501MaxtimesSuccess() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 5);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", Collections.singleton("foo-label"));
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
     }
 
-    @Test(expected = MablSystemError.class)
-    public void apiClientRetriesOn501OverMaxtimesFailure() throws IOException, MablSystemError {
+    @Test(expected = MablSystemException.class)
+    public void apiClientRetriesOn501OverMaxtimesFailure() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 6);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", Collections.singleton("foo-label"));
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
     }
 
     private void registerPostCreateRetryMappings(

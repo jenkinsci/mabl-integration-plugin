@@ -21,7 +21,6 @@ public class Property {
     }
 
     public Property() {
-
     }
 
     public String getName() {
