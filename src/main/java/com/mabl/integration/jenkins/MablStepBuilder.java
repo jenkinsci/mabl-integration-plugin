@@ -115,12 +115,12 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setApiBaseUrl(String apiBaseUrl) {
-        this.apiBaseUrl = apiBaseUrl;
+        this.apiBaseUrl = StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl;
     }
 
     @DataBoundSetter
     public void setAppBaseUrl(String appBaseUrl) {
-        this.appBaseUrl = appBaseUrl;
+        this.appBaseUrl = StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl;
     }
 
     // Accessors to be used by Jelly UI templates
