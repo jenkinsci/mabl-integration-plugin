@@ -166,7 +166,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.31 (08/11/2020)
+#### v0.0.31 (08/12/2020)
 -   Fixed a regression related to default endpoints
 
 #### v0.0.30 (08/10/2020)
