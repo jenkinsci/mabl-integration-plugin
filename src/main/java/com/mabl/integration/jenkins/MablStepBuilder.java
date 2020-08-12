@@ -33,6 +33,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -74,8 +75,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private boolean continueOnPlanFailure;
     private boolean continueOnMablError;
     private boolean disableSslVerification;
-    private String apiBaseUrl = DEFAULT_MABL_API_BASE_URL;
-    private String appBaseUrl = DEFAULT_MABL_APP_BASE_URL;
+    private String apiBaseUrl;
+    private String appBaseUrl;
 
     @DataBoundConstructor
     public MablStepBuilder(
@@ -115,12 +116,12 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setApiBaseUrl(String apiBaseUrl) {
-        this.apiBaseUrl = StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl;
+        this.apiBaseUrl = apiBaseUrl;
     }
 
     @DataBoundSetter
     public void setAppBaseUrl(String appBaseUrl) {
-        this.appBaseUrl = StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl;
+        this.appBaseUrl = appBaseUrl;
     }
 
     // Accessors to be used by Jelly UI templates
@@ -172,9 +173,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
         final PrintStream outputStream = listener.getLogger();
         final MablRestApiClient client = new MablRestApiClientImpl(
-                apiBaseUrl,
+                StringUtils.isBlank(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
                 getRestApiSecret(getRestApiKeyId()),
-                appBaseUrl,
+                StringUtils.isBlank(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
                 disableSslVerification
         );
 
