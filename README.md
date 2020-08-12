@@ -166,6 +166,9 @@ Note that
 
 ### Change Log
 
+#### v0.0.31 (08/12/2020)
+-   Fixed a regression related to default endpoints
+
 #### v0.0.30 (08/10/2020)
 -   Updated JUnit report to include information about test case IDs in
     both the properties section of the TestSuite tag as well as in the non-standard

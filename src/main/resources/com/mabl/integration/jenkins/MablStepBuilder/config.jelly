@@ -35,9 +35,9 @@
     </f:entry>
   </f:advanced>
   <f:invisibleEntry>
-    <f:textbox field="apiBaseUrl"/>
+    <f:textbox field="apiBaseUrl" default="https://api.mabl.com"/>
   </f:invisibleEntry>
   <f:invisibleEntry>
-    <f:textbox field="appBaseUrl"/>
+    <f:textbox field="appBaseUrl" default="https://app.mabl.com"/>
   </f:invisibleEntry>
 </j:jelly>
