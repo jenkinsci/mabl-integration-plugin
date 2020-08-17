@@ -118,6 +118,25 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
     }
 
+    @Test
+    public void createDeploymentRequestWithBranch() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+        final String environmentId = "my-env-e";
+        final String applicationId = "my-app-a";
+        final String branch = "my-test-branch";
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId,
+                String.format("{\"environment_id\":\"%s\",\"application_id\":\"%s\",\"source_control_tag\":\"%s\",\"properties\":%s}",
+                        environmentId, applicationId, branch, fakeProperties)
+        );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, branch);
+    }
+
     private void assertSuccessfulCreateDeploymentRequest(
             final String restApiKey,
             final String environmentId,

@@ -143,19 +143,22 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             try {
 
                 // Poll until we are successful or failed - note execution service is responsible for timeout
-                ExecutionResult executionResult;
-                do {
-                    Thread.sleep(pollingIntervalMilliseconds);
-                    executionResult = client.getExecutionResults(deployment.id);
+                ExecutionResult executionResult = null;
+                for (int i=0; i<2; i++) {
+                    // Rerun this loop twice in case there are plan retries
+                    do {
+                        TimeUnit.MILLISECONDS.sleep(pollingIntervalMilliseconds);
+                        executionResult = client.getExecutionResults(deployment.id);
 
-                    if (executionResult == null) {
-                        // No such id - this shouldn't happen
-                        throw new MablSystemException("No deployment event found for id [%s] in mabl.", deployment.id);
-                    }
+                        if (executionResult == null) {
+                            // No such id - this shouldn't happen
+                            throw new MablSystemException("No deployment event found for id [%s] in mabl.", deployment.id);
+                        }
 
-                    printAllJourneyExecutionStatuses(executionResult);
+                        printAllJourneyExecutionStatuses(executionResult);
 
-                } while (!allPlansComplete(executionResult));
+                    } while (!allPlansComplete(executionResult));
+                }
 
                 printFinalStatuses(executionResult);
 
@@ -164,9 +167,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 }
 
             } catch (InterruptedException e) {
-                // TODO better error handling/logging
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+                outputStream.println("[WARNING] Waiting for execution has been interrupted");
             }
 
         } catch (IOException e) {

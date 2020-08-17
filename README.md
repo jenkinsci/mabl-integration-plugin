@@ -166,6 +166,11 @@ Note that
 
 ### Change Log
 
+#### v0.0.32 (TBD)
+-   Added retry logic to avoid early job completion in case failed plans are retried
+-   Updated JUnit, Mockito dependency
+-   Added unit test for branching
+
 #### v0.0.31 (08/12/2020)
 -   Fixed a regression related to default endpoints
 
