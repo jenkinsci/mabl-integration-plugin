@@ -144,21 +144,18 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
                 // Poll until we are successful or failed - note execution service is responsible for timeout
                 ExecutionResult executionResult = null;
-                for (int i=0; i<2; i++) {
-                    // Rerun this loop twice in case there are plan retries
-                    do {
-                        TimeUnit.MILLISECONDS.sleep(pollingIntervalMilliseconds);
-                        executionResult = client.getExecutionResults(deployment.id);
+                do {
+                    TimeUnit.MILLISECONDS.sleep(pollingIntervalMilliseconds);
+                    executionResult = client.getExecutionResults(deployment.id);
 
-                        if (executionResult == null) {
-                            // No such id - this shouldn't happen
-                            throw new MablSystemException("No deployment event found for id [%s] in mabl.", deployment.id);
-                        }
+                    if (executionResult == null) {
+                        // No such id - this shouldn't happen
+                        throw new MablSystemException("No deployment event found for id [%s] in mabl.", deployment.id);
+                    }
 
-                        printAllJourneyExecutionStatuses(executionResult);
+                    printAllJourneyExecutionStatuses(executionResult);
 
-                    } while (!allPlansComplete(executionResult));
-                }
+                } while (!allPlansComplete(executionResult));
 
                 printFinalStatuses(executionResult);
 

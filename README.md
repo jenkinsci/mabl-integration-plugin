@@ -167,7 +167,7 @@ Note that
 ### Change Log
 
 #### v0.0.32 (TBD)
--   Added retry logic to avoid early job completion in case failed plans are retried
+-   Added JaCoCo test coverage report and checks
 -   Updated JUnit, Mockito dependency
 -   Added unit test for branching
 

@@ -35,10 +35,4 @@ public class Properties {
         properties.add(new Property(name, value));
     }
 
-    public void addProperties(Collection<Property> props) {
-        if (properties == null) {
-            properties = new ArrayList<>();
-        }
-        properties.addAll(props);
-    }
 }

@@ -54,13 +54,10 @@ public class TestCase {
     }
 
     public void setTestCaseIDs(final Collection<String> testCaseIDs) {
-        final List<Property> props = new ArrayList<>();
-        props.add(new Property("requirement", String.join(",", testCaseIDs)));
         if (properties == null) {
-            properties = new Properties(props);
-        } else {
-            properties.addProperties(props);
+            properties = new Properties();
         }
+        properties.addProperty("requirement", String.join(",", testCaseIDs));
     }
 
     public void setFailure(Failure failure) {
