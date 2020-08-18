@@ -106,6 +106,40 @@ public abstract class AbstractWiremockTest {
         return mappedUrl;
     }
 
+    /**
+     * Register the local file to a mapping and provide full URL path
+     *
+     * @param path             mapped relative path
+     * @param responseBuilder  target response
+     * @param jsonResponseFile     return json body in this file on a hit
+     * @param expectedUsername required username
+     * @param expectedPassword required password
+     * @return mapped URL (full URL)
+     */
+    protected String registerGetMappingWithFile(
+            final String path,
+            final ResponseDefinitionBuilder responseBuilder,
+            final String jsonResponseFile,
+            final String expectedUsername,
+            final String expectedPassword
+    ) {
+
+        final String mappedUrl = generatePageUrl(path);
+        expectedUrls.put(path, "GET");
+
+        final MappingBuilder mappingBuilder = get(urlPathEqualTo(path))
+                .willReturn(responseBuilder
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile(jsonResponseFile));
+
+        mappingBuilder.withBasicAuth(expectedUsername, expectedPassword);
+        mappingBuilder.withHeader("user-agent", new EqualToPattern(PLUGIN_USER_AGENT));
+
+        stubFor(mappingBuilder);
+
+        return mappedUrl;
+    }
+
     protected void verifyExpectedUrls() {
         for (final Map.Entry<String, String> expectedUrlEntry : this.expectedUrls.entrySet()) {
 

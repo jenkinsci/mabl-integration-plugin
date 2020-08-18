@@ -1,0 +1,108 @@
+{
+  "event_status": {},
+  "plan_execution_metrics": {
+    "total": 2,
+    "passed": 0,
+    "failed": 1
+  },
+  "journey_execution_metrics": {
+    "total": 2,
+    "passed": 0,
+    "failed": 1,
+    "running": 1,
+    "skipped": 0
+  },
+  "executions": [
+    {
+      "status": "failed",
+      "success": false,
+      "plan": {
+        "id": "GhoSTkwliRcUjJcxAWPFhw-p",
+        "name": "Succeeds on Rerun Plan",
+        "href": "https://api.mabl.com/schedule/runPolicy/GhoSTkwliRcUjJcxAWPFhw-p",
+        "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/plans/GhoSTkwliRcUjJcxAWPFhw-p"
+      },
+      "plan_execution": {
+        "id": "z5i7SKwiGEh7zWhPTC9ctQ-pr",
+        "status": "failed",
+        "href": "https://api.mabl.com/execution/runPolicyExecution/GhoSTkwliRcUjJcxAWPFhw-p",
+        "is_retry": false
+      },
+      "journeys": [
+        {
+          "id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "name": "Succeeds on Rerun Test",
+          "href": "https://api.mabl.com/test/journey/gPgREld17nYEn2qnlHZkjg-j:0",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/train/journeys/gPgREld17nYEn2qnlHZkjg-j/journeyrun/XuFMlmyfm34iwwMOPu4DWQ-jr"
+        }
+      ],
+      "journey_executions": [
+        {
+          "journey_id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "journey_execution_id": "XuFMlmyfm34iwwMOPu4DWQ-jr",
+          "application_id": "DbFj4WJo5o3rkMgrkYqf0w-a",
+          "environment_id": "4_1-Mk0Dc3MLWhgYriTZCQ-e",
+          "initial_url": "https://sheety.co",
+          "run_multiplier_index": 0,
+          "browser_type": "chrome",
+          "status": "failed",
+          "status_cause": "Failed assertion that the variable with value 0 has a value equal to \"1\".",
+          "success": false,
+          "href": "https://api.mabl.com/execution/runPolicyExecution/z5i7SKwiGEh7zWhPTC9ctQ-pr/testScriptExecution/XuFMlmyfm34iwwMOPu4DWQ-jr",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/journey-runs/XuFMlmyfm34iwwMOPu4DWQ-jr",
+          "start_time": 1597771804290,
+          "stop_time": 1597771836333,
+          "failure_summary": {
+            "flow_id": "wDTRjEWi3iR1YBVM2e47yw-f:0",
+            "step_number": 5,
+            "error": "Failed assertion that the variable with value 0 has a value equal to \"1\".",
+            "image_href": "https://storage.googleapis.com/mabl-dev-workspace-aqw8f3ylzyjna4cp8keg4rhck8n/execution-output/bgzu/DbFj4WJo5o3rkMgrkYqf0w-a/GhoSTkwliRcUjJcxAWPFhw-p/z5i7SKwiGEh7zWhPTC9ctQ-pr/XuFMlmyfm34iwwMOPu4DWQ-jr/36/screenshot.png?GoogleAccessId=cloud-storage-signer@mabl-dev.iam.gserviceaccount.com&Expires=1598376643&Signature=PM3XWBlFy5zXFX4KQ3TtCY5jFoqp3Y9uudy3B%2FvrucgguVmVa6U1c7kVPsRTOmQlQ%2Fz7CN6aB%2BMmKwupl%2F16XKvcta3EcgbRCCZdnd7mUVF1qQr%2BDZ1%2Fx9rbfzqjKSaaIGV8p4%2FNoPXECzGsQ1VsJdEMni3K6rb2yCe15Be%2BqomSsGbuZvyto%2FHHHPsDzEp5Ya%2FR5LprQEq4IdEGtD3Ns0gdjv9jAd%2F9s4GW%2BwPmGDTAz7gRf2cq%2BUZv2cK0o%2BnyvfgpaT0YIzzfPMmhEHxq9weXbP6MGgLGTE4Gc90SiqTF78pLLiwFAbuBspzLQtn7vZQs6SO2P5rSzeB4uQNChg%3D%3D",
+            "image_artifact_url": "https://api.mabl.com/artifact?path=storage.googleapis.com%2Fmabl-dev-workspace-aqw8f3ylzyjna4cp8keg4rhck8n%2Fexecution-output%2Fbgzu%2FDbFj4WJo5o3rkMgrkYqf0w-a%2FGhoSTkwliRcUjJcxAWPFhw-p%2Fz5i7SKwiGEh7zWhPTC9ctQ-pr%2FXuFMlmyfm34iwwMOPu4DWQ-jr%2F36%2Fscreenshot.png"
+          }
+        }
+      ],
+      "start_time": 1597771802232,
+      "stop_time": 1597771844019
+    },
+    {
+      "status": "scheduled",
+      "plan": {
+        "id": "GhoSTkwliRcUjJcxAWPFhw-p",
+        "name": "Succeeds on Rerun Plan",
+        "href": "https://api.mabl.com/schedule/runPolicy/GhoSTkwliRcUjJcxAWPFhw-p",
+        "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/plans/GhoSTkwliRcUjJcxAWPFhw-p"
+      },
+      "plan_execution": {
+        "id": "T1Uk3JOQlwFwu5LAewHJMA-pr",
+        "status": "scheduled",
+        "href": "https://api.mabl.com/execution/runPolicyExecution/GhoSTkwliRcUjJcxAWPFhw-p",
+        "is_retry": true,
+        "retry_of_id": "z5i7SKwiGEh7zWhPTC9ctQ-pr"
+      },
+      "journeys": [
+        {
+          "id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "name": "Succeeds on Rerun Test",
+          "href": "https://api.mabl.com/test/journey/gPgREld17nYEn2qnlHZkjg-j:0",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/train/journeys/gPgREld17nYEn2qnlHZkjg-j/journeyrun/ABWViElPJE70uvsfJWatsQ-jr"
+        }
+      ],
+      "journey_executions": [
+        {
+          "journey_id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "journey_execution_id": "ABWViElPJE70uvsfJWatsQ-jr",
+          "application_id": "DbFj4WJo5o3rkMgrkYqf0w-a",
+          "environment_id": "4_1-Mk0Dc3MLWhgYriTZCQ-e",
+          "initial_url": "https://sheety.co",
+          "run_multiplier_index": 0,
+          "browser_type": "chrome",
+          "status": "running",
+          "href": "https://api.mabl.com/execution/runPolicyExecution/T1Uk3JOQlwFwu5LAewHJMA-pr/testScriptExecution/ABWViElPJE70uvsfJWatsQ-jr",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/journey-runs/ABWViElPJE70uvsfJWatsQ-jr",
+          "start_time": 1597771856021
+        }
+      ],
+      "start_time": 1597771844074
+    }
+  ]
+}
