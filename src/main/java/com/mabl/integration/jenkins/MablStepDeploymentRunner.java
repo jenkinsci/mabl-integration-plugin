@@ -143,9 +143,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             try {
 
                 // Poll until we are successful or failed - note execution service is responsible for timeout
-                ExecutionResult executionResult;
+                ExecutionResult executionResult = null;
                 do {
-                    Thread.sleep(pollingIntervalMilliseconds);
+                    TimeUnit.MILLISECONDS.sleep(pollingIntervalMilliseconds);
                     executionResult = client.getExecutionResults(deployment.id);
 
                     if (executionResult == null) {
@@ -164,9 +164,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 }
 
             } catch (InterruptedException e) {
-                // TODO better error handling/logging
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+                outputStream.println("[WARNING] Waiting for execution has been interrupted");
             }
 
         } catch (IOException e) {

@@ -28,6 +28,7 @@ import static com.mabl.integration.jenkins.MablRestApiClientImpl.DEPLOYMENT_RESU
 import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNAME_PLACEHOLDER;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -59,6 +60,66 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+
+        // in reality, you would use the same event ID, but it is eeasier to test with separate ones
+        final String eventId1 = "fake-event-id-1";
+        final String eventId2 = "fake-event-id-2";
+        final String eventId3 = "fake-event-id-3";
+        registerGetMappingWithFile(
+                String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId1),
+                ok(),
+                "scheduled.json",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+        registerGetMappingWithFile(
+                String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId2),
+                ok(),
+                "retrying.json",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+        registerGetMappingWithFile(
+                String.format(DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE, eventId3),
+                ok(),
+                "retry-complete.json",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+            ExecutionResult result = client.getExecutionResults(eventId1);
+            assertEquals("scheduled", result.executions.get(0).status);
+            assertNull(result.eventStatus.succeeded);
+            assertNull(result.eventStatus.succeededFirstAttempt);
+            assertNull(result.eventStatus.succeededWithRetries);
+
+            result = client.getExecutionResults(eventId2);
+            assertEquals("failed", result.executions.get(0).status);
+            assertEquals("scheduled", result.executions.get(1).status);
+            assertNull(result.eventStatus.succeeded);
+            assertNull(result.eventStatus.succeededFirstAttempt);
+            assertNull(result.eventStatus.succeededWithRetries);
+
+            result = client.getExecutionResults(eventId3);
+            assertEquals("failed", result.executions.get(0).status);
+            assertEquals("succeeded", result.executions.get(1).status);
+            assertTrue(result.eventStatus.succeeded);
+            assertFalse(result.eventStatus.succeededFirstAttempt);
+            assertTrue(result.eventStatus.succeededWithRetries);
+
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+
+        verifyExpectedUrls();
     }
 
     @Test
@@ -116,6 +177,25 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+    }
+
+    @Test
+    public void createDeploymentRequestWithBranch() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+        final String environmentId = "my-env-e";
+        final String applicationId = "my-app-a";
+        final String branch = "my-test-branch";
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId,
+                String.format("{\"environment_id\":\"%s\",\"application_id\":\"%s\",\"source_control_tag\":\"%s\",\"properties\":%s}",
+                        environmentId, applicationId, branch, fakeProperties)
+        );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, branch);
     }
 
     private void assertSuccessfulCreateDeploymentRequest(

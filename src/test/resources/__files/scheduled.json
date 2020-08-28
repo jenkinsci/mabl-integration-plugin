@@ -1,0 +1,56 @@
+{
+  "event_status": {},
+  "plan_execution_metrics": {
+    "total": 1,
+    "passed": 0,
+    "failed": 0
+  },
+  "journey_execution_metrics": {
+    "total": 1,
+    "passed": 0,
+    "failed": 0,
+    "running": 1,
+    "skipped": 0
+  },
+  "executions": [
+    {
+      "status": "scheduled",
+      "plan": {
+        "id": "GhoSTkwliRcUjJcxAWPFhw-p",
+        "name": "Succeeds on Rerun Plan",
+        "href": "https://api.mabl.com/schedule/runPolicy/GhoSTkwliRcUjJcxAWPFhw-p",
+        "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/plans/GhoSTkwliRcUjJcxAWPFhw-p"
+      },
+      "plan_execution": {
+        "id": "JCOdn4hwOz6ZvFaf020S6Q-pr",
+        "status": "scheduled",
+        "href": "https://api.mabl.com/execution/runPolicyExecution/GhoSTkwliRcUjJcxAWPFhw-p",
+        "is_retry": false
+      },
+      "journeys": [
+        {
+          "id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "name": "Succeeds on Rerun Test",
+          "href": "https://api.mabl.com/test/journey/gPgREld17nYEn2qnlHZkjg-j:0",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/train/journeys/gPgREld17nYEn2qnlHZkjg-j/journeyrun/vtVOeF37R0OhPxwBY6f5MQ-jr"
+        }
+      ],
+      "journey_executions": [
+        {
+          "journey_id": "gPgREld17nYEn2qnlHZkjg-j:0",
+          "journey_execution_id": "vtVOeF37R0OhPxwBY6f5MQ-jr",
+          "application_id": "DbFj4WJo5o3rkMgrkYqf0w-a",
+          "environment_id": "4_1-Mk0Dc3MLWhgYriTZCQ-e",
+          "initial_url": "https://sheety.co",
+          "run_multiplier_index": 0,
+          "browser_type": "chrome",
+          "status": "running",
+          "href": "https://api.mabl.com/execution/runPolicyExecution/JCOdn4hwOz6ZvFaf020S6Q-pr/testScriptExecution/vtVOeF37R0OhPxwBY6f5MQ-jr",
+          "app_href": "https://app.mabl.com/workspaces/lwCaU5I1pmmRfzIepmUKLg-w/test/journey-runs/vtVOeF37R0OhPxwBY6f5MQ-jr",
+          "start_time": 1597772403758
+        }
+      ],
+      "start_time": 1597772401586
+    }
+  ]
+}

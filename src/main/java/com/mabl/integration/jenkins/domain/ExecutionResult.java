@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.google.common.collect.ImmutableCollection;
 
 import java.util.List;
 
@@ -165,6 +164,7 @@ public class ExecutionResult implements ApiResult {
     public static final class EventStatus {
         public Boolean succeeded;
         public Boolean succeededFirstAttempt;
+        public Boolean succeededWithRetries;
 
         public EventStatus(
         ) {
@@ -180,6 +180,11 @@ public class ExecutionResult implements ApiResult {
             return succeededFirstAttempt;
         }
 
+        @JsonGetter("succeeded_with_retries")
+        public Boolean getSucceededWithRetry() {
+            return succeededWithRetries;
+        }
+
         @JsonSetter("succeeded")
         public void setSucceeded(Boolean succeeded) {
             this.succeeded = succeeded;
@@ -188,6 +193,11 @@ public class ExecutionResult implements ApiResult {
         @JsonSetter("succeeded_first_attempt")
         public void setSucceededFirstAttempt(Boolean succeededFirstAttempt) {
             this.succeededFirstAttempt = succeededFirstAttempt;
+        }
+
+        @JsonSetter("succeeded_with_retries")
+        public void setSucceededWithRetry(Boolean succeededWithRetries) {
+            this.succeededWithRetries = succeededWithRetries;
         }
     }
 
