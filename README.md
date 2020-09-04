@@ -166,6 +166,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.33 (09/04/2020)
+-   Set explicit dependency on credentials and plain credentials
+    dependency to address incompatibility issue with Jenkins Enterprise
+
 #### v0.0.32 (08/28/2020)
 -   Added JaCoCo test coverage report and checks
 -   Updated JUnit, Mockito dependency
