@@ -166,7 +166,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.33 (09/04/2020)
+#### v0.0.34 (09/04/2020)
 -   Set explicit dependency on credentials and plain credentials
     dependency to address incompatibility issue with Jenkins Enterprise
 
@@ -318,6 +318,17 @@ mvn clean package \
   && docker cp target/mabl-integration.hpi jenkins:/var/jenkins_home/plugins/ \
   && docker restart jenkins
 ```
+
+### Compatibility with Jenkins Enterprise
+
+To ensure compatibility with Jenkins Enterprise, make sure the credentials
+and plain credentials dependencies are compatible in the minimum version
+of the enterprise release. Check the plugin list in the
+[CloudBees Jenkins Distribution](https://docs.cloudbees.com/docs/release-notes/latest/cloudbees-jenkins-distribution/)
+Release Notes.
+
+You can also test with Jenkins Enterprise using the images published
+on [Docker Hub](https://hub.docker.com/r/cloudbees/jenkins-enterprise).
 
 ### Local Machine
 Overview of how to run/debug plugin with Intellij on local machine.
