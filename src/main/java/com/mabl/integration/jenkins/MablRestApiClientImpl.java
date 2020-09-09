@@ -78,7 +78,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String REST_API_USERNAME_PLACEHOLDER = "key";
     static final String DEPLOYMENT_TRIGGER_ENDPOINT = "/events/deployment";
     static final String DEPLOYMENT_RESULT_ENDPOINT_TEMPLATE = "/execution/result/event/%s";
-    static final String GET_ORGANIZATION_ENDPOINT_TEMPLATE = "/apiKeys/%s";
+    static final String GET_ORGANIZATION_ENDPOINT_TEMPLATE = "/apiKeys/self";
     static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
     static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
     static final String GET_LABELS_ENDPOINT_TEMPLATE = "/schedule/runPolicy/labels?organization_id=%s";
@@ -97,7 +97,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     ) {
         this(restApiBaseUrl, restApiKey, appBaseUrl,false);
     }
-    
+
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
@@ -135,7 +135,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                     .build();
             httpClientBuilder.setConnectionManager(new PoolingHttpClientConnectionManager(socketFactoryRegistry));
         }
-        
+
         httpClient = httpClientBuilder.build();
     }
 
