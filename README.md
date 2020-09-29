@@ -346,7 +346,7 @@ the screenshot below:
 
 - Log into this URL on your web browser
 
-        localhost:8090/jenkins
+        localhost:9090/jenkins
 Now you can test your plugin.
 
 ## Deployment
