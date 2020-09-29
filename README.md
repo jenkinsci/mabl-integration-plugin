@@ -166,6 +166,9 @@ Note that
 
 ### Change Log
 
+#### v0.0.35 (09/29/2020)
+-   Remove use of deprecated API endpoint
+
 #### v0.0.34 (09/04/2020)
 -   Set explicit dependency on credentials and plain credentials
     dependency to address incompatibility issue with Jenkins Enterprise
