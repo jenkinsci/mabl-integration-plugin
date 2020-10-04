@@ -5,8 +5,10 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.Permission;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 
 import java.util.Collection;
 
@@ -15,16 +17,17 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 import static org.junit.Assert.assertEquals;
 
 public class MablStepDescriptorTest {
 
-    private MablStepBuilder.MablStepDescriptor descriptor;
+    private MablStepBuilder.MablStepDescriptor mablStepDescriptor;
 
     @Before
     public void setup() {
-        descriptor = mock(MablStepBuilder.MablStepDescriptor.class);
-        doNothing().when(descriptor).load();
+        mablStepDescriptor = mock(MablStepBuilder.MablStepDescriptor.class);
+        doNothing().when(mablStepDescriptor).load();
     }
 
     @Test
@@ -40,10 +43,10 @@ public class MablStepDescriptorTest {
                 return EXTENDED_READ.equals(permission);
             }
         };
-        when(descriptor.doCheckRestApiKeyIds(item, null)).thenCallRealMethod();
-        assertNotEquals(FormValidation.ok(), descriptor.doCheckRestApiKeyIds(item, null));
-        when(descriptor.doCheckRestApiKeyIds(item, "")).thenCallRealMethod();
-        assertNotEquals(FormValidation.ok(), descriptor.doCheckRestApiKeyIds(item, ""));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, null)).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, null));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, ""));
     }
 
     @Test
@@ -59,8 +62,8 @@ public class MablStepDescriptorTest {
                 return EXTENDED_READ.equals(permission);
             }
         };
-        when(descriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
-        assertEquals(FormValidation.ok(), descriptor.doCheckRestApiKeyIds(item, "an-api-key"));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key"));
     }
 
     @Test
@@ -76,8 +79,8 @@ public class MablStepDescriptorTest {
                 return USE_ITEM.equals(permission);
             }
         };
-        when(descriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
-        assertEquals(FormValidation.ok(), descriptor.doCheckRestApiKeyIds(item, "an-api-key"));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key"));
     }
 
     @Test
@@ -93,9 +96,9 @@ public class MablStepDescriptorTest {
                 return false;
             }
         };
-        when(descriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key")).thenCallRealMethod();
         assertNotEquals(FormValidation.ok(),
-                descriptor.doCheckRestApiKeyIds(item, "an-api-key"));
+                mablStepDescriptor.doCheckRestApiKeyIds(item, "an-api-key"));
     }
 
     @Test
@@ -111,33 +114,93 @@ public class MablStepDescriptorTest {
                 return true;
             }
         };
-        when(descriptor.doCheckRestApiKeyIds(item, "${invalidName}")).thenCallRealMethod();
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "${invalidName}")).thenCallRealMethod();
         assertNotEquals(FormValidation.ok(),
-                descriptor.doCheckRestApiKeyIds(item, "${invalidName}"));
+                mablStepDescriptor.doCheckRestApiKeyIds(item, "${invalidName}"));
 
-        when(descriptor.doCheckRestApiKeyIds(item, "${couldBeValid")).thenCallRealMethod();
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "${couldBeValid")).thenCallRealMethod();
         assertEquals(FormValidation.ok(),
-                descriptor.doCheckRestApiKeyIds(item, "${couldBeValid"));
+                mablStepDescriptor.doCheckRestApiKeyIds(item, "${couldBeValid"));
     }
 
     @Test
     public void testCheckMablBranch_Valid()
     {
-        when(descriptor.doCheckMablBranch(null)).thenCallRealMethod();
-        assertEquals(FormValidation.ok(), descriptor.doCheckMablBranch(null));
+        when(mablStepDescriptor.doCheckMablBranch(null)).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckMablBranch(null));
 
-        when(descriptor.doCheckMablBranch("")).thenCallRealMethod();
-        assertEquals(FormValidation.ok(), descriptor.doCheckMablBranch(""));
+        when(mablStepDescriptor.doCheckMablBranch("")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckMablBranch(""));
 
-        when(descriptor.doCheckMablBranch("A_Valid_Branch-Name")).thenCallRealMethod();
-        assertEquals(FormValidation.ok(), descriptor.doCheckMablBranch("A_Valid_Branch-Name"));
+        when(mablStepDescriptor.doCheckMablBranch("A_Valid_Branch-Name")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckMablBranch("A_Valid_Branch-Name"));
     }
 
     @Test
     public void testCheckMablBranch_InValid()
     {
-        when(descriptor.doCheckMablBranch("Br@nch1nv@l1d")).thenCallRealMethod();
-        assertNotEquals(FormValidation.ok(), descriptor.doCheckMablBranch("Br@nch1nv@l1d"));
+        when(mablStepDescriptor.doCheckMablBranch("Br@nch1nv@l1d")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckMablBranch("Br@nch1nv@l1d"));
     }
+
+    @Test
+    public void testDoFillApplicationIdItems_NoApiKey()
+    {
+        when(mablStepDescriptor.doFillApplicationIdItems(
+                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+        assertEquals(1, model.size());
+        assertEquals("Select a valid API key", model.iterator().next().value);
+
+        when(mablStepDescriptor.doFillApplicationIdItems(
+                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+        model = mablStepDescriptor.doFillApplicationIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+        assertEquals(1, model.size());
+        assertEquals("Select a valid API key", model.iterator().next().value);
+    }
+
+    @Test
+    public void testDoFillApplicationIdItems_NoSecret()
+    {
+        when(mablStepDescriptor.doFillApplicationIdItems(
+                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+
+        try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
+            mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
+
+            ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
+            assertEquals(0, model.size());
+        }
+    }
+
+    @Test
+    public void testDoFillEnvironmentIdItems_NoApiKey() {
+        when(mablStepDescriptor.doFillEnvironmentIdItems(
+                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+        assertEquals(1, model.size());
+        assertEquals("Select a valid API key", model.iterator().next().value);
+
+        when(mablStepDescriptor.doFillEnvironmentIdItems(
+                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+        model = mablStepDescriptor.doFillEnvironmentIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+        assertEquals(1, model.size());
+        assertEquals("Select a valid API key", model.iterator().next().value);
+    }
+
+    @Test
+    public void testDoFillEnvironmentIdItems_NoSecret()
+    {
+        when(mablStepDescriptor.doFillEnvironmentIdItems(
+                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+
+        try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
+            mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
+
+            ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
+            assertEquals(0, model.size());
+        }
+    }
+
 
 }
