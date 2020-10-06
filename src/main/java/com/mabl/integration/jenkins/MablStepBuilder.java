@@ -33,7 +33,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -91,7 +90,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setLabels(String labels) {
-        this.labels = labels;
+        String value = labels;
+        if (!StringUtils.isEmpty(labels)) {
+            value = labels.trim().replaceAll(",[\\s]+", ",");
+        }
+        this.labels = value;
     }
 
     @DataBoundSetter
@@ -334,7 +337,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 @AncestorInPath Item item,
                 @QueryParameter String value
         ) {
-            if (item == null || StringUtils.isBlank(value)) {
+            if (StringUtils.isBlank(value)) {
                     return FormValidation.warning("Provide a credentials ID");
             } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(USE_ITEM)) {
                 return FormValidation.warning("Insufficient permissions");
@@ -429,6 +432,21 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             return getSelectValidApiKeyListBoxModel();
+        }
+
+        public FormValidation doCheckMablBranch(
+                @QueryParameter String value
+        ) {
+            if (StringUtils.isEmpty(value)) {
+                return FormValidation.ok();
+            }
+
+            if (value.matches("[A-Za-z0-9_-]+")) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("The branch name field may only contain alpha-numeric characters, " +
+                    "as well as dashes and underscores.");
         }
 
         private static ListBoxModel getSelectValidApiKeyListBoxModel() {
