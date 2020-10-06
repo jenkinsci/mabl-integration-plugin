@@ -166,13 +166,11 @@ Note that
 
 ### Change Log
 
-#### v0.0.36 (10/05/2020)
+#### v0.0.35 (10/06/2020)
 -   Updated Wiremock, JUnit, Jackson, Spotbugs and JaCoCo dependencies
 -   Added validation for branch field
 -   Added trimming whitespaces from labels
-
-#### v0.0.35 (09/29/2020)
--   Remove use of deprecated API endpoint
+-   Removed use of deprecated API endpoint
 
 #### v0.0.34 (09/04/2020)
 -   Set explicit dependency on credentials and plain credentials
