@@ -166,6 +166,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.36 (12/23/2020)
+-   Updated Apache HTTP client, Mockito, Jackson, Jenkins HPI plugin,
+    and Spotbugs dependencies
+
 #### v0.0.35 (10/06/2020)
 -   Updated Wiremock, JUnit, Jackson, Spotbugs and JaCoCo dependencies
 -   Added validation for branch field
