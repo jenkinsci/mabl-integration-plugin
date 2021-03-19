@@ -106,11 +106,9 @@ mabl applicationId: 'APP-ID-a', continueOnMablError: true, continueOnPlanFailure
 
 ``` syntaxhighlighter-pre
 node {
-   stage('mabl') {
-       steps {
-           step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
-       }
-   }
+  stage('mabl') {
+    step([$class: 'MablStepBuilder', restApiKeyId: 'REST-API-KEY-ID', environmentId: 'ENV-ID-e', applicationId: 'APP-ID-a'])
+  }
 }
 ```
 
