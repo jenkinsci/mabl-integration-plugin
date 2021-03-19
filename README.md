@@ -85,7 +85,7 @@ pipeline step for mabl. This can be written by hand or created via the
 -   continueOnPlanFailure: Continue if your plan/tests fail
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
--   restApiKeyId: The id of the API key secret of the desired deployment workspace -
+-   restApiKeyId: The id of the API key secret of the desired deployment workspace. "restApiKeyId" is not real key -
     Required
 -   labels: if specified, only plans with (any of the) labels will be triggered.
     If multiple labels are provided, separate them with commas.
@@ -95,8 +95,6 @@ pipeline step for mabl. This can be written by hand or created via the
 
 The following sections shows how to use the integration plugin in either a declarative or in a scripted
 pipeline.
-
-**Notice: "restApiKeyId" is ID of Jenkins credential not real key**
 
 #### Declarative Pipeline
 
