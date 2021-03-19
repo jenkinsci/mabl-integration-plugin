@@ -96,6 +96,8 @@ pipeline step for mabl. This can be written by hand or created via the
 The following sections shows how to use the integration plugin in either a declarative or in a scripted
 pipeline.
 
+**Notice: "restApiKeyId" is ID of Jenkins credential not real key**
+
 #### Declarative Pipeline
 
 ``` syntaxhighlighter-pre
