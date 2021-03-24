@@ -1,5 +1,6 @@
 package com.mabl.integration.jenkins;
 
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
@@ -196,6 +197,106 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         );
 
         assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, branch);
+    }
+
+    @Test
+    public void testCheckConnection_Ok() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+
+        registerGetMapping(
+                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                new ResponseDefinitionBuilder().withStatus(200),
+                "",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+            client.checkConnection();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    @Test(expected = IOException.class)
+    public void testCheckConnection_Unauthorized() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+
+        registerGetMapping(
+                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                new ResponseDefinitionBuilder().withStatus(401),
+                "",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+            client.checkConnection();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    @Test(expected = IOException.class)
+    public void testCheckConnection_InvalidKey() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+
+        registerGetMapping(
+                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                new ResponseDefinitionBuilder().withStatus(403),
+                "",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+            client.checkConnection();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    @Test(expected = IOException.class)
+    public void testCheckConnection_ServiceDown() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+
+        registerGetMapping(
+                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                new ResponseDefinitionBuilder().withStatus(500),
+                "",
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId
+        );
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+            client.checkConnection();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
     }
 
     private void assertSuccessfulCreateDeploymentRequest(

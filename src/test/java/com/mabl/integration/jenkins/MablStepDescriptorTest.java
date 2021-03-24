@@ -147,14 +147,14 @@ public class MablStepDescriptorTest {
     public void testDoFillApplicationIdItems_NoApiKey()
     {
         when(mablStepDescriptor.doFillApplicationIdItems(
-                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+                null, false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com", null, null);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
 
         when(mablStepDescriptor.doFillApplicationIdItems(
-                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        model = mablStepDescriptor.doFillApplicationIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+                "", false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
+        model = mablStepDescriptor.doFillApplicationIdItems("", false, "https://api.mabl.com", "https://app.mabl.com", null, null);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
     }
@@ -163,12 +163,12 @@ public class MablStepDescriptorTest {
     public void testDoFillApplicationIdItems_NoSecret()
     {
         when(mablStepDescriptor.doFillApplicationIdItems(
-                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
 
         try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
             mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
 
-            ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
+            ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com", null, null);
             assertEquals(0, model.size());
         }
     }
@@ -176,14 +176,14 @@ public class MablStepDescriptorTest {
     @Test
     public void testDoFillEnvironmentIdItems_NoApiKey() {
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+                null, false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com", null, null);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
 
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        model = mablStepDescriptor.doFillEnvironmentIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+                "", false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
+        model = mablStepDescriptor.doFillEnvironmentIdItems("", false, "https://api.mabl.com", "https://app.mabl.com", null, null);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
     }
@@ -192,15 +192,107 @@ public class MablStepDescriptorTest {
     public void testDoFillEnvironmentIdItems_NoSecret()
     {
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com", null, null)).thenCallRealMethod();
 
         try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
             mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
 
-            ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
+            ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com", null, null);
             assertEquals(0, model.size());
         }
     }
 
+    @Test
+    public void testProxyCredentialsIds_Blank() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return EXTENDED_READ.equals(permission);
+            }
+        };
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, null)).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, null));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, ""));
+    }
+
+    @Test
+    public void testProxyCredentialsIds_ExtendedRead() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return EXTENDED_READ.equals(permission);
+            }
+        };
+        when(mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key"));
+    }
+
+    @Test
+    public void testProxyCredentialsIds_UseItem() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return USE_ITEM.equals(permission);
+            }
+        };
+        when(mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(), mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key"));
+    }
+
+    @Test
+    public void testProxyCredentialsIds_InsufficentPermissions() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return false;
+            }
+        };
+        when(mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(),
+                mablStepDescriptor.doCheckProxyCredentialsIds(item, "an-api-key"));
+    }
+
+    @Test
+    public void testProxyCredentialsIds_ExpressionBasedCreds() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return true;
+            }
+        };
+        when(mablStepDescriptor.doCheckProxyCredentialsIds(item, "${invalidName}")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(),
+                mablStepDescriptor.doCheckProxyCredentialsIds(item, "${invalidName}"));
+
+        when(mablStepDescriptor.doCheckProxyCredentialsIds(item, "${couldBeValid")).thenCallRealMethod();
+        assertEquals(FormValidation.ok(),
+                mablStepDescriptor.doCheckProxyCredentialsIds(item, "${couldBeValid"));
+    }
 
 }

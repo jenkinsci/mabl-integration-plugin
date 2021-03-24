@@ -1,6 +1,14 @@
 package com.mabl.integration.jenkins.validation;
 
+import com.mabl.integration.jenkins.MablRestApiClient;
+import com.mabl.integration.jenkins.MablRestApiClientImpl;
+import com.mabl.integration.jenkins.MablStepBuilder;
+import com.mabl.integration.jenkins.MablStepConstants;
 import hudson.util.FormValidation;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
+
+import java.io.IOException;
 
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_APPLICATION_ID_LABEL;
@@ -28,10 +36,37 @@ public class MablStepBuilderValidator {
             String environmentId,
             String applicationId
     ) {
+        return validateForm(restApiKeyName, environmentId, applicationId,false, null, null,
+                MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL);
+    }
+
+    /**
+     * Validate form
+     *
+     * @param restApiKeyId prospective key id
+     * @param environmentId prospective environment identifier
+     * @param applicationId prospective application identifier
+     * @param disableSslVerification prospective flag to indicate if SSL verification should be disabled
+     * @param proxyUrl prospective proxy URL
+     * @param proxyCredentialsId prospective proxy credentials id
+     * @param apiBaseUrl base URL for API (not user-visible)
+     * @param appBaseUrl base URL for the ap (not user-visible)
+     * @return validation result
+     */
+    public static FormValidation validateForm(
+            String restApiKeyId,
+            String environmentId,
+            String applicationId,
+            boolean disableSslVerification,
+            String proxyUrl,
+            String proxyCredentialsId,
+            String apiBaseUrl,
+            String appBaseUrl
+    ) {
         try {
 
             // TODO MOVE into validator class when we add remote validation
-            final String restApiKeyClean = trimToNull(restApiKeyName);
+            final String restApiKeyClean = trimToNull(restApiKeyId);
             final String applicationIdClean = trimToNull(applicationId);
             final String environmentIdClean = trimToNull(environmentId);
 
@@ -56,9 +91,28 @@ public class MablStepBuilderValidator {
                         FORM_APPLICATION_ID_LABEL, FORM_ENVIRONMENT_ID_LABEL);
             }
 
-            // Future validations
-            // TODO contact API an ensure key exists
-            // TODO ensure workspace contains (1) environment (2) application
+            if (!StringUtils.isBlank(proxyUrl)) {
+                try {
+                    HttpHost.create(proxyUrl);
+                } catch (IllegalArgumentException e) {
+                    return error("Invalid proxy URL provided: %s", proxyUrl);
+                }
+            }
+
+            try {
+                MablRestApiClient client = MablStepBuilder.createMablRestApiClient(
+                        restApiKeyClean,
+                        disableSslVerification,
+                        trimToNull(proxyUrl),
+                        trimToNull(proxyCredentialsId),
+                        apiBaseUrl,
+                        appBaseUrl
+                );
+                client.checkConnection();
+            } catch (IOException e) {
+                return error("Failed to connect to mabl API: " + e.getMessage());
+            }
+
             return okWithMarkup("<span style='color:green'>✓ Everything looks good</span>");
         } catch (Exception e) {
             return error("Client error : " + e.getMessage());

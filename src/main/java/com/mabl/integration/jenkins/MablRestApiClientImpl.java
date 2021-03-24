@@ -1,5 +1,6 @@
 package com.mabl.integration.jenkins;
 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -17,11 +18,15 @@ import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import hudson.remoting.Base64;
 import hudson.util.Secret;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -46,6 +51,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -82,6 +88,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
     static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
     static final String GET_LABELS_ENDPOINT_TEMPLATE = "/schedule/runPolicy/labels?organization_id=%s";
+    static final String HEALTH_ENDPOINT = "/health";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -89,25 +96,31 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private final String restApiBaseUrl;
     private final Secret restApiKey;
     private final String appBaseUrl;
+    private final HttpHost proxy;
+    private final StandardUsernamePasswordCredentials proxyCredentials;
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
             final String appBaseUrl
     ) {
-        this(restApiBaseUrl, restApiKey, appBaseUrl,false);
+        this(restApiBaseUrl, restApiKey, appBaseUrl, null, null, false);
     }
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
             final String appBaseUrl,
+            final String proxyUrl,
+            final StandardUsernamePasswordCredentials proxyCredentials,
             final boolean disableSslVerification
     ) {
 
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
         this.appBaseUrl = appBaseUrl;
+        this.proxy = StringUtils.isBlank(proxyUrl) ? null : HttpHost.create(proxyUrl);
+        this.proxyCredentials = proxyCredentials;
 
         final HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
@@ -153,7 +166,29 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         provider.setCredentials(AuthScope.ANY, creds);
 
+        // Set proxy credentials if provided
+        if (proxy != null && proxyCredentials != null) {
+            final Credentials c = new UsernamePasswordCredentials(
+                    proxyCredentials.getUsername(),
+                    proxyCredentials.getPassword().getPlainText()
+            );
+            provider.setCredentials(new AuthScope(proxy), c);
+        }
+
         return provider;
+    }
+
+    private CredentialsProvider getProxyCredentialsProvider(
+            final StandardUsernamePasswordCredentials credentials
+    ) {
+        final CredentialsProvider provider = new BasicCredentialsProvider();
+        final UsernamePasswordCredentials creds =
+                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, restApiKey.getPlainText());
+
+        provider.setCredentials(AuthScope.ANY, creds);
+
+        return provider;
+
     }
 
     private Header getBasicAuthHeader(
@@ -223,6 +258,23 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         return appBaseUrl;
     }
 
+    @Override
+    public void checkConnection() throws IOException {
+        final String url = restApiBaseUrl + HEALTH_ENDPOINT;
+        final HttpResponse response = httpClient.execute(buildGetRequest(url));
+        final int statusCode = response.getStatusLine().getStatusCode();
+        switch (statusCode) {
+            case 200:
+                break;
+            case 401:
+                throw new IOException("invalid API key provided or the proxy connection requires authentication");
+            case 403:
+                throw new IOException("invalid API key type. You must use a CI/CD Integration key type");
+            default:
+                throw new IOException(response.getStatusLine().toString());
+        }
+    }
+
     private HttpGet buildGetRequest(String url) {
         try {
             final HttpGet request = new HttpGet(url);
@@ -259,6 +311,9 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 .setConnectTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setConnectionRequestTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setSocketTimeout(REQUEST_TIMEOUT_MILLISECONDS)
+                .setProxy(proxy)
+                .setProxyPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
+                .setTargetPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
                 .build();
     }
 
