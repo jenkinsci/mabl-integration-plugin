@@ -159,7 +159,7 @@ public class MablBuildValidatorTest {
 
     private void mockNoopRestApiClient(MockedStatic<MablStepBuilder> mocked) {
         mocked.when(() -> MablStepBuilder.createMablRestApiClient(
-                "sample-key-id", false,null, null, MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL)).thenReturn(
+                "sample-key-id", false, MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL)).thenReturn(
                 new MablRestApiClient() {
                     @Override
                     public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties) throws IOException {

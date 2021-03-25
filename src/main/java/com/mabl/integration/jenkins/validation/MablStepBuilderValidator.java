@@ -1,15 +1,13 @@
 package com.mabl.integration.jenkins.validation;
 
 import com.mabl.integration.jenkins.MablRestApiClient;
-import com.mabl.integration.jenkins.MablRestApiClientImpl;
-import com.mabl.integration.jenkins.MablStepBuilder;
-import com.mabl.integration.jenkins.MablStepConstants;
 import hudson.util.FormValidation;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHost;
 
 import java.io.IOException;
 
+import static com.mabl.integration.jenkins.MablStepBuilder.createMablRestApiClient;
+import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_API_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_APP_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_APPLICATION_ID_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_ENVIRONMENT_ID_LABEL;
@@ -36,8 +34,8 @@ public class MablStepBuilderValidator {
             String environmentId,
             String applicationId
     ) {
-        return validateForm(restApiKeyName, environmentId, applicationId,false, null, null,
-                MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL);
+        return validateForm(restApiKeyName, environmentId, applicationId, false,
+                DEFAULT_MABL_API_BASE_URL, DEFAULT_MABL_APP_BASE_URL);
     }
 
     /**
@@ -47,8 +45,6 @@ public class MablStepBuilderValidator {
      * @param environmentId prospective environment identifier
      * @param applicationId prospective application identifier
      * @param disableSslVerification prospective flag to indicate if SSL verification should be disabled
-     * @param proxyUrl prospective proxy URL
-     * @param proxyCredentialsId prospective proxy credentials id
      * @param apiBaseUrl base URL for API (not user-visible)
      * @param appBaseUrl base URL for the ap (not user-visible)
      * @return validation result
@@ -58,8 +54,6 @@ public class MablStepBuilderValidator {
             String environmentId,
             String applicationId,
             boolean disableSslVerification,
-            String proxyUrl,
-            String proxyCredentialsId,
             String apiBaseUrl,
             String appBaseUrl
     ) {
@@ -91,20 +85,11 @@ public class MablStepBuilderValidator {
                         FORM_APPLICATION_ID_LABEL, FORM_ENVIRONMENT_ID_LABEL);
             }
 
-            if (!StringUtils.isBlank(proxyUrl)) {
-                try {
-                    HttpHost.create(proxyUrl);
-                } catch (IllegalArgumentException e) {
-                    return error("Invalid proxy URL provided: %s", proxyUrl);
-                }
-            }
-
             try {
-                MablRestApiClient client = MablStepBuilder.createMablRestApiClient(
+                MablRestApiClient client;
+                client = createMablRestApiClient(
                         restApiKeyClean,
                         disableSslVerification,
-                        trimToNull(proxyUrl),
-                        trimToNull(proxyCredentialsId),
                         apiBaseUrl,
                         appBaseUrl
                 );

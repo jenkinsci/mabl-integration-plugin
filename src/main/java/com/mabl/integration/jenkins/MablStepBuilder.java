@@ -77,8 +77,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private boolean disableSslVerification;
     private String apiBaseUrl;
     private String appBaseUrl;
-    private String proxyUrl;
-    private String proxyCredentialsId;
 
     @DataBoundConstructor
     public MablStepBuilder(
@@ -130,12 +128,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         this.appBaseUrl = appBaseUrl;
     }
 
-    @DataBoundSetter
-    public void setProxyUrl(String proxyUrl) { this.proxyUrl = proxyUrl; }
-
-    @DataBoundSetter
-    public void setProxyCredentialsId(String proxyCredentialsId) { this.proxyCredentialsId = proxyCredentialsId; }
-
     // Accessors to be used by Jelly UI templates
     public String getRestApiKeyId() {
         return restApiKeyId;
@@ -175,10 +167,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     public String getAppBaseUrl() { return this.appBaseUrl; }
 
-    public String getProxyUrl() { return this.proxyUrl; }
-
-    public String getProxyCredentialsId() { return this.proxyCredentialsId; }
-
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
@@ -192,8 +180,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 StringUtils.isBlank(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
                 getRestApiSecret(getRestApiKeyId()),
                 StringUtils.isBlank(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
-                proxyUrl,
-                getProxyCredentials(getProxyCredentialsId()),
                 disableSslVerification
         );
 
@@ -291,20 +277,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return secretKey;
     }
 
-    static StandardUsernamePasswordCredentials getProxyCredentials(final String proxyCredentialsId) {
-        if (proxyCredentialsId == null) {
-            return null;
-        }
-        List<StandardUsernamePasswordCredentials> passwordCredentials =
-                CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, (Item) null, ACL.SYSTEM, Collections.emptyList());
-        for (StandardUsernamePasswordCredentials cred : passwordCredentials) {
-            if (proxyCredentialsId.equals(cred.getId())) {
-                return cred;
-            }
-        }
-        return null;
-    }
-
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
@@ -347,15 +319,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 @QueryParameter("environmentId") final String environmentId,
                 @QueryParameter("applicationId") final String applicationId,
                 @QueryParameter("disableSslVerification") final boolean disableSslVerification,
-                @QueryParameter("proxyUrl") final String proxyUrl,
-                @QueryParameter("proxyCredentialsId") final String proxyCredentialsId,
                 @QueryParameter("apiBaseUrl") final String apiBaseUrl,
                 @QueryParameter("appBaseUrl") final String appBaseUrl
         ) {
             return MablStepBuilderValidator.validateForm(
-                    restApiKeyId, environmentId, applicationId, disableSslVerification,
-                    proxyUrl, proxyCredentialsId, apiBaseUrl, appBaseUrl
-            );
+                    restApiKeyId, environmentId, applicationId, disableSslVerification, apiBaseUrl, appBaseUrl);
         }
 
         public ListBoxModel doFillRestApiKeyIdItems(
@@ -395,24 +363,17 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 @QueryParameter String restApiKeyId,
                 @QueryParameter boolean disableSslVerification,
                 @QueryParameter String apiBaseUrl,
-                @QueryParameter String appBaseUrl,
-                @QueryParameter String proxyUrl,
-                @QueryParameter String proxyCredentialsId) {
+                @QueryParameter String appBaseUrl
+        ) {
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
             Secret secretKey = getRestApiSecret(restApiKeyId);
             if (secretKey != null) {
-                StandardUsernamePasswordCredentials proxyCredentials = null;
-                if (!StringUtils.isBlank(proxyCredentialsId) && !StringUtils.isBlank(proxyUrl)) {
-                    proxyCredentials = getProxyCredentials(proxyCredentialsId);
-                }
                 final MablRestApiClient client =
                         createMablRestApiClient(
                                 secretKey,
                                 disableSslVerification,
-                                proxyUrl,
-                                proxyCredentials,
                                 apiBaseUrl,
                                 appBaseUrl
                 );
@@ -450,21 +411,16 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 @QueryParameter String restApiKeyId,
                 @QueryParameter boolean disableSslVerification,
                 @QueryParameter String apiBaseUrl,
-                @QueryParameter String appBaseUrl,
-                @QueryParameter String proxyUrl,
-                @QueryParameter String proxyCredentialsId) {
+                @QueryParameter String appBaseUrl
+        ) {
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
 
             final Secret secretKey = getRestApiSecret(restApiKeyId);
             if (secretKey != null) {
-                StandardUsernamePasswordCredentials proxyCredentials = null;
-                if (!StringUtils.isBlank(proxyUrl) && !StringUtils.isBlank(proxyCredentialsId)) {
-                    proxyCredentials = getProxyCredentials(proxyCredentialsId);
-                }
                 final MablRestApiClient client = createMablRestApiClient(
-                        secretKey, disableSslVerification, proxyUrl, proxyCredentials, apiBaseUrl, appBaseUrl);
+                        secretKey, disableSslVerification, apiBaseUrl, appBaseUrl);
                 return getEnvironmentIdItems(client);
             }
             return new ListBoxModel();
@@ -509,40 +465,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                     "as well as dashes and underscores.");
         }
 
-        public ListBoxModel doFillProxyCredentialsIdItems(
-                @AncestorInPath Item item,
-                @QueryParameter String proxyCredentialsId) {
-            StandardListBoxModel result = new StandardListBoxModel();
-            if (proxyCredentialsId != null) {
-                result.add(proxyCredentialsId);
-            }
-            List<StandardUsernamePasswordCredentials> creds =
-                    lookupCredentials(StandardUsernamePasswordCredentials.class, item, ACL.SYSTEM,
-                            Collections.emptyList());
-            for (StandardUsernamePasswordCredentials cred : creds) {
-                result.add(cred.getId());
-            }
-            return result.includeEmptyValue();
-        }
-
-        public FormValidation doCheckProxyCredentialsIds(
-                @AncestorInPath Item item,
-                @QueryParameter String value
-        ) {
-            if (StringUtils.isBlank(value)) {
-                return FormValidation.warning("Provide a credentials ID");
-            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(USE_ITEM)) {
-                return FormValidation.warning("Insufficient permissions");
-            }
-
-            if (value.startsWith("${") && value.endsWith("}")) {
-                return FormValidation.warning("Cannot validate expression based credentials");
-            }
-
-            return FormValidation.ok();
-        }
-
-
         private static ListBoxModel getSelectValidApiKeyListBoxModel() {
             final ListBoxModel listBoxModel = new ListBoxModel();
             listBoxModel.add("Select a valid API key");
@@ -552,8 +474,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         private static MablRestApiClient createMablRestApiClient(
                 final Secret key,
                 final boolean disableSslVerification,
-                final String proxyUrl,
-                final StandardUsernamePasswordCredentials proxyCredentials,
                 final String apiBaseUrl,
                 final String appBaseUrl
         ) {
@@ -561,8 +481,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                     StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
                     key,
                     StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
-                    proxyUrl,
-                    proxyCredentials,
                     disableSslVerification);
         }
     }
@@ -570,8 +488,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public @Nonnull static MablRestApiClient createMablRestApiClient(
             final String restApiKeyId,
             final boolean disableSslVerification,
-            final String proxyUrl,
-            final String proxyCredentialsId,
             final String apiBaseUrl,
             final String appBaseUrl
     ) {
@@ -579,8 +495,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
                 getRestApiSecret(restApiKeyId),
                 StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
-                proxyUrl,
-                getProxyCredentials(proxyCredentialsId),
                 disableSslVerification);
     }
 

@@ -16,8 +16,10 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
+import hudson.ProxyConfiguration;
 import hudson.remoting.Base64;
 import hudson.util.Secret;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -96,31 +98,30 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private final String restApiBaseUrl;
     private final Secret restApiKey;
     private final String appBaseUrl;
-    private final HttpHost proxy;
-    private final StandardUsernamePasswordCredentials proxyCredentials;
+    private ProxyConfiguration proxy;
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
             final String appBaseUrl
     ) {
-        this(restApiBaseUrl, restApiKey, appBaseUrl, null, null, false);
+        this(restApiBaseUrl, restApiKey, appBaseUrl, false);
     }
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
             final String appBaseUrl,
-            final String proxyUrl,
-            final StandardUsernamePasswordCredentials proxyCredentials,
             final boolean disableSslVerification
     ) {
+        final Jenkins jenkins = Jenkins.getInstanceOrNull();
+        if (jenkins != null) {
+            proxy = jenkins.proxy;
+        }
 
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
         this.appBaseUrl = appBaseUrl;
-        this.proxy = StringUtils.isBlank(proxyUrl) ? null : HttpHost.create(proxyUrl);
-        this.proxyCredentials = proxyCredentials;
 
         final HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setRedirectStrategy(new DefaultRedirectStrategy())
@@ -167,12 +168,12 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         provider.setCredentials(AuthScope.ANY, creds);
 
         // Set proxy credentials if provided
-        if (proxy != null && proxyCredentials != null) {
+        if (proxy != null && !StringUtils.isBlank(proxy.getUserName())) {
             final Credentials c = new UsernamePasswordCredentials(
-                    proxyCredentials.getUsername(),
-                    proxyCredentials.getPassword().getPlainText()
+                    proxy.getUserName(),
+                    proxy.getPassword()
             );
-            provider.setCredentials(new AuthScope(proxy), c);
+            provider.setCredentials(new AuthScope(new HttpHost(proxy.name, proxy.port)), c);
         }
 
         return provider;
@@ -231,7 +232,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
     @Override
     public GetApiKeyResult getApiKeyResult() throws IOException {
-        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, restApiKey.getPlainText());
+        final String url = restApiBaseUrl + GET_ORGANIZATION_ENDPOINT_TEMPLATE;
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
@@ -311,7 +312,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 .setConnectTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setConnectionRequestTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setSocketTimeout(REQUEST_TIMEOUT_MILLISECONDS)
-                .setProxy(proxy)
+                .setProxy(proxy != null ? new HttpHost(proxy.name, proxy.port) : null)
                 .setProxyPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
                 .setTargetPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
                 .build();

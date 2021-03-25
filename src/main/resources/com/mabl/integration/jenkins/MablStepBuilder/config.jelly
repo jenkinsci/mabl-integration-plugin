@@ -29,12 +29,6 @@
     <f:entry title="${%Disable SSL verification}" field="disableSslVerification">
       <f:checkbox default="false" />
     </f:entry>
-    <f:entry title="${%Proxy server URL}" field="proxyUrl">
-      <f:textbox/>
-    </f:entry>
-    <f:entry title="${%Proxy credentials}" field="proxyCredentialsId">
-      <c:select includeUser="true"/>
-    </f:entry>
   </f:advanced>
   <f:invisibleEntry>
     <f:textbox field="apiBaseUrl" default="https://api.mabl.com"/>
@@ -44,5 +38,5 @@
   </f:invisibleEntry>
   <f:validateButton
       title="${%Validate}" progress="${%Validating...}"
-      method="validateForm" with="restApiKeyId,applicationId,environmentId,disableSslVerification,proxyUrl,proxyCredentialsId,apiBaseUrl,appBaseUrl" />
+      method="validateForm" with="restApiKeyId,applicationId,environmentId,disableSslVerification,apiBaseUrl,appBaseUrl" />
 </j:jelly>
