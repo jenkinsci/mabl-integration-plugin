@@ -1,6 +1,5 @@
 package com.mabl.integration.jenkins;
 
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -54,7 +53,6 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -63,7 +61,6 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
 import static com.mabl.integration.jenkins.MablStepConstants.REQUEST_TIMEOUT_MILLISECONDS;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
-import static org.apache.commons.httpclient.HttpStatus.SC_FORBIDDEN;
 import static org.apache.commons.httpclient.HttpStatus.SC_NOT_FOUND;
 import static org.apache.commons.httpclient.HttpStatus.SC_OK;
 
@@ -90,7 +87,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
     static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
     static final String GET_LABELS_ENDPOINT_TEMPLATE = "/schedule/runPolicy/labels?organization_id=%s";
-    static final String HEALTH_ENDPOINT = "/health";
+    static final String HEALTH_LIVE_ENDPOINT = "/health/live";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -168,28 +165,15 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         provider.setCredentials(AuthScope.ANY, creds);
 
         // Set proxy credentials if provided
-        if (proxy != null && !StringUtils.isBlank(proxy.getUserName())) {
+        if (proxy != null && (!StringUtils.isBlank(proxy.getUserName()) || !StringUtils.isBlank(proxy.getPassword()))) {
             final Credentials c = new UsernamePasswordCredentials(
-                    proxy.getUserName(),
+                    proxy.getUserName() == null ? "" : proxy.getUserName(),
                     proxy.getPassword()
             );
             provider.setCredentials(new AuthScope(new HttpHost(proxy.name, proxy.port)), c);
         }
 
         return provider;
-    }
-
-    private CredentialsProvider getProxyCredentialsProvider(
-            final StandardUsernamePasswordCredentials credentials
-    ) {
-        final CredentialsProvider provider = new BasicCredentialsProvider();
-        final UsernamePasswordCredentials creds =
-                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, restApiKey.getPlainText());
-
-        provider.setCredentials(AuthScope.ANY, creds);
-
-        return provider;
-
     }
 
     private Header getBasicAuthHeader(
@@ -261,7 +245,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
     @Override
     public void checkConnection() throws IOException {
-        final String url = restApiBaseUrl + HEALTH_ENDPOINT;
+        final String url = restApiBaseUrl + HEALTH_LIVE_ENDPOINT;
         final HttpResponse response = httpClient.execute(buildGetRequest(url));
         final int statusCode = response.getStatusLine().getStatusCode();
         switch (statusCode) {
