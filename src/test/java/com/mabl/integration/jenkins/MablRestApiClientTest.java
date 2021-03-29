@@ -204,7 +204,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
 
         registerGetMapping(
-                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                MablRestApiClientImpl.HEALTH_LIVE_ENDPOINT,
                 new ResponseDefinitionBuilder().withStatus(200),
                 "",
                 REST_API_USERNAME_PLACEHOLDER,
@@ -229,7 +229,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
 
         registerGetMapping(
-                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                MablRestApiClientImpl.HEALTH_LIVE_ENDPOINT,
                 new ResponseDefinitionBuilder().withStatus(401),
                 "",
                 REST_API_USERNAME_PLACEHOLDER,
@@ -254,7 +254,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
 
         registerGetMapping(
-                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                MablRestApiClientImpl.HEALTH_LIVE_ENDPOINT,
                 new ResponseDefinitionBuilder().withStatus(403),
                 "",
                 REST_API_USERNAME_PLACEHOLDER,
@@ -279,7 +279,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String fakeRestApiKeyId = "aFakeRestApiKeyId";
 
         registerGetMapping(
-                MablRestApiClientImpl.HEALTH_ENDPOINT,
+                MablRestApiClientImpl.HEALTH_LIVE_ENDPOINT,
                 new ResponseDefinitionBuilder().withStatus(500),
                 "",
                 REST_API_USERNAME_PLACEHOLDER,
