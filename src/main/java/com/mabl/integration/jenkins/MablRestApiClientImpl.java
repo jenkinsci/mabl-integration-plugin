@@ -254,7 +254,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             case 401:
                 throw new IOException("Invalid API key provided or the proxy connection requires authentication");
             case 403:
-                throw new IOException("Invalid API key type. You must use a CI/CD Integration key type");
+                throw new IOException("Invalid API key type. You must use a 'CI/CD Integration' key type");
             default:
                 throw new IOException(response.getStatusLine().toString());
         }
