@@ -10,6 +10,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Adding a mabl project step](#adding-a-mabl-project-step)
   * [Adding a mabl pipeline step](#adding-a-mabl-pipeline-step)
   * [Environment variable collection](#environment-variable-collection)
+  * [Configuring a proxy](#configuring-a-proxy)
   * [Upgrading from previous versions](#upgrading-from-previous-versions)
   * [Change log](#change-log)
   * [Building from source](#building-from-source)
@@ -146,6 +147,18 @@ Send build environment variables is set. Collecting the following information:
   'RUN_DISPLAY_URL' => 'http://127.0.0.1:9090/job/mabl%20integration/47/display/redirect'
 ```
 
+### Configuring a proxy
+
+This plugin requires access to resources hosted on the mabl cloud. If your Jenkins instance cannot directly access
+Internet resources, then you have to configure Jenkins to use a proxy.
+
+1. Visit the *Manage Jenkins* and then to the * Manage Plugins* page
+2. Click on the *Advanced* tab
+3. Fill out the *Server*, *Port*, and - if authentication is needed - the *User name* and/or *Password* fields
+   that reflect the proxy configuration in your environment
+
+![](img/config-proxy.png)
+
 ### Upgrading from previous versions
 
 #### Upgrading from pre-0.0.29 versions
@@ -165,6 +178,10 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.37 (03/29/2021)
+-   Added support for using forward proxies for interacting with mabl
+-   Updated JUnit, Mockito, JSON, Jackson, Spotbugs dependencies
 
 #### v0.0.36 (12/23/2020)
 -   Updated Apache HTTP client, Mockito, Jackson, Jenkins HPI plugin,

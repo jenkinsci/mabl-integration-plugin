@@ -82,5 +82,12 @@ public interface MablRestApiClient {
      */
     String getAppBaseUrl();
 
+    /**
+     * Performs testing the health endpoint to ensure that connection is working.
+     *
+     * @throws IOException on connection failure
+     */
+    void checkConnection() throws IOException;
+
     void close();
 }

@@ -202,5 +202,23 @@ public class MablStepDescriptorTest {
         }
     }
 
+    @Test
+    public void testProxyCredentialsIds_Blank() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return EXTENDED_READ.equals(permission);
+            }
+        };
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, null)).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, null));
+        when(mablStepDescriptor.doCheckRestApiKeyIds(item, "")).thenCallRealMethod();
+        assertNotEquals(FormValidation.ok(), mablStepDescriptor.doCheckRestApiKeyIds(item, ""));
+    }
 
 }

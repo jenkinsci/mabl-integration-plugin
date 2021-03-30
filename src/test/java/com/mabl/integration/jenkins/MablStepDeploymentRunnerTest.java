@@ -288,6 +288,16 @@ public class MablStepDeploymentRunnerTest {
     }
 
     @Test
+    public void planWithFailedEventCreation() throws IOException {
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
+                .thenReturn(null);
+
+        assertFalse("failure expected as continue on error is false", runner.call());
+
+        verify(client).close();
+    }
+
+    @Test
     public void executionResultToString_undefinedStatus_isWaiting() {
         ExecutionResult.JourneyExecutionResult result = new ExecutionResult.JourneyExecutionResult(
             null,
