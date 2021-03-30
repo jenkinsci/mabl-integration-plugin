@@ -1,39 +1,41 @@
 package com.mabl.integration.jenkins.test.output;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
-@XmlRootElement(name = "testcase")
-@XmlAccessorType(XmlAccessType.FIELD)
+import java.util.Collection;
+
+@XStreamAlias("testcase")
 public class TestCase {
 
-    @XmlAttribute(name = "classname")
+    @XStreamAsAttribute
+    @XStreamAlias("classname")
     private String plan;
-    @XmlAttribute(name = "name")
+
+    @XStreamAsAttribute
+    @XStreamAlias("name")
     private String journey;
-    @XmlAttribute(name = "time")
+
+    @XStreamAsAttribute
+    @XStreamAlias("time")
     private long duration;
-    @XmlAttribute(name = "xlink:type")
+
+    @XStreamAsAttribute
+    @XStreamAlias("xlink:type")
     private String linkType;
-    @XmlAttribute(name = "xlink:href")
+
+    @XStreamAsAttribute
+    @XStreamAlias("xlink:href")
     private String appHref;
 
-    @XmlElement(name = "failure")
     private Failure failure;
 
-    @XmlElement(name = "skipped")
+    @XStreamAsAttribute
     private Skipped skipped;
 
     // Note that this is nan-standard element.
     // XRay supports this extension, see
     // https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports
-    @XmlElement(name = "properties")
     private Properties properties;
 
     public TestCase() {
