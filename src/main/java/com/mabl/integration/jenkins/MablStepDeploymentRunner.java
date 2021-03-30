@@ -137,8 +137,12 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final CreateDeploymentProperties properties = getDeploymentProperties();
             final CreateDeploymentResult deployment =
                     client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
-            outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
-                    client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
+            if (deployment != null) {
+                outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
+                        client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
+            } else {
+                throw new MablSystemException("Failed to create deployment event");
+            }
 
             try {
 

@@ -13,10 +13,6 @@
     <f:select />
   </f:entry>
 
-  <f:validateButton
-     title="${%Validate}" progress="${%Validating...}"
-     method="validateForm" with="restApiKeyId,applicationId,environmentId" />
-
   <f:advanced>
     <f:entry title="${%Plan Labels}" field="labels">
       <f:textbox/>
@@ -40,4 +36,7 @@
   <f:invisibleEntry>
     <f:textbox field="appBaseUrl" default="https://app.mabl.com"/>
   </f:invisibleEntry>
+  <f:validateButton
+      title="${%Validate}" progress="${%Validating...}"
+      method="validateForm" with="restApiKeyId,applicationId,environmentId,disableSslVerification,apiBaseUrl,appBaseUrl" />
 </j:jelly>

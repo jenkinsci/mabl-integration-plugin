@@ -15,13 +15,19 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
+import hudson.ProxyConfiguration;
 import hudson.remoting.Base64;
 import hudson.util.Secret;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -46,7 +52,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -55,7 +61,6 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
 import static com.mabl.integration.jenkins.MablStepConstants.REQUEST_TIMEOUT_MILLISECONDS;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
-import static org.apache.commons.httpclient.HttpStatus.SC_FORBIDDEN;
 import static org.apache.commons.httpclient.HttpStatus.SC_NOT_FOUND;
 import static org.apache.commons.httpclient.HttpStatus.SC_OK;
 
@@ -82,6 +87,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     static final String GET_APPLICATIONS_ENDPOINT_TEMPLATE = "/applications?organization_id=%s";
     static final String GET_ENVIRONMENTS_ENDPOINT_TEMPLATE = "/environments?organization_id=%s";
     static final String GET_LABELS_ENDPOINT_TEMPLATE = "/schedule/runPolicy/labels?organization_id=%s";
+    static final String HEALTH_LIVE_ENDPOINT = "/health/live";
 
     private static final Header JSON_TYPE_HEADER = new BasicHeader("Content-Type", "application/json");
 
@@ -89,13 +95,14 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private final String restApiBaseUrl;
     private final Secret restApiKey;
     private final String appBaseUrl;
+    private ProxyConfiguration proxy;
 
     MablRestApiClientImpl(
             final String restApiBaseUrl,
             final Secret restApiKey,
             final String appBaseUrl
     ) {
-        this(restApiBaseUrl, restApiKey, appBaseUrl,false);
+        this(restApiBaseUrl, restApiKey, appBaseUrl, false);
     }
 
     MablRestApiClientImpl(
@@ -104,6 +111,10 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final String appBaseUrl,
             final boolean disableSslVerification
     ) {
+        final Jenkins jenkins = Jenkins.getInstanceOrNull();
+        if (jenkins != null) {
+            proxy = jenkins.proxy;
+        }
 
         this.restApiKey = restApiKey;
         this.restApiBaseUrl = restApiBaseUrl;
@@ -153,6 +164,15 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         provider.setCredentials(AuthScope.ANY, creds);
 
+        // Set proxy credentials if provided
+        if (proxy != null && (!StringUtils.isBlank(proxy.getUserName()) || !StringUtils.isBlank(proxy.getPassword()))) {
+            final Credentials credentials = new UsernamePasswordCredentials(
+                    proxy.getUserName() == null ? "" : proxy.getUserName(),
+                    proxy.getPassword()
+            );
+            provider.setCredentials(new AuthScope(new HttpHost(proxy.name, proxy.port)), credentials);
+        }
+
         return provider;
     }
 
@@ -196,7 +216,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
     @Override
     public GetApiKeyResult getApiKeyResult() throws IOException {
-        final String url = restApiBaseUrl + String.format(GET_ORGANIZATION_ENDPOINT_TEMPLATE, restApiKey.getPlainText());
+        final String url = restApiBaseUrl + GET_ORGANIZATION_ENDPOINT_TEMPLATE;
         return parseApiResult(httpClient.execute(buildGetRequest(url)), GetApiKeyResult.class);
     }
 
@@ -221,6 +241,23 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     @Override
     public String getAppBaseUrl() {
         return appBaseUrl;
+    }
+
+    @Override
+    public void checkConnection() throws IOException {
+        final String url = restApiBaseUrl + HEALTH_LIVE_ENDPOINT;
+        final HttpResponse response = httpClient.execute(buildGetRequest(url));
+        final int statusCode = response.getStatusLine().getStatusCode();
+        switch (statusCode) {
+            case 200:
+                break;
+            case 401:
+                throw new IOException("Invalid API key provided or the proxy connection requires authentication");
+            case 403:
+                throw new IOException("Invalid API key type. You must use a 'CI/CD Integration' key type");
+            default:
+                throw new IOException(response.getStatusLine().toString());
+        }
     }
 
     private HttpGet buildGetRequest(String url) {
@@ -259,6 +296,9 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 .setConnectTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setConnectionRequestTimeout(REQUEST_TIMEOUT_MILLISECONDS)
                 .setSocketTimeout(REQUEST_TIMEOUT_MILLISECONDS)
+                .setProxy(proxy != null ? new HttpHost(proxy.name, proxy.port) : null)
+                .setProxyPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
+                .setTargetPreferredAuthSchemes(Collections.singletonList(AuthSchemes.BASIC))
                 .build();
     }
 
