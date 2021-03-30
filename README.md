@@ -152,7 +152,7 @@ Send build environment variables is set. Collecting the following information:
 This plugin requires access to resources hosted on the mabl cloud. If your Jenkins instance cannot directly access
 Internet resources, then you have to configure Jenkins to use a proxy.
 
-1. Visit the *Manage Jenkins* and then to the * Manage Plugins* page
+1. Visit the *Manage Jenkins* and then to the *Manage Plugins* page
 2. Click on the *Advanced* tab
 3. Fill out the *Server*, *Port*, and - if authentication is needed - the *User name* and/or *Password* fields
    that reflect the proxy configuration in your environment
