@@ -1,10 +1,9 @@
 package com.mabl.integration.jenkins;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mabl.integration.jenkins.domain.CreateDeploymentPayload;
@@ -51,13 +50,14 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
 import static com.mabl.integration.jenkins.MablStepConstants.REQUEST_TIMEOUT_MILLISECONDS;
 import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
@@ -70,15 +70,7 @@ import static org.apache.commons.httpclient.HttpStatus.SC_OK;
  */
 public class MablRestApiClientImpl implements MablRestApiClient {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    {
-        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-    }
+    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     static final String REST_API_USERNAME_PLACEHOLDER = "key";
     static final String DEPLOYMENT_TRIGGER_ENDPOINT = "/events/deployment";
@@ -195,7 +187,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
-        final String jsonPayload = objectMapper.writeValueAsString(
+        final String jsonPayload = gson.toJson(
                 new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties));
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes(StandardCharsets.UTF_8));
 
@@ -280,7 +272,12 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         switch (statusCode) {
             case SC_OK: // fall through case
             case SC_CREATED:
-                return resultClass.cast(objectMapper.readerFor(resultClass).readValue(response.getEntity().getContent()));
+                ApiResult result = null;
+                try (InputStream responseStream = response.getEntity().getContent()) {
+                    result = gson.fromJson(
+                            new JsonReader(new InputStreamReader(responseStream)), resultClass);
+                }
+                return result;
             case SC_NOT_FOUND:
                 return null;
             default:

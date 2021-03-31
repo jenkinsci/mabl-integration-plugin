@@ -79,7 +79,7 @@ public class MablStepDeploymentRunnerTest {
         );
     }
 
-    @Test
+    @Test(timeout = 6000000)
     public void runTestsHappyPath() throws IOException {
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
                 .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));

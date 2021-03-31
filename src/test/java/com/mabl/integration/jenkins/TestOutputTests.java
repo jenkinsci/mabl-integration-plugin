@@ -12,10 +12,6 @@ import com.thoughtworks.xstream.XStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +40,7 @@ public class TestOutputTests {
     }
 
     @Test
-    public void testTestCaseOutputWithFailure() throws JAXBException {
+    public void testTestCaseOutputWithFailure() {
         Failure failure = new Failure("My Reason", "My Message");
         TestCase testCase = new TestCase("My Plan Name", "My Test Name", 23L, "http://myapphref.com", failure);
 
@@ -54,7 +50,7 @@ public class TestOutputTests {
     }
 
     @Test
-    public void testEntireTestSuite() throws JAXBException {
+    public void testEntireTestSuite() {
         TestSuite emptyTestSuite = new TestSuite(
                 "Empty Test Suite",
                 0L,

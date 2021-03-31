@@ -1,16 +1,14 @@
 package com.mabl.integration.jenkins.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
 public class GetApiKeyResult implements ApiResult {
     public String organization_id;
 
-    @JsonCreator
     public GetApiKeyResult(
-            @JsonProperty("organization_id") String organization_id
+            String organization_id
     ) {
         this.organization_id = organization_id;
     }
@@ -19,25 +17,24 @@ public class GetApiKeyResult implements ApiResult {
     public static class ApiKey {
         public final String id;
         public final String name;
-        public final Long createdTime;
-        public final String createdById;
-        public final Long lastUpdatedTime;
-        public final String lastUpdatedById;
-        public final String organizationId;
+        @SerializedName("created_time") public final Long createdTime;
+        @SerializedName("created_by_id") public final String createdById;
+        @SerializedName("last_updated_time") public final Long lastUpdatedTime;
+        @SerializedName("last_updated_by_id")public final String lastUpdatedById;
+        @SerializedName("organization_id") public final String organizationId;
         public final List<Scope> scopes;
         public final List<Tag> tags;
 
-        @JsonCreator
         public ApiKey(
-                @JsonProperty("id") final String id,
-                @JsonProperty("name") final String name,
-                @JsonProperty("created_time") final Long created_time,
-                @JsonProperty("created_by_id") final String created_by_id,
-                @JsonProperty("last_updated_time") final Long last_updated_time,
-                @JsonProperty("last_updated_by_id") final String last_updated_by_id,
-                @JsonProperty("organization_id") final String organization_id,
-                @JsonProperty("scopes") final List<Scope> scopes,
-                @JsonProperty("scopes") final List<Tag> tags
+                final String id,
+                final String name,
+                final Long created_time,
+                final String created_by_id,
+                final Long last_updated_time,
+                final String last_updated_by_id,
+                final String organization_id,
+                final List<Scope> scopes,
+                final List<Tag> tags
         ) {
             this.id = id;
             this.name = name;
@@ -53,13 +50,12 @@ public class GetApiKeyResult implements ApiResult {
 
     @SuppressWarnings("WeakerAccess")
     public static class Scope {
-        public final String permission;
-        public final String target;
+        @SerializedName("id") public final String permission;
+        @SerializedName("name") public final String target;
 
-        @JsonCreator
         public Scope(
-                @JsonProperty("id") final String permission,
-                @JsonProperty("name") final String target
+                final String permission,
+                final String target
         ) {
             this.permission = permission;
             this.target = target;
@@ -70,9 +66,8 @@ public class GetApiKeyResult implements ApiResult {
     public static class Tag {
         public final String name;
 
-        @JsonCreator
         public Tag(
-                @JsonProperty("name") final String name
+                final String name
         ) {
             this.name = name;
         }

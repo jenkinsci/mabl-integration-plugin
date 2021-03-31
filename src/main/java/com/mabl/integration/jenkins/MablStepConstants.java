@@ -1,6 +1,7 @@
 package com.mabl.integration.jenkins;
 
 import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.message.BasicHeader;
 
@@ -22,8 +23,8 @@ public class MablStepConstants {
     static final String PLUGIN_VERSION_UNKNOWN = "unknown";
     static final String PLUGIN_USER_AGENT =
             "mabl-jenkins-plugin/" + PLUGIN_VERSION + " (JVM: " +
-            System.getProperty("java.version") + ", Jenkins: " +
-                    Hudson.getVersion() + ")";
+            System.getProperty("java.version") +
+                    (Jenkins.getInstanceOrNull() != null ? ", Jenkins: " + Hudson.getVersion() : "") + ")";
     static final String TEST_OUTPUT_XML_FILENAME = "report.xml";
     public static final String TEST_OUTPUT_XML_XLINK = "http://www.w3.org/1999/xlink";
 
