@@ -52,6 +52,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -275,7 +276,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 ApiResult result = null;
                 try (InputStream responseStream = response.getEntity().getContent()) {
                     result = gson.fromJson(
-                            new JsonReader(new InputStreamReader(responseStream)), resultClass);
+                            new JsonReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8)), resultClass);
                 }
                 return result;
             case SC_NOT_FOUND:

@@ -157,6 +157,20 @@ public class MablBuildValidatorTest {
                 actual.getMessage().contains(FORM_API_KEY_LABEL));
     }
 
+    @Test
+    public void validateBadRestApiKey() {
+
+        final FormValidation actual = validateForm(
+                "key:invalid-key",
+                null,
+                null
+        );
+
+        assertEquals(ERROR, actual.kind);
+        assertTrue("rest API key label expected",
+                actual.getMessage().contains(FORM_API_KEY_LABEL));
+    }
+
     private void mockNoopRestApiClient(MockedStatic<MablStepBuilder> mocked) {
         mocked.when(() -> MablStepBuilder.createMablRestApiClient(
                 "sample-key-id", false, MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL)).thenReturn(

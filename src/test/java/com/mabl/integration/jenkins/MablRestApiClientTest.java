@@ -96,23 +96,23 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
             ExecutionResult result = client.getExecutionResults(eventId1);
             assertEquals("scheduled", result.executions.get(0).status);
-            assertNull(result.eventStatus.succeeded);
-            assertNull(result.eventStatus.succeededFirstAttempt);
-            assertNull(result.eventStatus.succeededWithRetries);
+            assertNull(result.eventStatus.getSucceeded());
+            assertNull(result.eventStatus.getSucceededFirstAttempt());
+            assertNull(result.eventStatus.getSucceededWithRetry());
 
             result = client.getExecutionResults(eventId2);
             assertEquals("failed", result.executions.get(0).status);
             assertEquals("scheduled", result.executions.get(1).status);
-            assertNull(result.eventStatus.succeeded);
-            assertNull(result.eventStatus.succeededFirstAttempt);
-            assertNull(result.eventStatus.succeededWithRetries);
+            assertNull(result.eventStatus.getSucceeded());
+            assertNull(result.eventStatus.getSucceededFirstAttempt());
+            assertNull(result.eventStatus.getSucceededWithRetry());
 
             result = client.getExecutionResults(eventId3);
             assertEquals("failed", result.executions.get(0).status);
             assertEquals("succeeded", result.executions.get(1).status);
-            assertTrue(result.eventStatus.succeeded);
-            assertFalse(result.eventStatus.succeededFirstAttempt);
-            assertTrue(result.eventStatus.succeededWithRetries);
+            assertTrue(result.eventStatus.getSucceeded());
+            assertFalse(result.eventStatus.getSucceededFirstAttempt());
+            assertTrue(result.eventStatus.getSucceededWithRetry());
 
         } finally {
             if (client != null) {
