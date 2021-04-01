@@ -1,19 +1,17 @@
 package com.mabl.integration.jenkins.test.output;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.converters.extended.ToAttributedValueConverter;
 
-@XmlRootElement(name = "failure")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XStreamAlias("failure")
+@XStreamConverter(value=ToAttributedValueConverter.class, strings={"reason"})
 public class Failure {
 
-    @XmlValue()
     private String reason;
 
-    @XmlAttribute(name = "message")
+    @XStreamAsAttribute
     private String message;
 
     public Failure() {

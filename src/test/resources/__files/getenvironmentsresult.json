@@ -1,0 +1,22 @@
+{
+  "environments": [
+    {
+      "id": "fake-id-1",
+      "name": "fake-name-1",
+      "created_time": 1617296634,
+      "created_by_id": "fake-creator-1",
+      "last_updated_time": 1617296789,
+      "last_updated_by_id": "fake-updater-1",
+      "organization_id": "fake-workspace-id-1"
+    },
+    {
+      "id": "fake-id-2",
+      "name": "fake-name-2",
+      "created_time": 1617297634,
+      "created_by_id": "fake-creator-2",
+      "last_updated_time": 1617297890,
+      "last_updated_by_id": "fake-updater-2",
+      "organization_id": "fake-workspace-id-2"
+    }
+  ]
+}

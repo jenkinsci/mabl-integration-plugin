@@ -1,20 +1,17 @@
 package com.mabl.integration.jenkins.test.output;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@XmlRootElement(name = "properties")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XStreamAlias("properties")
 public class Properties {
 
-    @XmlElement(name = "property")
-    private List<Property> properties;
+    @XStreamAlias("property")
+    private List<Property> properties = new ArrayList<>();
 
     public Properties(List<Property> properties) {
         this.properties = properties;
@@ -29,9 +26,6 @@ public class Properties {
     }
 
     public void addProperty(String name, String value) {
-        if (properties == null) {
-            properties = new ArrayList<>();
-        }
         properties.add(new Property(name, value));
     }
 

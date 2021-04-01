@@ -6,18 +6,24 @@ import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.test.output.Failure;
+import com.mabl.integration.jenkins.test.output.Properties;
+import com.mabl.integration.jenkins.test.output.Property;
+import com.mabl.integration.jenkins.test.output.Skipped;
 import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import hudson.EnvVars;
 import hudson.FilePath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +58,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             "completed",
             "terminated"
     );
+
+    private static final String XML_DECLARATION =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
     private final MablRestApiClient client;
     private final PrintStream outputStream;
@@ -261,11 +270,19 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
     private void outputTestSuiteXml(TestSuites testSuites) {
         try {
-            JAXBContext context = JAXBContext.newInstance(TestSuites.class);
-            Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(testSuites, buildPath.write());
-        } catch (JAXBException e) {
+            XStream xstream = new XStream();
+            xstream.processAnnotations(Failure.class);
+            xstream.processAnnotations(Properties.class);
+            xstream.processAnnotations(Property.class);
+            xstream.processAnnotations(Skipped.class);
+            xstream.processAnnotations(TestCase.class);
+            xstream.processAnnotations(TestSuite.class);
+            xstream.processAnnotations(TestSuites.class);
+
+            final OutputStream outputStream = buildPath.write();
+            outputStream.write(XML_DECLARATION.getBytes(StandardCharsets.UTF_8));
+            xstream.toXML(testSuites, outputStream);
+        } catch (XStreamException e) {
             throw new MablSystemException("There was an error trying to output test results in mabl.", e);
         } catch (IOException e) {
             throw new MablSystemException("There was an error trying to write test results in mabl.", e);

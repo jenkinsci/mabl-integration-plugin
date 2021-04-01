@@ -1,8 +1,6 @@
 package com.mabl.integration.jenkins.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * mabl result from deployment event creation
@@ -10,19 +8,18 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class CreateDeploymentResult implements ApiResult {
     public String id;
-    public String workspaceId;
-    public String mablBranch;
+    @SerializedName("workspace_id") public String workspaceId;
+    @SerializedName("source_control_tag") public String mablBranch;
 
-    @JsonCreator
     public CreateDeploymentResult(
-            @JsonProperty("id") final String id,
-            @JsonProperty("workspace_id") final String workspaceId
+            final String id,
+            final String workspaceId
     ) {
         this.id = id;
         this.workspaceId = workspaceId;
     }
 
-    @JsonSetter("source_control_tag")
+    @SerializedName("source_control_tag")
     public void setMablBranch(final String mablBranch) {
         this.mablBranch = mablBranch;
     }

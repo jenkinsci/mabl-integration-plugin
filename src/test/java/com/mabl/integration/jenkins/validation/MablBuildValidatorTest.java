@@ -9,7 +9,9 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.domain.GetEnvironmentsResultTest;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
+import com.mabl.integration.jenkins.domain.GetLabelsResultTest;
 import hudson.util.FormValidation;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -148,6 +150,20 @@ public class MablBuildValidatorTest {
 
         final FormValidation actual = validateForm(
                 null,
+                null,
+                null
+        );
+
+        assertEquals(ERROR, actual.kind);
+        assertTrue("rest API key label expected",
+                actual.getMessage().contains(FORM_API_KEY_LABEL));
+    }
+
+    @Test
+    public void validateBadRestApiKey() {
+
+        final FormValidation actual = validateForm(
+                "key:invalid-key",
                 null,
                 null
         );

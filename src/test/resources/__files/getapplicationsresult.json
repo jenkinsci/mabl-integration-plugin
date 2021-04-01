@@ -1,0 +1,22 @@
+{
+  "applications": [
+    {
+      "id": "fake-id-1",
+      "name": "fake-name-1",
+      "created_time": 1617293557,
+      "created_by_id": "creator-id-1",
+      "last_updated_time": 1617294567,
+      "last_updated_by_id": "updated-id-1",
+      "organization_id": "workspace-id-1"
+    },
+    {
+      "id": "fake-id-2",
+      "name": "fake-name-2",
+      "created_time": 1617294567,
+      "created_by_id": "creator-id-2",
+      "last_updated_time": 1617295678,
+      "last_updated_by_id": "updated-id-2",
+      "organization_id": "workspace-id-2"
+    }
+  ]
+}

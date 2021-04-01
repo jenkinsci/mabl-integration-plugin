@@ -4,44 +4,53 @@ import com.google.common.collect.ImmutableList;
 import com.mabl.integration.jenkins.test.output.Failure;
 import com.mabl.integration.jenkins.test.output.Properties;
 import com.mabl.integration.jenkins.test.output.Property;
+import com.mabl.integration.jenkins.test.output.Skipped;
 import com.mabl.integration.jenkins.test.output.TestCase;
 import com.mabl.integration.jenkins.test.output.TestSuite;
 import com.mabl.integration.jenkins.test.output.TestSuites;
+import com.thoughtworks.xstream.XStream;
+import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
 public class TestOutputTests {
 
-    @Test
-    public void testTestCaseOutputNoFailure() throws JAXBException {
-        TestCase testCase = new TestCase("My Plan Name", "My Test Name", 23L, "http://myapphref.com");
-        JAXBContext jaxbContext = JAXBContext.newInstance(TestCase.class);
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        StringWriter stringWriter = new StringWriter();
-        marshaller.marshal(testCase, stringWriter);
-        assertEquals(MablTestConstants.TEST_CASE_XML, stringWriter.toString());
+    private XStream xstream;
+
+    @Before
+    public void configureXStream() {
+        xstream = new XStream();
+        xstream.processAnnotations(Failure.class);
+        xstream.processAnnotations(Properties.class);
+        xstream.processAnnotations(Property.class);
+        xstream.processAnnotations(Skipped.class);
+        xstream.processAnnotations(TestCase.class);
+        xstream.processAnnotations(TestSuite.class);
+        xstream.processAnnotations(TestSuites.class);
     }
 
     @Test
-    public void testTestCaseOutputWithFailure() throws JAXBException {
+    public void testTestCaseOutputNoFailure() {
+        TestCase testCase = new TestCase("My Plan Name", "My Test Name", 23L, "http://myapphref.com");
+        String xml = xstream.toXML(testCase);
+        assertEquals(MablTestConstants.TEST_CASE_XML, xml);
+    }
+
+    @Test
+    public void testTestCaseOutputWithFailure() {
         Failure failure = new Failure("My Reason", "My Message");
         TestCase testCase = new TestCase("My Plan Name", "My Test Name", 23L, "http://myapphref.com", failure);
-        JAXBContext jaxbContext = JAXBContext.newInstance(TestCase.class);
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        StringWriter stringWriter = new StringWriter();
-        marshaller.marshal(testCase, stringWriter);
-        assertEquals(MablTestConstants.TEST_CASE_XML_WITH_FAILURE, stringWriter.toString());
+
+        String xml = xstream.toXML(testCase);
+
+        assertEquals(MablTestConstants.TEST_CASE_XML_WITH_FAILURE, xml);
     }
 
     @Test
-    public void testEntireTestSuite() throws JAXBException {
+    public void testEntireTestSuite() {
         TestSuite emptyTestSuite = new TestSuite(
                 "Empty Test Suite",
                 0L,
@@ -76,10 +85,7 @@ public class TestOutputTests {
         suites.add(testSuite1);
         TestSuites testSuites = new TestSuites(ImmutableList.copyOf(suites));
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(TestSuites.class);
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        StringWriter stringWriter = new StringWriter();
-        marshaller.marshal(testSuites, stringWriter);
-        assertEquals(MablTestConstants.TEST_SUITES_XML, stringWriter.toString());
+        String xml = xstream.toXML(testSuites);
+        assertEquals(MablTestConstants.TEST_SUITES_XML, xml);
     }
 }

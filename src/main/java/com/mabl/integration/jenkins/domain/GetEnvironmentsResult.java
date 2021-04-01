@@ -1,16 +1,13 @@
 package com.mabl.integration.jenkins.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 public class GetEnvironmentsResult implements ApiResult {
     public List<Environment> environments;
 
-    @JsonCreator
     public GetEnvironmentsResult(
-            @JsonProperty("environments") final List<Environment> environments
+            final List<Environment> environments
     ) {
         this.environments = environments;
     }
@@ -25,15 +22,14 @@ public class GetEnvironmentsResult implements ApiResult {
         public final String lastUpdatedById;
         public final String organizationId;
 
-        @JsonCreator
         public Environment(
-                @JsonProperty("id") final String id,
-                @JsonProperty("name") final String name,
-                @JsonProperty("created_time") final Long created_time,
-                @JsonProperty("created_by_id") final String created_by_id,
-                @JsonProperty("last_updated_time") final Long last_updated_time,
-                @JsonProperty("last_updated_by_id") final String last_updated_by_id,
-                @JsonProperty("organization_id") final String organization_id
+                final String id,
+                final String name,
+                final Long created_time,
+                final String created_by_id,
+                final Long last_updated_time,
+                final String last_updated_by_id,
+                final String organization_id
         ) {
             this.id = id;
             this.name = name;

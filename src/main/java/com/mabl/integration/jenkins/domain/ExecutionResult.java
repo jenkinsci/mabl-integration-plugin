@@ -1,9 +1,6 @@
 package com.mabl.integration.jenkins.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
@@ -13,12 +10,11 @@ import java.util.List;
 
 public class ExecutionResult implements ApiResult {
     public List<ExecutionSummary> executions;
-    public EventStatus eventStatus;
+    @SerializedName("event_status") public EventStatus eventStatus;
 
-    @JsonCreator
     public ExecutionResult(
-            @JsonProperty("executions") final List<ExecutionSummary> executions,
-            @JsonProperty("event_status") final EventStatus eventStatus
+            final List<ExecutionSummary> executions,
+            final EventStatus eventStatus
     ) {
         this.executions = executions;
         this.eventStatus = eventStatus;
@@ -27,26 +23,25 @@ public class ExecutionResult implements ApiResult {
     @SuppressWarnings("WeakerAccess")
     public static class ExecutionSummary {
         public final String status;
-        public final String statusCause;
+        @SerializedName("status_code") public final String statusCause;
         public final boolean success;
-        public final Long startTime;
-        public final Long stopTime;
+        @SerializedName("start_time") public final Long startTime;
+        @SerializedName("stop_time") public final Long stopTime;
         public final PlanSummary plan;
-        public final PlanExecutionResult planExecution;
+        @SerializedName("plan_execution") public final PlanExecutionResult planExecution;
         public final List<JourneySummary> journeys;
-        public final List<JourneyExecutionResult> journeyExecutions;
+        @SerializedName("journey_executions") public final List<JourneyExecutionResult> journeyExecutions;
 
-        @JsonCreator
         public ExecutionSummary(
-                @JsonProperty("status") final String status,
-                @JsonProperty("status_code") final String statusCause,
-                @JsonProperty("success") final boolean success,
-                @JsonProperty("start_time") final Long startTime,
-                @JsonProperty("stop_time") final Long stopTime,
-                @JsonProperty("plan") final PlanSummary plan,
-                @JsonProperty("plan_execution") final PlanExecutionResult planExecution,
-                @JsonProperty("journeys") final List<JourneySummary> journeys,
-                @JsonProperty("journey_executions") final List<JourneyExecutionResult> journeysExecutions
+                final String status,
+                final String statusCause,
+                final boolean success,
+                final Long startTime,
+                final Long stopTime,
+                PlanSummary plan,
+                final PlanExecutionResult planExecution,
+                final List<JourneySummary> journeys,
+                final List<JourneyExecutionResult> journeysExecutions
         ) {
             this.status = status;
             this.statusCause = statusCause;
@@ -65,10 +60,9 @@ public class ExecutionResult implements ApiResult {
         public final String id;
         public final String name;
 
-        @JsonCreator
         public PlanSummary(
-                @JsonProperty("id") final String id,
-                @JsonProperty("name") final String name
+                final String id,
+                final String name
         ) {
             this.id = id;
             this.name = name;
@@ -80,14 +74,13 @@ public class ExecutionResult implements ApiResult {
         public final String id;
         public final String name;
         public final String href;
-        public final String appHref;
+        @SerializedName("app_href") public final String appHref;
 
-        @JsonCreator
         public JourneySummary(
-                @JsonProperty("id") final String id,
-                @JsonProperty("name") final String name,
-                @JsonProperty("href") final String href,
-                @JsonProperty("app_href") final String appHref
+                final String id,
+                final String name,
+                final String href,
+                final String appHref
         ) {
             this.id = id;
             this.name = name;
@@ -97,10 +90,9 @@ public class ExecutionResult implements ApiResult {
     }
 
     public static class TestCaseID {
-        public final String caseID;
+        @SerializedName("id") public final String caseID;
 
-        @JsonCreator
-        public TestCaseID(@JsonProperty("id") final String caseID) {
+        public TestCaseID(final String caseID) {
             this.caseID = caseID;
         }
 
@@ -108,29 +100,28 @@ public class ExecutionResult implements ApiResult {
 
     @SuppressWarnings("WeakerAccess")
     public static class JourneyExecutionResult {
-        public final String id;
+        @SerializedName("journey_id") public final String id;
         public final String executionId;
         public final String href;
-        public final String appHref;
+        @SerializedName("app_href") public final String appHref;
         public final String status;
         public final String statusCause;
         public final boolean success;
-        public final Long startTime;
-        public final Long stopTime;
-        public final List<TestCaseID> testCases;
+        @SerializedName("start_time") public final Long startTime;
+        @SerializedName("stop_time") public final Long stopTime;
+        @SerializedName("test_cases") public final List<TestCaseID> testCases;
 
-        @JsonCreator
         public JourneyExecutionResult(
-                @JsonProperty("journey_id") final String id,
-                @JsonProperty("executionId") final String executionId,
-                @JsonProperty("href") final String href,
-                @JsonProperty("app_href") final String appHref,
-                @JsonProperty("status") final String status,
-                @JsonProperty("statusCause") final String statusCause,
-                @JsonProperty("success") final boolean success,
-                @JsonProperty("start_time") final Long startTime,
-                @JsonProperty("stop_time") final Long stopTime,
-                @JsonProperty("test_cases") final List<TestCaseID> testCases
+                final String id,
+                final String executionId,
+                final String href,
+                final String appHref,
+                final String status,
+                final String statusCause,
+                final boolean success,
+                final Long startTime,
+                final Long stopTime,
+                final List<TestCaseID> testCases
                 ) {
             this.id = id;
             this.executionId = executionId;
@@ -148,12 +139,11 @@ public class ExecutionResult implements ApiResult {
     @SuppressWarnings("WeakerAccess")
     public static class PlanExecutionResult {
         public final String id;
-        public final boolean isRetry;
+        @SerializedName("is_retry") public final boolean isRetry;
 
-        @JsonCreator
         public PlanExecutionResult(
-                @JsonProperty("id") final String id,
-                @JsonProperty("is_retry") final boolean isRetry
+                final String id,
+                final boolean isRetry
         ) {
             this.id = id;
             this.isRetry = isRetry;
@@ -163,39 +153,37 @@ public class ExecutionResult implements ApiResult {
     @SuppressWarnings("WeakerAccess")
     public static final class EventStatus {
         public Boolean succeeded;
-        public Boolean succeededFirstAttempt;
-        public Boolean succeededWithRetries;
+        @SerializedName("succeeded_first_attempt") public Boolean succeededFirstAttempt;
+        @SerializedName("succeeded_with_retries") public Boolean succeededWithRetries;
 
         public EventStatus(
         ) {
         }
 
-        @JsonGetter("succeeded")
         public Boolean getSucceeded() {
             return succeeded;
         }
 
-        @JsonGetter("succeeded_first_attempt")
+        @SerializedName("succeeded_first_attempt")
         public Boolean getSucceededFirstAttempt() {
             return succeededFirstAttempt;
         }
 
-        @JsonGetter("succeeded_with_retries")
+        @SerializedName("succeeded_with_retries")
         public Boolean getSucceededWithRetry() {
             return succeededWithRetries;
         }
 
-        @JsonSetter("succeeded")
         public void setSucceeded(Boolean succeeded) {
             this.succeeded = succeeded;
         }
 
-        @JsonSetter("succeeded_first_attempt")
+        @SerializedName("succeeded_first_attempt")
         public void setSucceededFirstAttempt(Boolean succeededFirstAttempt) {
             this.succeededFirstAttempt = succeededFirstAttempt;
         }
 
-        @JsonSetter("succeeded_with_retries")
+        @SerializedName("succeeded_with_retries")
         public void setSucceededWithRetry(Boolean succeededWithRetries) {
             this.succeededWithRetries = succeededWithRetries;
         }

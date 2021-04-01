@@ -1,18 +1,15 @@
 package com.mabl.integration.jenkins.test.output;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
-@XmlRootElement(name = "property")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XStreamAlias("property")
 public class Property {
 
-    @XmlAttribute(name = "name")
+    @XStreamAsAttribute
     private String name;
 
-    @XmlAttribute(name = "value")
+    @XStreamAsAttribute
     private String value;
 
     public Property(String name, String value) {
