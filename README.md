@@ -85,7 +85,7 @@ pipeline step for mabl. This can be written by hand or created via the
 -   continueOnPlanFailure: Continue if your plan/tests fail
 -   environmentId: Selects the environment to run deployments against
     (one of environmentId or applicationId is required)
--   restApiKeyId: The id of the API key secret of the desired deployment workspace. "restApiKeyId" is not real key -
+-   restApiKeyId: The id of the API key secret of the desired deployment workspace. The id is the value that is assigned in the Jenkins configuration to the corresponding secret. It is not the secret itself.
     Required
 -   labels: if specified, only plans with (any of the) labels will be triggered.
     If multiple labels are provided, separate them with commas.
