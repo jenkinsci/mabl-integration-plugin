@@ -18,8 +18,12 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +58,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             "completed",
             "terminated"
     );
+
+    private static final String XML_DECLARATION =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
     private final MablRestApiClient client;
     private final PrintStream outputStream;
@@ -272,7 +279,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             xstream.processAnnotations(TestSuite.class);
             xstream.processAnnotations(TestSuites.class);
 
-            xstream.toXML(testSuites, buildPath.write());
+            final OutputStream outputStream = buildPath.write();
+            outputStream.write(XML_DECLARATION.getBytes(StandardCharsets.UTF_8));
+            xstream.toXML(testSuites, outputStream);
         } catch (XStreamException e) {
             throw new MablSystemException("There was an error trying to output test results in mabl.", e);
         } catch (IOException e) {

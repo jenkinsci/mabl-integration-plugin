@@ -1,0 +1,27 @@
+{
+  "id": "fake-id",
+  "name": "fake-name",
+  "created_time": 1617238221,
+  "created_by_id": "fake-creator-id",
+  "last_updated_time": 1617239876,
+  "last_updated_by_id": "fake-updater-id",
+  "organization_id": "fake-organization-id",
+  "scopes": [
+    {
+      "id": "fake-permission",
+      "name": "fake-target"
+    },
+    {
+      "id": "fake-permisssion-2",
+      "name": "fake-target-2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "fake-tag-1"
+    },
+    {
+      "name": "fake-tag-2"
+    }
+  ]
+}

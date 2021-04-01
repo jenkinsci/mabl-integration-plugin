@@ -10,6 +10,7 @@ import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
+import com.mabl.integration.jenkins.domain.GetEnvironmentsResultTest;
 import hudson.util.Secret;
 import org.junit.Test;
 

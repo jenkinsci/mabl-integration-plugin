@@ -1,0 +1,12 @@
+{
+  "labels": [
+    {
+      "name": "regression",
+      "color": "red"
+    },
+    {
+      "name": "smoke",
+      "color": "amber"
+    }
+  ]
+}
