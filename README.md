@@ -179,6 +179,11 @@ Note that
 
 ### Change Log
 
+#### v0.0.38 (04/02/2021)
+-   Added support for running plugin with Java Runtime Environment 11
+-   Added GSON library for deserializing from JSON
+-   Replaced Jackson with XStream for XML serialization
+
 #### v0.0.37 (03/29/2021)
 -   Added support for using forward proxies for interacting with mabl
 -   Updated JUnit, Mockito, JSON, Jackson, Spotbugs dependencies
