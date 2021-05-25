@@ -177,6 +177,11 @@ Note that
 
 ### Change Log
 
+#### v0.0.39 (05/25/2021)
+- Increased request timeout for interacting with mabl API
+- Added retry handler for idempotent operations when interacting with mabl API
+- Update components: Wiremock, JUnit5, GSON, Spotbugs, JaCoCo
+
 #### v0.0.38 (04/01/2021)
 -   Added support for running plugin with Java Runtime Environment 11
 -   Added GSON library for deserializing from JSON
