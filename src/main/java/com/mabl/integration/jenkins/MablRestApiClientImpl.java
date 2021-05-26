@@ -44,6 +44,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -52,7 +53,6 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -119,7 +119,8 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
-                .setConnectionTimeToLive(30, TimeUnit.SECONDS) // use keep alive in SSL API connections
+                .setConnectionTimeToLive(60, TimeUnit.SECONDS) // use keep alive in SSL API connections
+                .setRetryHandler(new StandardHttpRequestRetryHandler(3, true))
                 .setDefaultRequestConfig(getDefaultRequestConfig());
 
         if (disableSslVerification) {

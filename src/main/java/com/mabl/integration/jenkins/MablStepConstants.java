@@ -33,7 +33,7 @@ public class MablStepConstants {
     public static final String DEFAULT_MABL_API_BASE_URL = "https://api.mabl.com";
     public static final String DEFAULT_MABL_APP_BASE_URL = "https://app.mabl.com";
     static final int EXECUTION_TIMEOUT_SECONDS = 3600;
-    static final int REQUEST_TIMEOUT_MILLISECONDS = 60000;
+    static final int REQUEST_TIMEOUT_MILLISECONDS = 120000;
     static final long EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS = 10000;
 
     // Form labels
