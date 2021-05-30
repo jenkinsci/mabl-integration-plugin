@@ -1,6 +1,6 @@
 ![mabl logo](https://avatars3.githubusercontent.com/u/25963599?s=100&v=4)
 # mabl Jenkins Plugin
-[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/mabl-integration-plugin/master)](https://ci.jenkins.io/job/Plugins/job/mabl-integration-plugin/job/master/) [![GitHub](https://img.shields.io/github/license/jenkinsci/mabl-integration-plugin)](https://github.com/jenkinsci/mabl-integration-plugin/blob/master/LICENSE) [![Twitter Follow](https://img.shields.io/twitter/follow/mablhq)](https://twitter.com/mablhq)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/mabl-integration-plugin/main)](https://ci.jenkins.io/job/Plugins/job/mabl-integration-plugin/job/main/) [![GitHub](https://img.shields.io/github/license/jenkinsci/mabl-integration-plugin)](https://github.com/jenkinsci/mabl-integration-plugin/blob/main/LICENSE) [![Twitter Follow](https://img.shields.io/twitter/follow/mablhq)](https://twitter.com/mablhq)
 
 This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a step in your Jenkins build. Your Jenkins build outcome will be tied to that of your deployment event.
 
