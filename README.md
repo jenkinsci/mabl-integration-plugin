@@ -30,7 +30,7 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Requirements
 
--   Minimum Jenkins version: *2.164.3*
+-   Minimum Jenkins version: *2.222.4*
 -   Minimum Java runtime version: *8*
 -   mabl API key
     -   See [integration
@@ -176,6 +176,11 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.40 (07/07/2021)
+- Changed minimum Jenkins version to 2.222.4 (pre-requisite for updating credentials plugin dependency)
+- Updated credentials plugin dependency to address security vulnerability
+- Updated plain-credentials, wiremock dependencies
 
 #### v0.0.39 (05/25/2021)
 - Increased request timeout for interacting with mabl API
