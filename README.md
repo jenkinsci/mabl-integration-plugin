@@ -177,7 +177,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.49 (07/07/2021)
+#### v0.0.40 (07/07/2021)
 - Changed minimum Jenkins version to 2.222.4 (pre-requisite for updating credentials plugin dependency)
 - Updated credentials plugin dependency to address security vulnerability
 - Updated plain-credentials, wiremock dependencies
