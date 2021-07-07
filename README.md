@@ -20,7 +20,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Deployment](#deployment)
 
 ## Plugin Installation
-Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v2.164+` server from the *Available Plugins* tab by searching for "mabl".
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v2.222+` server from the *Available Plugins* tab by searching for "mabl".
 
 ### Features
 
