@@ -315,9 +315,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                     case "failed":
                     case "completed":
                     case "skipped":
-                        final SortedSet<String> ids =
+                        final SortedSet<String> allIds =
                                 testCaseIDs.computeIfAbsent(journeyResult.status + "-test-cases", k -> new TreeSet<>());
+                        final SortedSet<String> ids = new TreeSet<>();
                         for (ExecutionResult.TestCaseID id : journeyResult.testCases) {
+                            allIds.add(id.caseID);
                             ids.add(id.caseID);
                         }
 
