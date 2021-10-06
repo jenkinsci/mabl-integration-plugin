@@ -398,9 +398,7 @@ public class MablStepDeploymentRunnerTest {
             assertEquals(4, suite.getTests());
 
             for (TestCase testCase : suite.getTestCases()) {
-                Properties caseProperties = testCase.getProperties();
-                assertNotNull(caseProperties);
-                Collection<Property> casePropertyCollection = caseProperties.getProperties();
+                Collection<Property> casePropertyCollection = testCase.getProperties();
                 assertNotNull(casePropertyCollection);
                 Property caseProperty = casePropertyCollection.iterator().next();
                 assertEquals("requirement", caseProperty.getName());

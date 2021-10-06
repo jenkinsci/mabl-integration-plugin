@@ -136,6 +136,9 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>4.4.1</version>
+                <configuration>
+                    <excludeFilterFile>spotbugsfilter.xml</excludeFilterFile>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

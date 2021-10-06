@@ -14,7 +14,9 @@ public class Properties {
     private List<Property> properties = new ArrayList<>();
 
     public Properties(List<Property> properties) {
-        this.properties = properties;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties.addAll(properties);
+        }
     }
 
     public Properties() {
