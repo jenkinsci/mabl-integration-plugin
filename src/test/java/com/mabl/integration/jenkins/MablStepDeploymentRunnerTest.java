@@ -360,7 +360,7 @@ public class MablStepDeploymentRunnerTest {
         }
     }
 
-    @Test(timeout = 600000)
+    @Test
     public void executionSummary_testCaseIdsAndSkipped() {
         ExecutionResult executionResult = createExecutionResultWithTestCaseIds();
         for (ExecutionResult.ExecutionSummary summary : executionResult.executions) {
