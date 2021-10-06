@@ -375,7 +375,7 @@ public class MablStepDeploymentRunnerTest {
             for (Property property : propertyCollection) {
                 switch (property.getName()) {
                     case "failed-test-cases":
-                        assertEquals("FAILED-1,FAILED-91", property.getValue());
+                        assertEquals("FAILED-1,FAILED-11,FAILED-91", property.getValue());
                         foundFailed = true;
                         break;
                     case "completed-test-cases":
@@ -393,9 +393,9 @@ public class MablStepDeploymentRunnerTest {
             assertTrue(foundCompleted);
             assertTrue(foundFailed);
             assertTrue(foundSkipped);
-            assertEquals(1, suite.getFailures());
+            assertEquals(2, suite.getFailures());
             assertEquals(1, suite.getSkipped());
-            assertEquals(3, suite.getTests());
+            assertEquals(4, suite.getTests());
 
             for (TestCase testCase : suite.getTestCases()) {
                 Properties caseProperties = testCase.getProperties();
@@ -405,7 +405,17 @@ public class MablStepDeploymentRunnerTest {
                 Property caseProperty = casePropertyCollection.iterator().next();
                 assertEquals("requirement", caseProperty.getName());
                 if (testCase.getFailure() != null) {
-                    assertEquals("FAILED-1,FAILED-91", caseProperty.getValue());
+                    switch (testCase.getJourney()) {
+                        case "Failing Test 1":
+                            assertEquals("FAILED-1,FAILED-91", caseProperty.getValue());
+                            break;
+                        case "Failing Test 2":
+                            assertEquals("FAILED-11", caseProperty.getValue());
+                            break;
+                        default:
+                            System.err.println("journey:" + testCase.getJourney());
+                            assertFalse(true);
+                    }
                     assertNull(testCase.getSkipped());
                 } else if (testCase.getSkipped() != null) {
                     assertEquals("SKIPPED-3,SKIPPED-33,SKIPPED-333", caseProperty.getValue());
@@ -431,11 +441,32 @@ public class MablStepDeploymentRunnerTest {
                                         true, 1596323475000L, 1596323575000L,
                                         null,
                                         null,
-                                        new ArrayList<>(),
+                                        Arrays.asList(
+                                                new ExecutionResult.JourneySummary(
+                                                        "failingTestId1-j",
+                                                        "Failing Test 1",
+                                                        "https://app.example.com",
+                                                        "https://app.example.com"),
+                                                new ExecutionResult.JourneySummary(
+                                                        "skippedTestId-j",
+                                                        "Skipped Test",
+                                                        "https://app.example.com",
+                                                        "https://app.example.com"),
+                                                new ExecutionResult.JourneySummary(
+                                                        "completedTestId-j",
+                                                        "Completed Test",
+                                                        "https://app.example.com",
+                                                        "https://app.example.com"),
+                                                new ExecutionResult.JourneySummary(
+                                                        "failingTestId2-j",
+                                                        "Failing Test 2",
+                                                        "https://app.example.com",
+                                                        "https://app.example.com")
+                                        ),
                                         Arrays.asList(
                                                 new ExecutionResult.JourneyExecutionResult(
-                                                "failingTestRun-jr",
-                                                "executionId1",
+                                                "failingTestId1-j",
+                                                "failingTestId1-jr",
                                                 "http://www.example.com",
                                                 "http://app.example.com",
                                                 "failed",
@@ -447,8 +478,8 @@ public class MablStepDeploymentRunnerTest {
                                                          new ExecutionResult.TestCaseID("FAILED-1"),
                                                          new ExecutionResult.TestCaseID("FAILED-91"))),
                                                 new ExecutionResult.JourneyExecutionResult(
-                                                        "skippedTestRun-jr",
-                                                        "executionId2",
+                                                        "skippedTestId-j",
+                                                        "skippedTestId-jr",
                                                         "http://www.example.com",
                                                         "http://app.example.com",
                                                         "skipped",
@@ -461,8 +492,8 @@ public class MablStepDeploymentRunnerTest {
                                                                 new ExecutionResult.TestCaseID("SKIPPED-33"),
                                                                 new ExecutionResult.TestCaseID("SKIPPED-333"))),
                                                 new ExecutionResult.JourneyExecutionResult(
-                                                        "completedTestRun-jr",
-                                                        "executionId3",
+                                                        "completedTestId-j",
+                                                        "completedTestId-jr",
                                                         "http://www.example.com",
                                                         "http://app.example.com",
                                                         "completed",
@@ -471,7 +502,19 @@ public class MablStepDeploymentRunnerTest {
                                                         1596323475002L,
                                                         1596323565002L,
                                                         singletonList(
-                                                                new ExecutionResult.TestCaseID("COMPLETED-2")))
+                                                                new ExecutionResult.TestCaseID("COMPLETED-2"))),
+                                                new ExecutionResult.JourneyExecutionResult(
+                                                        "failingTestId2-j",
+                                                        "failingTestId2-jr",
+                                                        "http://www.example.com",
+                                                        "http://app.example.com",
+                                                        "failed",
+                                                        "failed because ",
+                                                        false,
+                                                        1596323475003L,
+                                                        1596323565003L,
+                                                        singletonList(
+                                                                new ExecutionResult.TestCaseID("FAILED-11")))
                                         )
                                 )
                 ),

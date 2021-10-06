@@ -315,11 +315,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                     case "failed":
                     case "completed":
                     case "skipped":
-                        final SortedSet<String> ids =
-                                testCaseIDs.computeIfAbsent(journeyResult.status + "-test-cases", k -> new TreeSet<>());
+                        final SortedSet<String> ids = new TreeSet<>();
                         for (ExecutionResult.TestCaseID id : journeyResult.testCases) {
                             ids.add(id.caseID);
                         }
+                        testCaseIDs.computeIfAbsent(journeyResult.status + "-test-cases", k -> new TreeSet<>()).addAll(ids);
 
                         // XRay - report extension
                         // https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports
