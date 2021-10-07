@@ -101,6 +101,20 @@ public class CreateDeploymentProperties {
         this.buildPlanResultUrl = buildPlanResultUrl;
     }
 
-
+    public CreateDeploymentProperties copy() {
+        CreateDeploymentProperties copy = new CreateDeploymentProperties();
+        copy.setDeploymentOrigin(deploymentOrigin);
+        copy.setRepositoryBranchName(repositoryBranchName);
+        copy.setRepositoryRevisionNumber(repositoryRevisionNumber);
+        copy.setRepositoryUrl(repositoryUrl);
+        copy.setRepositoryName(repositoryName);
+        copy.setRepositoryPreviousRevisionNumber(repositoryPreviousRevisionNumber);
+        copy.setRepositoryCommitUsername(repositoryCommitUsername);
+        copy.setBuildPlanId(buildPlanId);
+        copy.setBuildPlanId(buildPlanName);
+        copy.setBuildPlanNumber(buildPlanNumber);
+        copy.setBuildPlanResultUrl(buildPlanResultUrl);
+        return copy;
+    }
 }
 

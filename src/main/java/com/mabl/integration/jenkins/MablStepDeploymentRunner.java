@@ -18,11 +18,9 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,8 +1,10 @@
 package com.mabl.integration.jenkins.test.output;
 
+import com.google.common.collect.ImmutableCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @XStreamAlias("testcase")
@@ -94,7 +96,7 @@ public class TestCase {
         return this.failure;
     }
 
-    public Properties getProperties() { return this.properties; }
+    public ImmutableCollection<Property> getProperties() { return properties.getProperties(); };
 
     public Skipped getSkipped() { return this.skipped; }
 }

@@ -19,6 +19,6 @@ public class CreateDeploymentPayload {
         this.planLabels = isBlank(planLabels) ? null :
                 Arrays.asList(commaDelimitedListToStringArray(planLabels));
         this.sourceControlTag = isBlank(mablBranch) ? null : mablBranch;
-        this.properties = properties;
+        this.properties = properties == null ? null : properties.copy();
     }
 }
