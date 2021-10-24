@@ -15,8 +15,8 @@ import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
 import hudson.ProxyConfiguration;
-import hudson.remoting.Base64;
 import hudson.util.Secret;
+import java.util.Base64;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -173,7 +173,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
     private Header getBasicAuthHeader(
             final Secret restApiKey
     ) {
-        final String encoded = Base64.encode((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey.getPlainText())
+        final String encoded = Base64.getEncoder().encodeToString((REST_API_USERNAME_PLACEHOLDER + ":" + restApiKey.getPlainText())
                 .getBytes(StandardCharsets.UTF_8));
         return new BasicHeader("Authorization", "Basic " + encoded);
     }
