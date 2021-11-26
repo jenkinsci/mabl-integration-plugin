@@ -184,6 +184,7 @@ Note that
 #### v0.0.43 (11/26/2021)
 - Updated documentation to clarify how to omit application ID or environment ID from pipelines
 - Updated GSON, SpotBugs and Jenkins Maven HPI plugin dependencies
+
 #### v0.0.42 (10/07/2021)
 - Fixed an issue where the associated test cases IDs were incorrectly recorded in the generated JUnit report
 - Updated WireMock, JUnit, GSON, SpotBugs dependencies
