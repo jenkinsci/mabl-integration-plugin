@@ -95,7 +95,7 @@ pipeline step for mabl. This can be written by hand or created via the
     [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
 
 Note that if you do not want to specify either the application ID or the environment ID,
-then use *empty* values in the pipeline configuration instead of completely omitting the
+then use an *empty* value in the pipeline configuration instead of completely omitting the
 corresponding configuration attributes.
 
 The following sections shows how to use the integration plugin in either a declarative or in a scripted
