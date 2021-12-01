@@ -94,6 +94,10 @@ pipeline step for mabl. This can be written by hand or created via the
     You may also want to use a Jenkins
     [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
 
+Note that if you do not want to specify either the application ID or the environment ID,
+then use an *empty* value in the pipeline configuration instead of completely omitting the
+corresponding configuration attributes.
+
 The following sections shows how to use the integration plugin in either a declarative or in a scripted
 pipeline.
 
@@ -176,6 +180,11 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.43 (11/30/2021)
+- Updated documentation to clarify how to omit application ID or environment ID from pipelines
+- Updated GSON, SpotBugs and Jenkins Maven HPI plugin dependencies
+- Remove dependence on Jenkins Base64 class
 
 #### v0.0.42 (10/07/2021)
 - Fixed an issue where the associated test cases IDs were incorrectly recorded in the generated JUnit report
