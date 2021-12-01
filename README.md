@@ -181,7 +181,7 @@ Note that
 
 ### Change Log
 
-#### v0.0.43 (11/26/2021)
+#### v0.0.43 (11/30/2021)
 - Updated documentation to clarify how to omit application ID or environment ID from pipelines
 - Updated GSON, SpotBugs and Jenkins Maven HPI plugin dependencies
 - Remove dependence on Jenkins Base64 class
