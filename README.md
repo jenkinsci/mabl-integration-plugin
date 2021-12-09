@@ -117,6 +117,11 @@ node {
 }
 ```
 
+Note that Jenkins pipelines may time out before your tests complete. In this case, adjust
+or set the `timeout` option in your pipeline configuration. See the
+[Available Options](https://www.jenkins.io/doc/book/pipeline/syntax/#options) section on the
+Jenkins documentation site for more information.
+
 ###  Environment Variable Collection
 
 The mabl plugin will optionally collect build and repository information
@@ -180,6 +185,11 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.44 (12/11/2021)
+- Increased timeout to trigger large deployments
+- Increased timeout for maximum test run duration
+- Updated documentation on increasing default Jenkins pipeline timeout
 
 #### v0.0.43 (11/30/2021)
 - Updated documentation to clarify how to omit application ID or environment ID from pipelines
