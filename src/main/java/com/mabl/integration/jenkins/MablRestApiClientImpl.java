@@ -119,7 +119,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
                 // TODO why isn't this setting the required Basic auth headers? Hardcoded as work around.
                 .setDefaultCredentialsProvider(getApiCredentialsProvider(restApiKey))
                 .setUserAgent(PLUGIN_USER_AGENT) // track calls @ API level
-                .setConnectionTimeToLive(60, TimeUnit.SECONDS) // use keep alive in SSL API connections
+                .setConnectionTimeToLive(10, TimeUnit.MINUTES) // use keep alive in SSL API connections
                 .setRetryHandler(new StandardHttpRequestRetryHandler(3, true))
                 .setDefaultRequestConfig(getDefaultRequestConfig());
 
