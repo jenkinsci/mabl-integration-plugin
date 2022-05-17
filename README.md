@@ -186,6 +186,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.45 (5/18/2022)
+- Updated credentials plugin dependency to address security vulnerability
+- Update README to fix IntelliJ configuration image
+
 #### v0.0.44 (12/11/2021)
 - Increased timeout to trigger large deployments
 - Increased timeout for maximum test run duration
