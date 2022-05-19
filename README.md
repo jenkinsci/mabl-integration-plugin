@@ -188,7 +188,7 @@ Note that
 
 #### v0.0.45 (5/18/2022)
 - Updated credentials plugin dependency to address security vulnerability
-- Update README to fix IntelliJ configuration image
+- Update README to clarify set up and validation steps
 
 #### v0.0.44 (12/11/2021)
 - Increased timeout to trigger large deployments
@@ -398,6 +398,26 @@ Release Notes.
 
 You can also test with Jenkins Enterprise using the images published
 on [Docker Hub](https://hub.docker.com/r/cloudbees/jenkins-enterprise).
+
+```bash
+# Launch Jenkins Enterprise container and automatically pull the image if not present
+docker run -d -p 9090:8080 --name=jenkins cloudbees/jenkins-enterprise
+
+# Find initialAdminPassword to unlock Jenkins on a browser at localhost:9090
+docker exec -it jenkins bash -c "cat /var/jenkins_home/secrets/initialAdminPassword"
+
+# Setup your Jenkins instance
+
+# Build and deploy plugin to Jenkins (make sure you're in the mabl-integration-plugin directory)
+mvn clean package \
+  && docker cp target/mabl-integration.hpi jenkins:/var/jenkins_home/plugins/ \
+  && docker restart jenkins
+```
+
+If the plugin is not loaded due to dependency errors, try restarting Jenkins.
+```bash
+docker restart jenkins
+```
 
 ### Local Machine
 Overview of how to run/debug plugin with Intellij on local machine.
