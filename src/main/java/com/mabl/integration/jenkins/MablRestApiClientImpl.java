@@ -61,9 +61,9 @@ import javax.net.ssl.SSLContext;
 
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_USER_AGENT;
 import static com.mabl.integration.jenkins.MablStepConstants.REQUEST_TIMEOUT_MILLISECONDS;
-import static org.apache.commons.httpclient.HttpStatus.SC_CREATED;
-import static org.apache.commons.httpclient.HttpStatus.SC_NOT_FOUND;
-import static org.apache.commons.httpclient.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_CREATED;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_OK;
 
 /**
  * mabl runner to launch all plans for a given
