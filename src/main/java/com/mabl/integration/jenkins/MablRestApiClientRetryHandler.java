@@ -6,8 +6,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.protocol.HttpContext;
 
-import static org.apache.commons.httpclient.HttpStatus.SC_NOT_IMPLEMENTED; // 501
-import static org.apache.commons.httpclient.HttpStatus.SC_BAD_GATEWAY; // 502
+import static org.apache.http.HttpStatus.SC_NOT_IMPLEMENTED; // 501
+import static org.apache.http.HttpStatus.SC_BAD_GATEWAY; // 502
 
 public class MablRestApiClientRetryHandler implements ServiceUnavailableRetryStrategy {
 
