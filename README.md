@@ -186,6 +186,9 @@ Note that
 
 ### Change Log
 
+#### v0.0.46 (11/15/2022)
+- Replace usages of deprecated imports
+
 #### v0.0.45 (5/18/2022)
 - Updated credentials plugin dependency to address security vulnerability
 - Update README to clarify set up and validation steps
