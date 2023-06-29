@@ -156,7 +156,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         // Adding check for null or empty restApiKey
         final String keyTest = restApiKey.getPlainText();
-        if (keyTest == null || keyTest.trim().isEmpty()) {
+        if (StringUtils.isBlank(keyTest)) {
             throw new IllegalArgumentException ("API key not found");
         }
 
