@@ -7,27 +7,33 @@ import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.Collection;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.USE_ITEM;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mockStatic;
 import static org.junit.Assert.assertEquals;
 
 public class MablStepDescriptorTest {
 
     private MablStepBuilder.MablStepDescriptor mablStepDescriptor;
 
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
     @Before
     public void setup() {
         mablStepDescriptor = mock(MablStepBuilder.MablStepDescriptor.class);
         doNothing().when(mablStepDescriptor).load();
+        // create a dummy security realm
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
     }
 
     @Test
@@ -146,15 +152,27 @@ public class MablStepDescriptorTest {
     @Test
     public void testDoFillApplicationIdItems_NoApiKey()
     {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return true;
+            }
+        };
+
         when(mablStepDescriptor.doFillApplicationIdItems(
-                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+                null, false, item)).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems(null, false, item);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
 
         when(mablStepDescriptor.doFillApplicationIdItems(
-                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        model = mablStepDescriptor.doFillApplicationIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+                "", false, item)).thenCallRealMethod();
+        model = mablStepDescriptor.doFillApplicationIdItems("", false, item);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
     }
@@ -162,28 +180,49 @@ public class MablStepDescriptorTest {
     @Test
     public void testDoFillApplicationIdItems_NoSecret()
     {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return true;
+            }
+        };
+
         when(mablStepDescriptor.doFillApplicationIdItems(
-                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+                "invalid-key", false, item)).thenCallRealMethod();
 
-        try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
-            mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
-
-            ListBoxModel model = mablStepDescriptor.doFillApplicationIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
-            assertEquals(0, model.size());
-        }
+        assertThrows(
+            IllegalStateException.class,
+            () -> mablStepDescriptor.doFillApplicationIdItems("invalid-key", false, item));
     }
 
     @Test
     public void testDoFillEnvironmentIdItems_NoApiKey() {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return true;
+            }
+        };
+
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                null, false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems(null, false, "https://api.mabl.com", "https://app.mabl.com");
+                null, false, item)).thenCallRealMethod();
+        ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems(null, false, item);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
 
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                "", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
-        model = mablStepDescriptor.doFillEnvironmentIdItems("", false, "https://api.mabl.com", "https://app.mabl.com");
+                "", false, item)).thenCallRealMethod();
+        model = mablStepDescriptor.doFillEnvironmentIdItems("", false, item);
         assertEquals(1, model.size());
         assertEquals("Select a valid API key", model.iterator().next().value);
     }
@@ -191,15 +230,24 @@ public class MablStepDescriptorTest {
     @Test
     public void testDoFillEnvironmentIdItems_NoSecret()
     {
+        Item item = new AbstractItem(null, "testItem") {
+            @Override
+            public Collection<? extends Job> getAllJobs() {
+                return null;
+            }
+
+            @Override
+            public boolean hasPermission(Permission permission) {
+                return true;
+            }
+        };
+
         when(mablStepDescriptor.doFillEnvironmentIdItems(
-                "invalid-key", false, "https://api.mabl.com", "https://app.mabl.com")).thenCallRealMethod();
+                "invalid-key", false, item)).thenCallRealMethod();
 
-        try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
-            mocked.when(() -> MablStepBuilder.getRestApiSecret("invalid-key")).thenReturn(null);
-
-            ListBoxModel model = mablStepDescriptor.doFillEnvironmentIdItems("invalid-key", false, "https://api.mabl.com", "https://app.mabl.com");
-            assertEquals(0, model.size());
-        }
+        assertThrows(
+            IllegalStateException.class,
+            () -> mablStepDescriptor.doFillEnvironmentIdItems("invalid-key", false, item));
     }
 
     @Test

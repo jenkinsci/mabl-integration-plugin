@@ -1,7 +1,13 @@
 package com.mabl.integration.jenkins;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import hudson.model.Job;
+import hudson.model.Queue;
+import hudson.model.queue.Tasks;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
@@ -16,7 +22,6 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -31,13 +36,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,12 +50,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.*;
 import static com.mabl.integration.jenkins.MablStepConstants.BUILD_STEP_DISPLAY_NAME;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS;
 import static com.mabl.integration.jenkins.MablStepConstants.EXECUTION_TIMEOUT_SECONDS;
-import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_APP_BASE_URL;
-import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_API_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.MABL_APP_BASE_URL;
+import static com.mabl.integration.jenkins.MablStepConstants.MABL_API_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.PLUGIN_SYMBOL;
 import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FILENAME;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -175,10 +179,22 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     ) throws InterruptedException {
 
         final PrintStream outputStream = listener.getLogger();
+
+        StringCredentials credentials = CredentialsProvider.findCredentialById(
+            restApiKeyId,
+            StringCredentials.class,
+            run,
+            Collections.emptyList()
+        );
+
+        if (credentials == null) {
+            throw new IllegalStateException("No credentials found for API key provided");
+        }
+
         final MablRestApiClient client = new MablRestApiClientImpl(
-                StringUtils.isBlank(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
-                getRestApiSecret(getRestApiKeyId()),
-                StringUtils.isBlank(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
+                MABL_API_BASE_URL,
+                credentials.getSecret(),
+                MABL_APP_BASE_URL,
                 disableSslVerification
         );
 
@@ -259,23 +275,6 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         return environmentVars;
     }
 
-    static Secret getRestApiSecret(final String restApiKeyId) {
-        if (restApiKeyId == null) {
-            return null;
-        }
-
-        Secret secretKey = null;
-        List<StringCredentials> stringCredentials =
-                CredentialsProvider.lookupCredentials(StringCredentials.class, (Item) null, ACL.SYSTEM, Collections.emptyList());
-        for (StringCredentials cred : stringCredentials) {
-            if (restApiKeyId.equals(cred.getId())) {
-                secretKey = cred.getSecret();
-                break;
-            }
-        }
-        return secretKey;
-    }
-
     /**
      * Descriptor used in views. Centralized metadata store for all {@link MablStepBuilder} instances.
      */
@@ -312,43 +311,67 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return BUILD_STEP_DISPLAY_NAME;
         }
 
-
+        @POST
         public FormValidation doValidateForm(
                 @QueryParameter("restApiKeyId") final String restApiKeyId,
                 @QueryParameter("environmentId") final String environmentId,
                 @QueryParameter("applicationId") final String applicationId,
                 @QueryParameter("disableSslVerification") final boolean disableSslVerification,
-                @QueryParameter("apiBaseUrl") final String apiBaseUrl,
-                @QueryParameter("appBaseUrl") final String appBaseUrl
+                @AncestorInPath final Job job
         ) {
-            return MablStepBuilderValidator.validateForm(
-                    restApiKeyId, environmentId, applicationId, disableSslVerification, apiBaseUrl, appBaseUrl);
+            if (job == null) {
+                Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            } else {
+                job.checkPermission(Item.CONFIGURE);
+            }
+            return MablStepBuilderValidator.validateForm(restApiKeyId, environmentId, applicationId, disableSslVerification, job);
         }
 
         public ListBoxModel doFillRestApiKeyIdItems(
                 @AncestorInPath Item item,
-                @QueryParameter String restApiKeyId) {
+                @QueryParameter String restApiKeyId
+        ) {
+            Jenkins.get().checkPermission(Job.CONFIGURE);
             StandardListBoxModel result = new StandardListBoxModel();
-            if (restApiKeyId != null) {
-                result.add(restApiKeyId);
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(restApiKeyId);
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(restApiKeyId);
+                }
             }
-            List<StringCredentials> creds =
-                    lookupCredentials(StringCredentials.class, item, ACL.SYSTEM,
-                            Collections.emptyList());
-            for (StringCredentials cred : creds) {
-                result.add(cred.getId());
-            }
-            return result.includeEmptyValue();
+
+            return result
+                .includeEmptyValue()
+                .includeMatchingAs(
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    item,
+                    StringCredentials.class,
+                    Collections.emptyList(),
+                    CredentialsMatchers.always()
+                );
         }
 
         public FormValidation doCheckRestApiKeyIds(
                 @AncestorInPath Item item,
                 @QueryParameter String value
         ) {
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return FormValidation.warning("Insufficient permissions");
+                }
+            }
+
             if (StringUtils.isBlank(value)) {
                 return FormValidation.warning("Provide a credentials ID");
-            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(USE_ITEM)) {
-                return FormValidation.warning("Insufficient permissions");
             }
 
             if (value.startsWith("${") && value.endsWith("}")) {
@@ -358,27 +381,48 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public ListBoxModel doFillApplicationIdItems(
                 @QueryParameter String restApiKeyId,
                 @QueryParameter boolean disableSslVerification,
-                @QueryParameter String apiBaseUrl,
-                @QueryParameter String appBaseUrl
+                @AncestorInPath Item item
         ) {
+            Jenkins.get().checkPermission(Job.CONFIGURE);
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
-            Secret secretKey = getRestApiSecret(restApiKeyId);
-            if (secretKey != null) {
-                final MablRestApiClient client =
-                        createMablRestApiClient(
-                                secretKey,
-                                disableSslVerification,
-                                apiBaseUrl,
-                                appBaseUrl
-                );
-                return getApplicationIdItems(client);
+
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return new ListBoxModel();
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return new ListBoxModel();
+                }
             }
-            return new ListBoxModel();
+
+            StringCredentials credentials = CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentials(
+                    StringCredentials.class,
+                    item,
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    Collections.emptyList()
+                ),
+                CredentialsMatchers.withId(restApiKeyId)
+            );
+
+            if (credentials == null) {
+                throw new IllegalStateException("No credentials found for API key provided");
+            }
+
+            final MablRestApiClient client =
+                createMablRestApiClient(
+                    credentials.getSecret(),
+                    disableSslVerification
+                );
+            return getApplicationIdItems(client);
         }
 
         private ListBoxModel getApplicationIdItems(
@@ -393,7 +437,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 String organizationId = apiKeyResult.organization_id;
                 GetApplicationsResult applicationsResult = client.getApplicationsResult(organizationId);
 
-                items.add("", "");
+                items.add("- none -", "");
                 for (GetApplicationsResult.Application application : applicationsResult.applications) {
                     items.add(application.name, application.id);
                 }
@@ -406,23 +450,48 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return getSelectValidApiKeyListBoxModel();
         }
 
+        @POST
         public ListBoxModel doFillEnvironmentIdItems(
                 @QueryParameter String restApiKeyId,
                 @QueryParameter boolean disableSslVerification,
-                @QueryParameter String apiBaseUrl,
-                @QueryParameter String appBaseUrl
+                @AncestorInPath Item item
         ) {
+            Jenkins.get().checkPermission(Job.CONFIGURE);
             if (StringUtils.isBlank(restApiKeyId)) {
                 return getSelectValidApiKeyListBoxModel();
             }
 
-            final Secret secretKey = getRestApiSecret(restApiKeyId);
-            if (secretKey != null) {
-                final MablRestApiClient client = createMablRestApiClient(
-                        secretKey, disableSslVerification, apiBaseUrl, appBaseUrl);
-                return getEnvironmentIdItems(client);
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return new ListBoxModel();
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return new ListBoxModel();
+                }
             }
-            return new ListBoxModel();
+
+            StringCredentials credentials = CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentials(
+                    StringCredentials.class,
+                    item,
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    Collections.emptyList()
+                ),
+                CredentialsMatchers.withId(restApiKeyId)
+            );
+
+            if (credentials == null) {
+                throw new IllegalStateException("No credentials found for API key provided");
+            }
+
+            final MablRestApiClient client =
+                createMablRestApiClient(
+                    credentials.getSecret(),
+                    disableSslVerification
+                );
+            return getEnvironmentIdItems(client);
         }
 
         private ListBoxModel getEnvironmentIdItems(final MablRestApiClient client) {
@@ -436,7 +505,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 String organizationId = apiKeyResult.organization_id;
                 GetEnvironmentsResult environmentsResult = client.getEnvironmentsResult(organizationId);
 
-                items.add("", "");
+                items.add("- none -", "");
                 for (GetEnvironmentsResult.Environment environment : environmentsResult.environments) {
                     items.add(environment.name, environment.id);
                 }
@@ -472,14 +541,12 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
         private static MablRestApiClient createMablRestApiClient(
                 final Secret key,
-                final boolean disableSslVerification,
-                final String apiBaseUrl,
-                final String appBaseUrl
+                final boolean disableSslVerification
         ) {
             return new MablRestApiClientImpl(
-                    StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
+                    MABL_API_BASE_URL,
                     key,
-                    StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
+                    MABL_APP_BASE_URL,
                     disableSslVerification);
         }
     }
@@ -487,13 +554,26 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public @Nonnull static MablRestApiClient createMablRestApiClient(
             final String restApiKeyId,
             final boolean disableSslVerification,
-            final String apiBaseUrl,
-            final String appBaseUrl
+            final Job job
     ) {
+        StringCredentials credentials = CredentialsMatchers.firstOrNull(
+            CredentialsProvider.lookupCredentials(
+                StringCredentials.class,
+                job,
+                job instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) job) : ACL.SYSTEM,
+                Collections.emptyList()
+            ),
+            CredentialsMatchers.withId(restApiKeyId)
+        );
+
+        if (credentials == null) {
+            throw new IllegalStateException("No credentials found for API key provided");
+        }
+
         return new MablRestApiClientImpl(
-                StringUtils.isEmpty(apiBaseUrl) ? DEFAULT_MABL_API_BASE_URL : apiBaseUrl,
-                getRestApiSecret(restApiKeyId),
-                StringUtils.isEmpty(appBaseUrl) ? DEFAULT_MABL_APP_BASE_URL : appBaseUrl,
+                MABL_API_BASE_URL,
+                credentials.getSecret(),
+                MABL_APP_BASE_URL,
                 disableSslVerification);
     }
 

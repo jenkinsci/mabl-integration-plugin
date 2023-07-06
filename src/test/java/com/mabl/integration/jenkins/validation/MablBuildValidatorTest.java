@@ -2,18 +2,19 @@ package com.mabl.integration.jenkins.validation;
 
 import com.mabl.integration.jenkins.MablRestApiClient;
 import com.mabl.integration.jenkins.MablStepBuilder;
-import com.mabl.integration.jenkins.MablStepConstants;
 import com.mabl.integration.jenkins.domain.CreateDeploymentProperties;
 import com.mabl.integration.jenkins.domain.CreateDeploymentResult;
 import com.mabl.integration.jenkins.domain.ExecutionResult;
 import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
-import com.mabl.integration.jenkins.domain.GetEnvironmentsResultTest;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
-import com.mabl.integration.jenkins.domain.GetLabelsResultTest;
+import hudson.model.FreeStyleProject;
 import hudson.util.FormValidation;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.MockedStatic;
 
 import java.io.IOException;
@@ -32,17 +33,26 @@ import static org.mockito.Mockito.mockStatic;
  * Unit test runner
  */
 public class MablBuildValidatorTest {
+    FreeStyleProject freeStyleProject;
+
+    @Rule
+    public JenkinsRule jenkinsRule = new JenkinsRule();
+
+    @Before
+    public void setupTest() {
+        freeStyleProject = jenkinsRule.jenkins.getItemByFullName("my-freestyle", FreeStyleProject.class);
+    }
 
     @Test
     public void validateGoodAllFieldsForm() {
-
         try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
             mockNoopRestApiClient(mocked);
 
             final FormValidation actual = validateForm(
                     "sample-key-id",
                     "sample-environment-id",
-                    "sample-application-id"
+                    "sample-application-id",
+                     freeStyleProject
             );
 
             assertEquals(actual.kind, OK);
@@ -51,14 +61,14 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateGoodEnvironmentOnlyForm() {
-
         try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
             mockNoopRestApiClient(mocked);
 
             final FormValidation actual = validateForm(
                     "sample-key-id",
                     "sample-environment-id",
-                    null
+                    null,
+                     freeStyleProject
             );
 
             assertEquals(actual.kind, OK);
@@ -68,13 +78,13 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateGoodApplicationOnlyForm() {
-
         try (MockedStatic<MablStepBuilder> mocked = mockStatic(MablStepBuilder.class)) {
             mockNoopRestApiClient(mocked);
             final FormValidation actual = validateForm(
                     "sample-key-id",
                     null,
-                    "sample-application-id"
+                    "sample-application-id",
+                     freeStyleProject
             );
 
             assertEquals(actual.kind, OK);
@@ -83,11 +93,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadNoEnvironmentOrApplicationForm() {
-
         final FormValidation actual = validateForm(
                 "sample-key-id",
                 null,
-                null
+                null,
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -99,11 +109,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadNoEnvironmentIdInWrongFieldApplicationForm() {
-
         final FormValidation actual = validateForm(
                 "sample-key-id",
                 "sample-a",
-                null
+                null,
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -115,11 +125,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadNoApplicationIdInWrongFieldApplicationForm() {
-
         final FormValidation actual = validateForm(
                 "sample-key-id",
                 null,
-                "sample-e"
+                "sample-e",
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -131,11 +141,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadNoEnvironmentOrApplicationWhiteSpaceForm() {
-
         final FormValidation actual = validateForm(
                 "sample-key-id",
                 "  ",
-                "\t"
+                "\t",
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -147,11 +157,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadNoRestApiKeyForm() {
-
         final FormValidation actual = validateForm(
                 null,
                 null,
-                null
+                null,
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -161,11 +171,11 @@ public class MablBuildValidatorTest {
 
     @Test
     public void validateBadRestApiKey() {
-
         final FormValidation actual = validateForm(
                 "key:invalid-key",
                 null,
-                null
+                null,
+                 freeStyleProject
         );
 
         assertEquals(ERROR, actual.kind);
@@ -175,7 +185,7 @@ public class MablBuildValidatorTest {
 
     private void mockNoopRestApiClient(MockedStatic<MablStepBuilder> mocked) {
         mocked.when(() -> MablStepBuilder.createMablRestApiClient(
-                "sample-key-id", false, MablStepConstants.DEFAULT_MABL_API_BASE_URL, MablStepConstants.DEFAULT_MABL_APP_BASE_URL)).thenReturn(
+                "sample-key-id", false, freeStyleProject)).thenReturn(
                 new MablRestApiClient() {
                     @Override
                     public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties) throws IOException {
