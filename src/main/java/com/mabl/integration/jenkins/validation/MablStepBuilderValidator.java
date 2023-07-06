@@ -1,13 +1,12 @@
 package com.mabl.integration.jenkins.validation;
 
 import com.mabl.integration.jenkins.MablRestApiClient;
+import hudson.model.Job;
 import hudson.util.FormValidation;
 
 import java.io.IOException;
 
 import static com.mabl.integration.jenkins.MablStepBuilder.createMablRestApiClient;
-import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_API_BASE_URL;
-import static com.mabl.integration.jenkins.MablStepConstants.DEFAULT_MABL_APP_BASE_URL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_APPLICATION_ID_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_ENVIRONMENT_ID_LABEL;
@@ -32,10 +31,10 @@ public class MablStepBuilderValidator {
     public static FormValidation validateForm(
             String restApiKeyName,
             String environmentId,
-            String applicationId
+            String applicationId,
+            Job job
     ) {
-        return validateForm(restApiKeyName, environmentId, applicationId, false,
-                DEFAULT_MABL_API_BASE_URL, DEFAULT_MABL_APP_BASE_URL);
+        return validateForm(restApiKeyName, environmentId, applicationId, false, job);
     }
 
     /**
@@ -45,8 +44,6 @@ public class MablStepBuilderValidator {
      * @param environmentId prospective environment identifier
      * @param applicationId prospective application identifier
      * @param disableSslVerification prospective flag to indicate if SSL verification should be disabled
-     * @param apiBaseUrl base URL for API (not user-visible)
-     * @param appBaseUrl base URL for the ap (not user-visible)
      * @return validation result
      */
     public static FormValidation validateForm(
@@ -54,8 +51,7 @@ public class MablStepBuilderValidator {
             String environmentId,
             String applicationId,
             boolean disableSslVerification,
-            String apiBaseUrl,
-            String appBaseUrl
+            Job job
     ) {
         try {
 
@@ -90,8 +86,7 @@ public class MablStepBuilderValidator {
                 client = createMablRestApiClient(
                         restApiKeyClean,
                         disableSslVerification,
-                        apiBaseUrl,
-                        appBaseUrl
+                        job
                 );
                 client.checkConnection();
             } catch (IOException e) {

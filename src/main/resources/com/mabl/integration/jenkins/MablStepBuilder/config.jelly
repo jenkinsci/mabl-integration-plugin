@@ -2,7 +2,9 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
   <f:entry title="${%API Key Secret}" field="restApiKeyId">
-      <c:select includeUser="true"/>
+      <c:select includeUser="true">
+        <option value="">- none -</option>
+      </c:select>
   </f:entry>
 
   <f:entry title="${%Application}" field="applicationId">
@@ -30,13 +32,7 @@
       <f:checkbox default="false" />
     </f:entry>
   </f:advanced>
-  <f:invisibleEntry>
-    <f:textbox field="apiBaseUrl" default="https://api.mabl.com"/>
-  </f:invisibleEntry>
-  <f:invisibleEntry>
-    <f:textbox field="appBaseUrl" default="https://app.mabl.com"/>
-  </f:invisibleEntry>
   <f:validateButton
       title="${%Validate}" progress="${%Validating...}"
-      method="validateForm" with="restApiKeyId,applicationId,environmentId,disableSslVerification,apiBaseUrl,appBaseUrl" />
+      method="validateForm" with="restApiKeyId,applicationId,environmentId,disableSslVerification" />
 </j:jelly>
