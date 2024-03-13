@@ -186,6 +186,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.48 (03/13/2024)
+- Fix broken documentation link
+- Fix continueOnPlanFailure
+
 #### v0.0.47 (07/06/2023)
 - Patched security vulnerabilities
 - Increased minimum Jenkins version
