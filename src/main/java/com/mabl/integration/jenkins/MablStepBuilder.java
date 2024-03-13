@@ -18,6 +18,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Executor;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -220,6 +221,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             } else {
                 run.setResult(Result.FAILURE);
+                Executor.currentExecutor().interrupt(Result.FAILURE);
             }
         } catch (ExecutionException e) {
             outputStream.println("There was an execution error trying to run your tests in mabl");
