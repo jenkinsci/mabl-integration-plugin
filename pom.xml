@@ -22,8 +22,8 @@
     <properties>
         <!-- NOTE: this version drives the minimum Jenkins version that the plugin can be installed on -->
         <jenkins.version>2.387.3</jenkins.version>
-		<java.level>11</java.level>
-		<java.version>11</java.version>
+        <java.level>11</java.level>
+        <java.version>${java.level}</java.version>
         <no-test-jar>false</no-test-jar>
 
         <release.skipTests>false</release.skipTests>
@@ -143,23 +143,23 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-					<release>${java.level}</release>
-				</configuration>
-			</plugin>
+                    <release>${java.level}</release>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
                 <configuration>
-					<minimumJavaVersion>${java.level}</minimumJavaVersion>
-				</configuration>
+                    <minimumJavaVersion>${java.level}</minimumJavaVersion>
+                </configuration>
             </plugin>
             <plugin>
-				<groupId>org.kohsuke</groupId>
-			    <artifactId>access-modifier-checker</artifactId>
-			    <configuration>
-			        <skip>true</skip>
-			    </configuration>
-			</plugin>
+                <groupId>org.kohsuke</groupId>
+                <artifactId>access-modifier-checker</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
