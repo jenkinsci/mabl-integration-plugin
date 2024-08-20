@@ -177,7 +177,7 @@ configured, make sure that you update the value to be a comma-separated list of 
 
 Note that
 * Jenkins versions 1.x are no longer supported
-* Minimum required Java version is Java 8
+* Minimum required Java version is Java 11
 * Jobs with mabl steps will have to be _manually_ updated
   1. Create a Secret text kind credential to store the mabl API key. The scope of the credential must be set to Global.
      The credential may be placed in any of the credential domains.
