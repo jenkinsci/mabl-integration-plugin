@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.2</version>
+        <version>4.52</version>
         <relativePath />
     </parent>
 
@@ -23,12 +23,11 @@
         <!-- NOTE: this version drives the minimum Jenkins version that the plugin can be installed on -->
         <jenkins.version>2.387.3</jenkins.version>
 		<java.level>11</java.level>
-		<java.version>${java.level}</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
+		<java.version>11</java.version>
         <no-test-jar>false</no-test-jar>
 
         <release.skipTests>false</release.skipTests>
+        <!-- <jenkins-test-harness.version>2.34</jenkins-test-harness.version> -->
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <concurrency>1</concurrency>
         <hpi.compatibleSinceVersion>0.0.30</hpi.compatibleSinceVersion>
@@ -96,6 +95,11 @@
             <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- <dependency>
+			<groupId>org.jenkins-ci.main</groupId>
+			<artifactId>jenkins-test-harness</artifactId>
+			<version>1802.v9de0d87365d2</version>
+		</dependency> -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -141,9 +145,12 @@
     <build>
         <plugins>
             <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+					<release>${java.level}</release>
+				</configuration>
 			</plugin>
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
