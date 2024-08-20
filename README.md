@@ -20,7 +20,7 @@ This plugin allows easy launching of [mabl](https://www.mabl.com) tests as a ste
   * [Deployment](#deployment)
 
 ## Plugin Installation
-Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v2.319.1+` server from the *Available Plugins* tab by searching for "mabl".
+Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenkins `v2.387.3+` server from the *Available Plugins* tab by searching for "mabl".
 
 ### Features
 
@@ -30,8 +30,8 @@ Install the [plugin](https://plugins.jenkins.io/mabl-integration) into your Jenk
 
 ### Requirements
 
--   Minimum Jenkins version: *2.319.1*
--   Minimum Java runtime version: *8*
+-   Minimum Jenkins version: *2.387.3*
+-   Minimum Java runtime version: *11*
 -   mabl API key
     -   See [integration
         docs](https://help.mabl.com/v1.0/docs/integrating-mabl-with-your-cicd-workflow#section-the-mabl-deployment-events-api)
@@ -185,6 +185,10 @@ Note that
   1. Update the mabl step in each affected job 
 
 ### Change Log
+
+#### v0.0.49 (08/20/2024)
+- Update documentation
+- Increased minimum Jenkins version
 
 #### v0.0.48 (03/13/2024)
 - Fix broken documentation link
