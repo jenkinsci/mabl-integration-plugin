@@ -457,9 +457,10 @@ Now you can test your plugin.
 
 Before making a new plugin release, ensure code is in high quality, fully tested state. See [extra checks](https://wiki.jenkins.io/display/JENKINS/Plugin+Release+Tips).
 
-1. Update your `~/.m2/settings.xml` according to the [Jenkins docs](https://wiki.jenkins.io/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkins-ci.org).
-2. Setup and run a GitHub [ssh agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent).
-3. Run `mvn release:prepare release:perform -B` from the HEAD of main
-4. Run `mvn deploy` on success of above step.
+1. Make sure you bump `pom.xml` version with `-SNAPSHOT` in your PR before merging to main
+2. Update your `~/.m2/settings.xml` according to the [Jenkins docs](https://wiki.jenkins.io/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkins-ci.org).
+3. Setup and run a GitHub [ssh agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent).
+4. Run `mvn release:prepare release:perform -B` from the HEAD of main
+5. Run `mvn deploy` on success of above step.
 
 Wait ~8 hours for plugin to become GA across all Jenkins instances under the "Available Plugins" listing.
