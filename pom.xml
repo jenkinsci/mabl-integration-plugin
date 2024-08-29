@@ -52,7 +52,7 @@
         <connection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/mabl-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/mabl-integration-plugin</url>
-        <tag>mabl-integration-0.0.49-SNAPSHOT</tag>
+        <tag>mabl-integration-0.0.49</tag>
     </scm>
 
     <repositories>
