@@ -153,8 +153,15 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final Secret restApiKey
     ) {
         final CredentialsProvider provider = new BasicCredentialsProvider();
+
+        // Adding check for null or empty restApiKey
+        final String keyTest = restApiKey.getPlainText();
+        if (StringUtils.isBlank(keyTest)) {
+            throw new IllegalArgumentException ("API key not found");
+        }
+
         final UsernamePasswordCredentials creds =
-                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, restApiKey.getPlainText());
+                new UsernamePasswordCredentials(REST_API_USERNAME_PLACEHOLDER, keyTest);
 
         provider.setCredentials(AuthScope.ANY, creds);
 
