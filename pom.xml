@@ -20,8 +20,9 @@
     <url>https://github.com/jenkinsci/mabl-integration-plugin</url>
 
     <properties>
-        <!-- NOTE: this version drives the minimum Jenkins version that the plugin can be installed on -->
-        <jenkins.version>2.387.3</jenkins.version>
+        <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+        <jenkins.baseline>2.387</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <java.level>11</java.level>
         <java.version>${java.level}</java.version>
         <no-test-jar>false</no-test-jar>
@@ -117,7 +118,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.387.x</artifactId>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
                 <version>1834.vc26f653a_a_b_10</version>
                 <scope>import</scope>
                 <type>pom</type>
