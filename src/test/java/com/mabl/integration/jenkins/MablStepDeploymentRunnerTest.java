@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.io.ByteArrayOutputStream;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
@@ -35,7 +36,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
+//import static org.mockito.Mockito;
+//import static org.mockito.MockSettings;
 /**
  * Unit test runner
  */
@@ -51,6 +53,8 @@ public class MablStepDeploymentRunnerTest {
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
     private final EnvVars envVars = new EnvVars();
+    private final String webUrlOverride = "https://test-web-override.example.com";
+    private final String apiUrlOverride = "https://test-api-override.example.com";
 
     private MablStepDeploymentRunner runner;
     private MablRestApiClient client;
@@ -75,7 +79,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
     }
 
@@ -160,7 +166,9 @@ public class MablStepDeploymentRunnerTest {
                 true,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -185,7 +193,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -214,7 +224,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -242,7 +254,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -270,7 +284,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         final CreateDeploymentResult createDeploymentResult = new CreateDeploymentResult(eventId, "workspace-w");

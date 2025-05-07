@@ -73,6 +73,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final boolean collectVars;
     private final FilePath buildPath;
     private final EnvVars environmentVars;
+    private final String webUrlOverride;
+    private final String  apiUrlOverride;
+
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
     @DataBoundConstructor
@@ -88,7 +91,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final boolean continueOnMablError,
             final boolean collectVars,
             final FilePath buildPath,
-            final EnvVars environmentVars
+            final EnvVars environmentVars,
+            final String webUrlOverride,
+            final String apiUrlOverride
 
     ) {
         this.outputStream = outputStream;
@@ -103,6 +108,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.collectVars = collectVars;
         this.buildPath = buildPath;
         this.environmentVars = environmentVars;
+        this.webUrlOverride = webUrlOverride;
+        this.apiUrlOverride = apiUrlOverride;
+
     }
 
     @Override
@@ -198,6 +206,19 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
 
         properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+        // Set URL overrides here if any.
+
+        if(webUrlOverride != null || apiUrlOverride != null) {
+            CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+            overrides.setWebURL(webUrlOverride);
+            overrides.setApiUrl(apiUrlOverride);
+            properties.setPlanOverrides(overrides);
+
+            outputStream.printf("URL overrides set : %n web_url : [%s]%n api_url : [%s]%n",
+                    webUrlOverride == null ? "empty" : webUrlOverride,
+                    apiUrlOverride == null ? "empty" : apiUrlOverride
+            );
+        }
         return properties;
     }
 

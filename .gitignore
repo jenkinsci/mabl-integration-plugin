@@ -16,3 +16,7 @@ buildNumber.properties
 *.iml
 *.iws
 work/
+
+# macOS system files
+.DS_Store
+**/.DS_Store
