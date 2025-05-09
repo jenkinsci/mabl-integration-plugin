@@ -21,8 +21,5 @@ work/
 .DS_Store
 **/.DS_Store
 
-# Maven user settings
- .m2/settings.xml
-
 # Maven settings.xml
 settings.xml

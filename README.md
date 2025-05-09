@@ -187,7 +187,7 @@ Note that
 ### Change Log
 
 #### v0.0.50 (05/08/2025)
-- added URL Override fields
+- Added support for browser and API URL Override fields
 
 #### v0.0.49 (08/20/2024)
 - Update documentation
