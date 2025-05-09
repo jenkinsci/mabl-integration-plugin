@@ -543,9 +543,9 @@ public class MablStepDeploymentRunnerTest {
                 .thenAnswer(invocation -> {
                     CreateDeploymentProperties props = invocation.getArgument(4);
                     assertNotNull("Properties should not be null", props);
-                    assertNotNull("Plan overrides should not be null", props.getPlanOverrides());
-                    assertEquals("Web URL override should match", webUrlOverride, props.getPlanOverrides().getWebURL());
-                    assertEquals("API URL override should match", apiUrlOverride, props.getPlanOverrides().getApiURL());
+                    assertNotNull("Plan overrides should not be null", props.getPlan_overrides());
+                    assertEquals("Web URL override should match", webUrlOverride, props.getPlan_overrides().getWeb_url());
+                    assertEquals("API URL override should match", apiUrlOverride, props.getPlan_overrides().getApi_url());
                     return new CreateDeploymentResult(eventId, "workspace-w");
                 });
 

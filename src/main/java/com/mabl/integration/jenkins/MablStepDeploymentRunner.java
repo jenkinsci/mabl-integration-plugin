@@ -207,16 +207,27 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
         properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
         // Set URL overrides here if any.
+        /**
+         * Checks and trims {@code webUrlOverride} and {@code apiUrlOverride}.
+         * If non-empty after trimming, sets them in {@code PlanOverride} and
+         * prints original values. Trimming uses {@code String.trim()}.
+         */
+        boolean hasWebUrl = webUrlOverride != null && !webUrlOverride.trim().isEmpty();
+        boolean hasApiUrl = apiUrlOverride != null && !apiUrlOverride.trim().isEmpty();
 
-        if(webUrlOverride != null || apiUrlOverride != null) {
+        if(hasWebUrl || hasApiUrl) {
             CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
-            overrides.setWebURL(webUrlOverride);
-            overrides.setApiUrl(apiUrlOverride);
-            properties.setPlanOverrides(overrides);
+            if(hasWebUrl){
+                overrides.setWeb_url(webUrlOverride.trim());
+                outputStream.println("web_url: [" +webUrlOverride+ "]");
+            }
+            if(hasApiUrl){
+                overrides.setApi_url(apiUrlOverride.trim());
+                outputStream.println("api_url: [" +apiUrlOverride+ "]");
+            }
 
-            outputStream.println("URL overrides set : ");
-            outputStream.println(" web_url : [" + webUrlOverride + "]");
-            outputStream.println(" api_url : [" + apiUrlOverride + "]");
+            properties.setPlan_overrides(overrides);
+            outputStream.println("Url Overrides set");
         }
         return properties;
     }

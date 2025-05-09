@@ -1,5 +1,7 @@
 package com.mabl.integration.jenkins.domain;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Objects;
 
 public class CreateDeploymentProperties {
@@ -14,7 +16,9 @@ public class CreateDeploymentProperties {
     private String buildPlanName;
     private String buildPlanNumber;
     private String buildPlanResultUrl;
-    private PlanOverride planOverrides;
+
+    @SerializedName("plan_overrides")
+    private PlanOverride plan_overrides;
 
     public String getDeploymentOrigin() {
         return deploymentOrigin;
@@ -60,7 +64,7 @@ public class CreateDeploymentProperties {
         return buildPlanResultUrl;
     }
 
-    public PlanOverride getPlanOverrides() {return planOverrides; }   // this it to override both api and web URL
+    public PlanOverride getPlan_overrides() {return plan_overrides; }   // this it to override both api and web URL
 
     public void setDeploymentOrigin(String plugin) {
         this.deploymentOrigin = plugin;
@@ -106,7 +110,7 @@ public class CreateDeploymentProperties {
         this.buildPlanResultUrl = buildPlanResultUrl;
     }
 
-    public void setPlanOverrides(PlanOverride planOverrides) { this.planOverrides = planOverrides; }
+    public void setPlan_overrides(PlanOverride plan_overrides) { this.plan_overrides = plan_overrides; }
 
     public CreateDeploymentProperties copy() {
         CreateDeploymentProperties copy = new CreateDeploymentProperties();
@@ -122,35 +126,52 @@ public class CreateDeploymentProperties {
         copy.setBuildPlanNumber(buildPlanNumber);
         copy.setBuildPlanResultUrl(buildPlanResultUrl);
 
-        // To check if there is URL changes in plan and if does then update it
-        if(planOverrides != null){
-            PlanOverride overrideCopy = new PlanOverride();
-            overrideCopy.setWebURL(planOverrides.getWebURL());
-            overrideCopy.setApiUrl(planOverrides.getApiURL());
-            copy.setPlanOverrides(overrideCopy);
+        /**
+         * Checks for URL changes within the plan. If any changes are detected,
+         * the URLs in the plan are updated accordingly.
+         */
+        if(plan_overrides != null){
+            boolean hasWebUrl = plan_overrides.getWeb_url() != null && !plan_overrides.getWeb_url().isEmpty();
+            boolean hasApiUrl = plan_overrides.getApi_url() != null && !plan_overrides.getApi_url().isEmpty();
+
+            if(hasWebUrl || hasApiUrl){
+                PlanOverride overrideCopy = new PlanOverride();
+                if(hasWebUrl){
+                    overrideCopy.setWeb_url(plan_overrides.getWeb_url());
+                }
+                if(hasApiUrl){
+                    overrideCopy.setApi_url(plan_overrides.getApi_url());
+                }
+                copy.setPlan_overrides(overrideCopy);
+            }
         }
         return copy;
     }
 
 
-    //InnerClass to change the new plans according to webURL Change and ApiURl Change
+    /**
+     * Inner class responsible for updating the application's plans
+     * based on changes to the web URL and API URL configurations.
+     */
     public static class PlanOverride{
-        private String webURL;
-        private String apiURL;
+        @SerializedName("web_url")
+        private String web_url;
+        @SerializedName("api_url")
+        private String api_url;
 
-        public void setWebURL(String webURL) {
-            this.webURL = webURL;
+        public void setWeb_url(String web_url) {
+            this.web_url = web_url;
         }
 
-        public void setApiUrl(String apiURL) {
-            this.apiURL = apiURL;
+        public void setApi_url(String api_url) {
+            this.api_url = api_url;
         }
 
-        public String getWebURL() {
-            return webURL;
+        public String getWeb_url() {
+            return web_url;
         }
-        public String getApiURL() {
-            return apiURL;
+        public String getApi_url() {
+            return api_url;
         }
 
         @Override
@@ -159,13 +180,13 @@ public class CreateDeploymentProperties {
             if(obj == null || getClass() != obj.getClass()) return false;
 
             PlanOverride other = (PlanOverride) obj;
-            return  Objects.equals(webURL, other.webURL) &&
-                    Objects.equals(apiURL, other.apiURL);
+            return  Objects.equals(web_url, other.web_url) &&
+                    Objects.equals(api_url, other.api_url);
         }
 
         @Override
         public int hashCode(){
-            return Objects.hash(webURL, apiURL);
+            return Objects.hash(web_url, api_url);
         }
     }
 }
