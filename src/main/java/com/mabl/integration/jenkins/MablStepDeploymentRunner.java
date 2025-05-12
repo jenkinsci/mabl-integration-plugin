@@ -73,6 +73,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final boolean collectVars;
     private final FilePath buildPath;
     private final EnvVars environmentVars;
+    private final String webUrlOverride;
+    private final String  apiUrlOverride;
+
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
     @DataBoundConstructor
@@ -88,7 +91,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final boolean continueOnMablError,
             final boolean collectVars,
             final FilePath buildPath,
-            final EnvVars environmentVars
+            final EnvVars environmentVars,
+            final String webUrlOverride,
+            final String apiUrlOverride
 
     ) {
         this.outputStream = outputStream;
@@ -103,6 +108,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.collectVars = collectVars;
         this.buildPath = buildPath;
         this.environmentVars = environmentVars;
+        this.webUrlOverride = webUrlOverride;
+        this.apiUrlOverride = apiUrlOverride;
+
     }
 
     @Override
@@ -198,6 +206,29 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
 
         properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+        // Set URL overrides here if any.
+        /**
+         * Checks and trims {@code webUrlOverride} and {@code apiUrlOverride}.
+         * If non-empty after trimming, sets them in {@code PlanOverride} and
+         * prints original values. Trimming uses {@code String.trim()}.
+         */
+        boolean hasWebUrl = webUrlOverride != null && !webUrlOverride.trim().isEmpty();
+        boolean hasApiUrl = apiUrlOverride != null && !apiUrlOverride.trim().isEmpty();
+
+        if(hasWebUrl || hasApiUrl) {
+            CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+            if(hasWebUrl){
+                overrides.setWeb_url(webUrlOverride.trim());
+                outputStream.println("webURL: [" +webUrlOverride+ "]");
+            }
+            if(hasApiUrl){
+                overrides.setApi_url(apiUrlOverride.trim());
+                outputStream.println("apiURL: [" +apiUrlOverride+ "]");
+            }
+
+            properties.setPlan_overrides(overrides);
+            outputStream.println("Url Overrides set");
+        }
         return properties;
     }
 

@@ -17,10 +17,8 @@ import org.junit.rules.Timeout;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
+import java.io.ByteArrayOutputStream;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
@@ -35,7 +33,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 /**
  * Unit test runner
  */
@@ -51,6 +48,8 @@ public class MablStepDeploymentRunnerTest {
     private final String eventId = "foo-event-id";
     private final FilePath buildPath = new FilePath(new File("/dev/null"));
     private final EnvVars envVars = new EnvVars();
+    private final String webUrlOverride = "https://test-web-override.example.com";
+    private final String apiUrlOverride = "https://test-api-override.example.com";
 
     private MablStepDeploymentRunner runner;
     private MablRestApiClient client;
@@ -75,7 +74,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
     }
 
@@ -160,7 +161,9 @@ public class MablStepDeploymentRunnerTest {
                 true,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -185,7 +188,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -214,7 +219,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -242,7 +249,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -270,7 +279,9 @@ public class MablStepDeploymentRunnerTest {
                 false,
                 true,
                 buildPath,
-                envVars
+                envVars,
+                null,
+                null
         );
 
         final CreateDeploymentResult createDeploymentResult = new CreateDeploymentResult(eventId, "workspace-w");
@@ -412,7 +423,7 @@ public class MablStepDeploymentRunnerTest {
                             break;
                         default:
                             System.err.println("journey:" + testCase.getJourney());
-                            assertFalse(true);
+                            fail();
                     }
                     assertNull(testCase.getSkipped());
                 } else if (testCase.getSkipped() != null) {
@@ -427,6 +438,188 @@ public class MablStepDeploymentRunnerTest {
         }
     }
 
+    @Test
+    public void testInterruptedExecution() throws IOException {
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class))).
+                thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
+
+        when(client.getExecutionResults(eventId))
+                .thenAnswer(invocation ->{
+                    Thread.currentThread().interrupt();
+                    return createExecutionResult("running",true);
+                });
+
+        assertTrue("successful outcome expected due to interruption handling", runner.call());
+
+        assertFalse("Thread Interrupted status should be clear",Thread.currentThread().isInterrupted());
+
+        verify(client).close();
+    }
+
+    @Test
+    public void testSafePlanNameWithNull() throws IOException {
+        when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
+                .thenReturn(new CreateDeploymentResult(eventId, "workspace-w"));
+
+        ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
+        eventStatus.setSucceeded(true);
+        ExecutionResult executionResult = new ExecutionResult(
+                singletonList(
+                        new ExecutionResult.ExecutionSummary(
+                                "completed", "success", true, 0L, 0L,
+                                new ExecutionResult.PlanSummary("plan-id", null),
+                                null,
+                                List.of(
+                                        new ExecutionResult.JourneySummary("journey-id", "Test Journey", "href", "appHref")
+                                ),
+                                List.of(
+                                        new ExecutionResult.JourneyExecutionResult(
+                                                "journey-id", "execution-id", "href", "appHref",
+                                                "completed", null, true, 0L, 0L, Collections.emptyList()
+                                        )
+                                )
+                        )
+                ),
+                eventStatus);
+
+        when(client.getExecutionResults(eventId))
+                .thenReturn(executionResult);
+
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PrintStream capturedOutputStream = new PrintStream(byteArrayOutputStream);
+        MablStepDeploymentRunner runnerWithCapture = new MablStepDeploymentRunner(
+                client,
+                capturedOutputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                labels,
+                null,
+                false,
+                false,
+                true,
+                buildPath,
+                envVars,
+                null,
+                null
+        );
+
+        assertTrue("successful outcome expected", runnerWithCapture.call());
+
+        String output = byteArrayOutputStream.toString();
+        assertTrue("Output should contain unnamed plan fallback", output.contains("<Unnamed Plan>"));
+
+        TestSuite testSuite = runnerWithCapture.createTestSuite(executionResult.executions.get(0));
+        assertEquals("<Unnamed Plan>", testSuite.getName());
+    }
+
+    @Test
+    public void testDeploymentCreateWithUrlOverrides() throws IOException {
+        MablStepDeploymentRunner runnerWithOverrides = new MablStepDeploymentRunner(
+                client,
+                outputStream,
+                TEST_POLLING_INTERVAL_MILLISECONDS,
+                environmentId,
+                applicationId,
+                labels,
+                null,
+                false,
+                false,
+                true,
+                buildPath,
+                envVars,
+                webUrlOverride,
+                apiUrlOverride
+        );
+
+        // Capture the properties that would be sent to mabl
+        when(client.createDeploymentEvent(
+                eq(environmentId),
+                eq(applicationId),
+                eq(labels),
+                isNull(),
+                any(CreateDeploymentProperties.class)))
+                .thenAnswer(invocation -> {
+                    CreateDeploymentProperties props = invocation.getArgument(4);
+                    assertNotNull("Properties should not be null", props);
+                    assertNotNull("Plan overrides should not be null", props.getPlan_overrides());
+                    assertEquals("Web URL override should match", webUrlOverride, props.getPlan_overrides().getWeb_url());
+                    assertEquals("API URL override should match", apiUrlOverride, props.getPlan_overrides().getApi_url());
+                    return new CreateDeploymentResult(eventId, "workspace-w");
+                });
+
+        when(client.getExecutionResults(eventId))
+                .thenReturn(createExecutionResult("succeeded", true));
+
+        assertTrue("successful outcome expected", runnerWithOverrides.call());
+    }
+
+    @Test
+    public void testExecutionSummaryWithTestCaseStatus() {
+        ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();
+        eventStatus.setSucceeded(false);
+
+        ExecutionResult.ExecutionSummary summary = new ExecutionResult.ExecutionSummary(
+                "failed", "Some tests failed", false, 1000L, 5000L,
+                new ExecutionResult.PlanSummary("plan-id", "Plan name"),
+                null,
+                Arrays.asList(
+                        new ExecutionResult.JourneySummary("j1", "Journey Failed", "href1", "appHref1"),
+                        new ExecutionResult.JourneySummary("j2", "Journey Skipped", "href2", "appHref2")
+                ),
+                Arrays.asList(
+                        new ExecutionResult.JourneyExecutionResult(
+                                "j1", "exec1", "href1", "appHref1", "failed", "Failed due to assertion", false, 1000L, 3000L,
+                                Arrays.asList(
+                                        new ExecutionResult.TestCaseID("TEST-123"),
+                                        new ExecutionResult.TestCaseID("TEST-456")
+                                )
+                        ),
+                        new ExecutionResult.JourneyExecutionResult(
+                                "j2", "exec2", "href2", "appHref2", "skipped", "Skipped due to dependency", false, 1000L, 1000L,
+                                List.of(
+                                        new ExecutionResult.TestCaseID("TEST-789")
+                                )
+                        )
+                )
+        );
+
+        TestSuite testSuite = runner.createTestSuite(summary);
+
+        assertEquals(2, testSuite.getTests());
+        assertEquals(1, testSuite.getFailures());
+        assertEquals(1, testSuite.getSkipped());
+
+        boolean foundFailedTestCases = false;
+        boolean foundSkippedTestCases = false;
+
+        for (Property property : testSuite.getProperties().getProperties()) {
+            if (property.getName().equals("failed-test-cases")) {
+                assertEquals("TEST-123,TEST-456", property.getValue());
+                foundFailedTestCases = true;
+            } else if (property.getName().equals("skipped-test-cases")) {
+                assertEquals("TEST-789", property.getValue());
+                foundSkippedTestCases = true;
+            }
+        }
+
+        assertTrue("Failed test cases should be recorded in properties", foundFailedTestCases);
+        assertTrue("Skipped test cases should be recorded in properties", foundSkippedTestCases);
+
+        // Verify test cases have correct requirement property
+        for (TestCase testCase : testSuite.getTestCases()) {
+            if (testCase.getJourney().equals("Journey Failed")) {
+                Property requirement = testCase.getProperties().iterator().next();
+                assertEquals("requirement", requirement.getName());
+                assertEquals("TEST-123,TEST-456", requirement.getValue());
+            } else if (testCase.getJourney().equals("Journey Skipped")) {
+                Property requirement = testCase.getProperties().iterator().next();
+                assertEquals("requirement", requirement.getName());
+                assertEquals("TEST-789", requirement.getValue());
+            }
+        }
+    }
 
     private ExecutionResult createExecutionResultWithTestCaseIds() {
         ExecutionResult.EventStatus eventStatus = new ExecutionResult.EventStatus();

@@ -16,3 +16,10 @@ buildNumber.properties
 *.iml
 *.iws
 work/
+
+#Mac specific files
+.DS_Store
+**/.DS_Store
+
+# Maven settings.xml
+settings.xml

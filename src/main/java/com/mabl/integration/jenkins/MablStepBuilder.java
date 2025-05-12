@@ -81,6 +81,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private boolean disableSslVerification;
     private String apiBaseUrl;
     private String appBaseUrl;
+    private String webUrlOverride;
+    private String apiUrlOverride;
 
     @DataBoundConstructor
     public MablStepBuilder(
@@ -132,6 +134,21 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         this.appBaseUrl = appBaseUrl;
     }
 
+    /**
+     * To change the webUrl dynamically if the user wants to change during deployment execution
+     */
+    @DataBoundSetter
+    public void setWebUrlOverride(String webUrlOverride) {this.webUrlOverride = webUrlOverride;}
+
+    /**
+     * To change the apiUrl dynamically if the user wants to change during deployment execution
+     */
+
+    @DataBoundSetter
+    public void setApiUrlOverride(String apiUrlOverride){
+        this.apiUrlOverride = apiUrlOverride;
+    }
+
     // Accessors to be used by Jelly UI templates
     public String getRestApiKeyId() {
         return restApiKeyId;
@@ -170,6 +187,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public String getApiBaseUrl() { return this.apiBaseUrl; }
 
     public String getAppBaseUrl() { return this.appBaseUrl; }
+
+    public String getWebUrlOverride() { return this.webUrlOverride; }
+
+    public String getApiUrlOverride() { return this.apiUrlOverride; }
 
     @Override
     public void perform(
@@ -211,7 +232,9 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 continueOnMablError,
                 isCollectVars(),
                 getOutputFileLocation(workspace),
-                getEnvironmentVars(run, listener)
+                getEnvironmentVars(run, listener),
+                webUrlOverride,
+                apiUrlOverride
         );
     
         Executor executor = Executor.currentExecutor();
