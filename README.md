@@ -69,7 +69,8 @@ The *Advanced...* button opens up additional options:
 -   Specify the test branch of your mabl tests
 -   Continue execution if your plan/tests fail
 -   Continue execution if there is an unexpected error in the mabl API
--   Disable SSL verification
+-   Disable SSL verification 
+-   Override the web URL and/or API URL used for the tests in the deployment.
 
 ![](img/config-advanced.png)
 
@@ -91,6 +92,8 @@ pipeline step for mabl. This can be written by hand or created via the
 -   labels: if specified, only plans with (any of the) labels will be triggered.
     If multiple labels are provided, separate them with commas.
 -   mablBranch: if specified, then tests from the specified branch will be executed.
+-   webUrlOverride: if specified, overrides the default mabl web application URL.
+-   apiUrlOverride: if specified, overrides the default mabl API URL.
     You may also want to use a Jenkins
     [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
 

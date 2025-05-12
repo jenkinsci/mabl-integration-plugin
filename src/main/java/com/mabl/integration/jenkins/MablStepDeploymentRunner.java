@@ -219,11 +219,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
             if(hasWebUrl){
                 overrides.setWeb_url(webUrlOverride.trim());
-                outputStream.println("web_url: [" +webUrlOverride+ "]");
+                outputStream.println("webURL: [" +webUrlOverride+ "]");
             }
             if(hasApiUrl){
                 overrides.setApi_url(apiUrlOverride.trim());
-                outputStream.println("api_url: [" +apiUrlOverride+ "]");
+                outputStream.println("apiURL: [" +apiUrlOverride+ "]");
             }
 
             properties.setPlan_overrides(overrides);
