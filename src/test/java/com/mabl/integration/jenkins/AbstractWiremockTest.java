@@ -35,7 +35,7 @@ public abstract class AbstractWiremockTest {
     @Rule
     public WireMockClassRule instanceRule = wireMockRule;
 
-    private Map<String, String> expectedUrls = new HashMap<String, String>();
+    private final Map<String, String> expectedUrls = new HashMap<>();
 
     /**
      * Register the local file to a mapping and provide full URL path

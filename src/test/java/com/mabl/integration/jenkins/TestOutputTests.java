@@ -60,7 +60,7 @@ public class TestOutputTests {
 
         Property property1 = new Property("environment", "my env-e");
         Property property2 = new Property("application", "my app-a");
-        ArrayList<Property> props = new ArrayList<Property>();
+        ArrayList<Property> props = new ArrayList<>();
         props.add(property1);
         props.add(property2);
         Properties properties = new Properties(ImmutableList.copyOf(props));
@@ -80,7 +80,7 @@ public class TestOutputTests {
         testSuite1.incrementTests();
         testSuite1.incrementFailures();
 
-        ArrayList<TestSuite> suites = new ArrayList<TestSuite>();
+        ArrayList<TestSuite> suites = new ArrayList<>();
         suites.add(emptyTestSuite);
         suites.add(testSuite1);
         TestSuites testSuites = new TestSuites(ImmutableList.copyOf(suites));

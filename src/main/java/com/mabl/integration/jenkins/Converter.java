@@ -30,6 +30,7 @@ public class Converter {
         return props;
     }
 
+    @SafeVarargs
     private static <String> String getProperty(Map<String, String> vars, PrintStream stream, String ...possibleProperties) {
         for(String property : possibleProperties) {
             if(vars.containsKey(property)) {

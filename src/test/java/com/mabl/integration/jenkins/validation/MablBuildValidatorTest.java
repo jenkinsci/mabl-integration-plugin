@@ -17,8 +17,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.MockedStatic;
 
-import java.io.IOException;
-
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_API_KEY_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_APPLICATION_ID_LABEL;
 import static com.mabl.integration.jenkins.MablStepConstants.FORM_ENVIRONMENT_ID_LABEL;
@@ -55,7 +53,7 @@ public class MablBuildValidatorTest {
                      freeStyleProject
             );
 
-            assertEquals(actual.kind, OK);
+            assertEquals(OK, actual.kind);
         }
     }
 
@@ -71,7 +69,7 @@ public class MablBuildValidatorTest {
                      freeStyleProject
             );
 
-            assertEquals(actual.kind, OK);
+            assertEquals(OK, actual.kind);
         }
 
     }
@@ -87,7 +85,7 @@ public class MablBuildValidatorTest {
                      freeStyleProject
             );
 
-            assertEquals(actual.kind, OK);
+            assertEquals(OK, actual.kind);
         }
     }
 
@@ -188,32 +186,32 @@ public class MablBuildValidatorTest {
                 "sample-key-id", false, freeStyleProject)).thenReturn(
                 new MablRestApiClient() {
                     @Override
-                    public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties) throws IOException {
+                    public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties) {
                         return null;
                     }
 
                     @Override
-                    public ExecutionResult getExecutionResults(String eventId) throws IOException {
+                    public ExecutionResult getExecutionResults(String eventId) {
                         return null;
                     }
 
                     @Override
-                    public GetApiKeyResult getApiKeyResult() throws IOException {
+                    public GetApiKeyResult getApiKeyResult() {
                         return null;
                     }
 
                     @Override
-                    public GetApplicationsResult getApplicationsResult(String organizationId) throws IOException {
+                    public GetApplicationsResult getApplicationsResult(String organizationId) {
                         return null;
                     }
 
                     @Override
-                    public GetEnvironmentsResult getEnvironmentsResult(String organizationId) throws IOException {
+                    public GetEnvironmentsResult getEnvironmentsResult(String organizationId) {
                         return null;
                     }
 
                     @Override
-                    public GetLabelsResult getLabelsResult(String organizationId) throws IOException {
+                    public GetLabelsResult getLabelsResult(String organizationId) {
                         return null;
                     }
 
@@ -223,7 +221,7 @@ public class MablBuildValidatorTest {
                     }
 
                     @Override
-                    public void checkConnection() throws IOException {
+                    public void checkConnection() {
                     }
 
                     @Override

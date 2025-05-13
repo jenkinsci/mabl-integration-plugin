@@ -16,24 +16,15 @@ public class JenkinsModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
-        if (inputStream == null) {
-            throw new RuntimeException("ERROR: failed to load configuration");
-        }
-
-        try {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE)) {
+            if (inputStream == null) {
+                throw new RuntimeException("ERROR: failed to load configuration");
+            }
             Properties properties = new Properties();
             properties.load(inputStream);
             Names.bindProperties(binder(), properties);
         } catch (IOException e) {
-            System.out.println("ERROR: could not load properties");
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException("ERROR: could not load properties", e);
         }
     }
 

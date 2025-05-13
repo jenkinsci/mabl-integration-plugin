@@ -2,14 +2,10 @@ package com.mabl.integration.jenkins;
 
 import hudson.model.Hudson;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.message.BasicHeader;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Optional;
 import java.util.jar.Manifest;
 
 /**

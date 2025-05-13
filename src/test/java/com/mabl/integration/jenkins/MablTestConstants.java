@@ -151,29 +151,29 @@ class MablTestConstants {
     static final String TEST_CASE_XML = "" +
             "<testcase classname=\"My Plan Name\" name=\"My Test Name\" time=\"23\" xlink:type=\"simple\" xlink:href=\"http://myapphref.com\"/>";
 
-    static final String TEST_CASE_XML_WITH_FAILURE = "" +
-            "<testcase classname=\"My Plan Name\" name=\"My Test Name\" time=\"23\" xlink:type=\"simple\" xlink:href=\"http://myapphref.com\">\n" +
-            "  <failure message=\"My Message\">My Reason</failure>\n" +
-            "</testcase>";
+    static final String TEST_CASE_XML_WITH_FAILURE = """
+            <testcase classname="My Plan Name" name="My Test Name" time="23" xlink:type="simple" xlink:href="http://myapphref.com">
+              <failure message="My Message">My Reason</failure>
+            </testcase>""";
 
-    static final String TEST_SUITES_XML = "" +
-            "<testsuites xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
-            "  <testsuite name=\"Empty Test Suite\" tests=\"0\" errors=\"0\" failures=\"0\" skipped=\"0\" time=\"0\" timestamp=\"2013-05-24T10:23:58\">\n" +
-            "    <properties/>\n" +
-            "  </testsuite>\n" +
-            "  <testsuite name=\"Full Test Suite\" tests=\"2\" errors=\"0\" failures=\"1\" skipped=\"0\" time=\"33\" timestamp=\"2013-05-24T10:23:58\">\n" +
-            "    <properties>\n" +
-            "      <property name=\"environment\" value=\"my env-e\"/>\n" +
-            "      <property name=\"application\" value=\"my app-a\"/>\n" +
-            "    </properties>\n" +
-            "    <testcase classname=\"My Plan Name 1\" name=\"My Test Name 1\" time=\"11\" xlink:type=\"simple\" xlink:href=\"http://myapphref.com\"/>\n" +
-            "    <testcase classname=\"My Plan Name 2\" name=\"My Test Name 2\" time=\"22\" xlink:type=\"simple\" xlink:href=\"http://myapphref.com\">\n" +
-            "      <failure message=\"My Message\">My Reason</failure>\n" +
-            "    </testcase>\n" +
-            "  </testsuite>\n" +
-            "</testsuites>";
+    static final String TEST_SUITES_XML = """
+            <testsuites xmlns:xlink="http://www.w3.org/1999/xlink">
+              <testsuite name="Empty Test Suite" tests="0" errors="0" failures="0" skipped="0" time="0" timestamp="2013-05-24T10:23:58">
+                <properties/>
+              </testsuite>
+              <testsuite name="Full Test Suite" tests="2" errors="0" failures="1" skipped="0" time="33" timestamp="2013-05-24T10:23:58">
+                <properties>
+                  <property name="environment" value="my env-e"/>
+                  <property name="application" value="my app-a"/>
+                </properties>
+                <testcase classname="My Plan Name 1" name="My Test Name 1" time="11" xlink:type="simple" xlink:href="http://myapphref.com"/>
+                <testcase classname="My Plan Name 2" name="My Test Name 2" time="22" xlink:type="simple" xlink:href="http://myapphref.com">
+                  <failure message="My Message">My Reason</failure>
+                </testcase>
+              </testsuite>
+            </testsuites>""";
 
-    static final Map<String, String> BUILD_VARS = new HashMap<String, String> () {
+    static final Map<String, String> BUILD_VARS = new HashMap<>() {
         {
             put("JOB_NAME", "MyFakeJobName");
             put("BUILD_NUMBER", "6");
@@ -181,7 +181,7 @@ class MablTestConstants {
         }
     };
 
-    static final Map<String, String> GIT_VARS = new HashMap<String, String>() {
+    static final Map<String, String> GIT_VARS = new HashMap<>() {
         {
             put("GIT_BRANCH", "main");
             put("GIT_COMMIT", "1234");
@@ -191,7 +191,7 @@ class MablTestConstants {
         }
     };
 
-    static final Map<String, String> SVN_VARS = new HashMap<String, String>() {
+    static final Map<String, String> SVN_VARS = new HashMap<>() {
         {
             put("SVN_REVISION", "12");
             put("SVN_URL", "https://svn.fakeDomain.com/int_test_svn");

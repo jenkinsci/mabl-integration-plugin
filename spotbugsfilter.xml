@@ -18,4 +18,9 @@
     <Field name="outputStream"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <Match>
+    <Class name="com.mabl.integration.jenkins.domain.CreateDeploymentResult" />
+    <Field name="mablBranch"/>
+    <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE"/>
+  </Match>
 </FindBugsFilter>

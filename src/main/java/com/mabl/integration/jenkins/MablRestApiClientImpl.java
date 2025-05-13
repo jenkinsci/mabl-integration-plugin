@@ -159,10 +159,10 @@ public class MablRestApiClientImpl implements MablRestApiClient {
         provider.setCredentials(AuthScope.ANY, creds);
 
         // Set proxy credentials if provided
-        if (proxy != null && (!StringUtils.isBlank(proxy.getUserName()) || !StringUtils.isBlank(proxy.getPassword()))) {
+        if (proxy != null && (!StringUtils.isBlank(proxy.getUserName()) || !StringUtils.isBlank(proxy.getSecretPassword().getPlainText()))) {
             final Credentials credentials = new UsernamePasswordCredentials(
                     proxy.getUserName() == null ? "" : proxy.getUserName(),
-                    proxy.getPassword()
+                    proxy.getSecretPassword().getPlainText()
             );
             provider.setCredentials(new AuthScope(new HttpHost(proxy.name, proxy.port)), credentials);
         }

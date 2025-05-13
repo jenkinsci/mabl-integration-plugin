@@ -36,7 +36,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
@@ -118,7 +118,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public void setContinueOnMablError(boolean continueOnMablError) {
         this.continueOnMablError = continueOnMablError;
     }
-    
+
     @DataBoundSetter
     public void setDisableSslVerification(boolean disableSslVerification) {
         this.disableSslVerification = disableSslVerification;
@@ -236,7 +236,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 webUrlOverride,
                 apiUrlOverride
         );
-    
+
         Executor executor = Executor.currentExecutor();
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
@@ -317,7 +317,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         }
 
         @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        public boolean configure(StaplerRequest2 req, JSONObject formData) throws FormException {
             JSONObject json = formData.getJSONObject("mabl");
             collectVars = json.getBoolean("collectVars");
             save();
@@ -375,7 +375,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             return result
                 .includeEmptyValue()
                 .includeMatchingAs(
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) item) : ACL.SYSTEM2,
                     item,
                     StringCredentials.class,
                     Collections.emptyList(),
@@ -432,10 +432,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             StringCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(
+                CredentialsProvider.lookupCredentialsInItem(
                     StringCredentials.class,
                     item,
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) item) : ACL.SYSTEM2,
                     Collections.emptyList()
                 ),
                 CredentialsMatchers.withId(restApiKeyId)
@@ -501,10 +501,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             StringCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(
+                CredentialsProvider.lookupCredentialsInItem(
                     StringCredentials.class,
                     item,
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                    item instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) item) : ACL.SYSTEM2,
                     Collections.emptyList()
                 ),
                 CredentialsMatchers.withId(restApiKeyId)
@@ -585,10 +585,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             final Job job
     ) {
         StringCredentials credentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
+            CredentialsProvider.lookupCredentialsInItem(
                 StringCredentials.class,
                 job,
-                job instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) job) : ACL.SYSTEM,
+                job instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) job) : ACL.SYSTEM2,
                 Collections.emptyList()
             ),
             CredentialsMatchers.withId(restApiKeyId)

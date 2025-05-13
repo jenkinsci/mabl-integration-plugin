@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 @XStreamAlias("testcase")
@@ -96,7 +95,7 @@ public class TestCase {
         return this.failure;
     }
 
-    public ImmutableCollection<Property> getProperties() { return properties.getProperties(); };
+    public ImmutableCollection<Property> getProperties() { return properties.getProperties(); }
 
     public Skipped getSkipped() { return this.skipped; }
 }

@@ -17,6 +17,6 @@ public class MablConstantsTest {
     public void ensurePluginVersionUnavailable() {
         final String pluginVersion = getPluginVersion();
         assertNotNull("plugin version unavailable", pluginVersion);
-        assertEquals("plugin version unavailable", pluginVersion, PLUGIN_VERSION_UNKNOWN);
+        assertEquals("plugin version unavailable", PLUGIN_VERSION_UNKNOWN, pluginVersion);
     }
 }

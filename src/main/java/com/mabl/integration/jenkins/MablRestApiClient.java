@@ -7,10 +7,8 @@ import com.mabl.integration.jenkins.domain.GetApiKeyResult;
 import com.mabl.integration.jenkins.domain.GetApplicationsResult;
 import com.mabl.integration.jenkins.domain.GetEnvironmentsResult;
 import com.mabl.integration.jenkins.domain.GetLabelsResult;
-import hudson.util.Secret;
 
 import java.io.IOException;
-import java.util.Set;
 
 public interface MablRestApiClient {
 
