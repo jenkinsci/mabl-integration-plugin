@@ -50,6 +50,8 @@ public class MablStepDeploymentRunnerTest {
     private final EnvVars envVars = new EnvVars();
     private final String webUrlOverride = "https://test-web-override.example.com";
     private final String apiUrlOverride = "https://test-api-override.example.com";
+    private final List<String> browser = Arrays.asList("firefox", "Chrome", "safari", "Edge");
+    private final String revision = "Plan successful";
 
     private MablStepDeploymentRunner runner;
     private MablRestApiClient client;
@@ -76,7 +78,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
     }
 
@@ -163,7 +167,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -190,7 +196,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -221,7 +229,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -251,7 +261,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         when(client.createDeploymentEvent(eq(environmentId), eq(applicationId), eq(labels), isNull(), any(CreateDeploymentProperties.class)))
@@ -281,7 +293,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         final CreateDeploymentResult createDeploymentResult = new CreateDeploymentResult(eventId, "workspace-w");
@@ -502,7 +516,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 null,
-                null
+                null,
+                browser,
+                revision
         );
 
         assertTrue("successful outcome expected", runnerWithCapture.call());
@@ -530,7 +546,9 @@ public class MablStepDeploymentRunnerTest {
                 buildPath,
                 envVars,
                 webUrlOverride,
-                apiUrlOverride
+                apiUrlOverride,
+                browser,
+                revision
         );
 
         // Capture the properties that would be sent to mabl
