@@ -71,6 +71,8 @@ The *Advanced...* button opens up additional options:
 -   Continue execution if there is an unexpected error in the mabl API
 -   Disable SSL verification 
 -   Override the web URL and/or API URL used for the tests in the deployment.
+-   Added browser Selection multiselect - [chrome, firefox, webkit, edge]
+-   Adding the revision (an arbitrary supplied String)
 
 ![](img/config-advanced.png)
 
@@ -94,6 +96,8 @@ pipeline step for mabl. This can be written by hand or created via the
 -   mablBranch: if specified, then tests from the specified branch will be executed.
 -   webUrlOverride: if specified, overrides the default mabl web application URL.
 -   apiUrlOverride: if specified, overrides the default mabl API URL.
+-   browser: Enables  to select one or more target browsers for the deployment from the following options: Chrome, Firefox, WebKit, and Edge.
+-   revisions: Allows users to attach an arbitrary supplied string to the deployment.
     You may also want to use a Jenkins
     [environment variable](https://www.jenkins.io/doc/pipeline/tour/environment/) to specify the branch.   
 

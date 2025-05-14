@@ -16,6 +16,8 @@ public class CreateDeploymentProperties {
     private String buildPlanName;
     private String buildPlanNumber;
     private String buildPlanResultUrl;
+    private String browser;
+    private String revisions;
 
     @SerializedName("plan_overrides")
     private PlanOverride plan_overrides;
@@ -66,6 +68,10 @@ public class CreateDeploymentProperties {
 
     public PlanOverride getPlan_overrides() {return plan_overrides; }   // this it to override both api and web URL
 
+    public String getBrowser() {return browser;}
+
+    public String getRevisions() {return revisions;}
+
     public void setDeploymentOrigin(String plugin) {
         this.deploymentOrigin = plugin;
     }
@@ -112,6 +118,14 @@ public class CreateDeploymentProperties {
 
     public void setPlan_overrides(PlanOverride plan_overrides) { this.plan_overrides = plan_overrides; }
 
+    public void setBroswer(String browser) { this.browser = browser; }
+
+    public void setRevisions(String revisions) {
+        if(revisions != null && !revisions.isEmpty()) {
+            this.revisions = revisions;
+        }
+    }
+
     public CreateDeploymentProperties copy() {
         CreateDeploymentProperties copy = new CreateDeploymentProperties();
         copy.setDeploymentOrigin(deploymentOrigin);
@@ -125,6 +139,11 @@ public class CreateDeploymentProperties {
         copy.setBuildPlanId(buildPlanName);
         copy.setBuildPlanNumber(buildPlanNumber);
         copy.setBuildPlanResultUrl(buildPlanResultUrl);
+        copy.setBroswer(browser);
+
+        if(revisions != null && !revisions.isEmpty()) {
+            copy.setRevisions(revisions);
+        }
 
         /**
          * Checks for URL changes within the plan. If any changes are detected,

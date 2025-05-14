@@ -75,6 +75,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final EnvVars environmentVars;
     private final String webUrlOverride;
     private final String  apiUrlOverride;
+    private final List<String> browsers;
+    private final String revisions;
 
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
@@ -93,7 +95,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final FilePath buildPath,
             final EnvVars environmentVars,
             final String webUrlOverride,
-            final String apiUrlOverride
+            final String apiUrlOverride,
+            final List<String> browsers,
+            final String revisions
 
     ) {
         this.outputStream = outputStream;
@@ -110,6 +114,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.environmentVars = environmentVars;
         this.webUrlOverride = webUrlOverride;
         this.apiUrlOverride = apiUrlOverride;
+        this.browsers = browsers != null ? browsers : new ArrayList<>();
+        this.revisions = revisions;
 
     }
 
@@ -145,7 +151,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 environmentId == null ? "empty" : environmentId,
                 applicationId == null ? "empty" : applicationId,
                 labels == null ? "empty" : labels,
-                mablBranch == null ? "master" : mablBranch
+                mablBranch == null ? "master" : mablBranch,
+                browsers == null ? "default" : String.join(", ", browsers)
         );
 
         try {
@@ -228,6 +235,18 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
             properties.setPlan_overrides(overrides);
             outputStream.println("Url Overrides set");
+        }
+
+        if(browsers!= null && !browsers.isEmpty()) {
+            String browserString = String.join(", ", browsers);
+            properties.setBroswer(browserString);
+
+        }
+        outputStream.println("Deployment created with browser: ["+ browsers +"]" );
+
+        if(revisions !=null && !revisions.trim().isEmpty()) {
+            properties.setRevisions(revisions.trim());
+            outputStream.println("Revision: [" + revisions + "]");
         }
         return properties;
     }
