@@ -42,7 +42,7 @@
               <div style="display: flex; gap: 20px;">
                   <div style="display: flex; align-items: center;">
                       <f:checkbox name="chrome" title="" checked="${browsers.contains('chrome')}" />
-                      <span style="margin-left: 8px;">Chrome</span>git
+                      <span style="margin-left: 8px;">Chrome</span>
                   </div>
                   <div style="display: flex; align-items: center;">
                       <f:checkbox name="firefox" title="" checked="${browsers.contains('firefox')}" />
