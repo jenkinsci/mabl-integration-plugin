@@ -224,9 +224,14 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
          */
         boolean hasWebUrl = webUrlOverride != null && !webUrlOverride.trim().isEmpty();
         boolean hasApiUrl = apiUrlOverride != null && !apiUrlOverride.trim().isEmpty();
+        boolean hasBrowsers = browsers != null && !browsers.isEmpty();
 
-        if(hasWebUrl || hasApiUrl) {
+
             CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+            if(overrides == null) {
+                overrides = new CreateDeploymentProperties.PlanOverride();
+            }
+
             if(hasWebUrl){
                 overrides.setWeb_url(webUrlOverride.trim());
                 outputStream.println("webURL: [" +webUrlOverride+ "]");
@@ -236,16 +241,15 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 outputStream.println("apiURL: [" +apiUrlOverride+ "]");
             }
 
-            properties.setPlan_overrides(overrides);
-            outputStream.println("Url Overrides set");
-        }
+            if(hasBrowsers){
+                overrides.setBrowser_types(browsers);
+                outputStream.println("Deployment created with browsers: [" + String.join(", ", browsers) + "]");
+            }
 
-        if(browsers!= null && !browsers.isEmpty()) {
-            String browserString = String.join(", ", browsers);
-            properties.setBroswer(browserString);
-
-        }
-        outputStream.println("Deployment created with browser: ["+ browsers +"]" );
+            if(hasApiUrl || hasWebUrl || hasBrowsers) {
+                properties.setPlan_overrides(overrides);
+                outputStream.println("Url Overrides set");
+            }
 
         if(revisions !=null && !revisions.trim().isEmpty()) {
             properties.setRevisions(revisions.trim());

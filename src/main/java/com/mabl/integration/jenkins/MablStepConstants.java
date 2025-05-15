@@ -30,8 +30,8 @@ public class MablStepConstants {
 
     // Label for build steps drop down list
     static final String BUILD_STEP_DISPLAY_NAME = "Run mabl tests";
-    public static final String MABL_API_BASE_URL = "https://api.mabl.com";
-    public static final String MABL_APP_BASE_URL = "https://app.mabl.com";
+    public static final String MABL_API_BASE_URL = "https://api-dev.mabl.com";
+    public static final String MABL_APP_BASE_URL = "https://app-dev.mabl.com";
     static final int EXECUTION_TIMEOUT_SECONDS = 6 * 3600;
     static final int REQUEST_TIMEOUT_MILLISECONDS = 10 * 60 * 1000;
     static final long EXECUTION_STATUS_POLLING_INTERNAL_MILLISECONDS = 10000;
