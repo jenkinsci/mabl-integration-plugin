@@ -39,10 +39,24 @@
     </f:entry>
       <f:section title="BrowserSelection">
           <f:entry title="Browser" field="browser">
-              <f:checkbox name="chrome" title="Chrome" checked="${browsers.contains('chrome')}" />
-              <f:checkbox name="firefox" title="Firefox" checked="${browsers.contains('firefox')}" />
-              <f:checkbox name="edge" title="Edge" checked="${browsers.contains('edge')}" />
-              <f:checkbox name="safari" title="Webkit" checked="${browsers.contains('safari')}" />
+              <div style="display: flex; gap: 20px;">
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="chrome" title="" checked="${browsers.contains('chrome')}" />
+                      <span style="margin-left: 8px;">Chrome</span>git
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="firefox" title="" checked="${browsers.contains('firefox')}" />
+                      <span style="margin-left: 8px;">Firefox</span>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="edge" title="" checked="${browsers.contains('edge')}" />
+                      <span style="margin-left: 8px;">Edge</span>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="webkit" title="" checked="${browsers.contains('webkit')}" />
+                      <span style="margin-left: 8px;">Webkit</span>
+                  </div>
+              </div>
           </f:entry>
       </f:section>
       <f:entry title="${%Revision}" field="revisions">

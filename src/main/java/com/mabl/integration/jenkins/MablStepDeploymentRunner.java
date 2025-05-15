@@ -114,7 +114,10 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.environmentVars = environmentVars;
         this.webUrlOverride = webUrlOverride;
         this.apiUrlOverride = apiUrlOverride;
-        this.browsers = browsers != null ? browsers : new ArrayList<>();
+        if (browsers == null) {
+            throw new IllegalArgumentException("Browsers list cannot be null");
+        }
+        this.browsers = new ArrayList<>(browsers);
         this.revisions = revisions;
 
     }

@@ -63,6 +63,7 @@ import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
 /**
  * mabl custom build step
  */
@@ -173,7 +174,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public void setEdge(boolean edge){updateBrowser("edge", edge);}
 
     @DataBoundSetter
-    public void setSafari(boolean safari){updateBrowser("safari", safari);}
+    public void setwebkit(boolean webkit){updateBrowser("webkit", webkit);}
 
     /**
      * To update the arbitary supplied String
@@ -232,7 +233,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     public boolean isEdge() {return browsers !=null && browsers.contains("edge");}
 
-    public boolean isSafari() {return browsers !=null && browsers.contains("safari");}
+    public boolean iswebkit() {return browsers !=null && browsers.contains("webkit");}
 
     public String getRevisions() { return this.revisions; }
 
@@ -652,13 +653,14 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void updateBrowser(String browserName , boolean selected){
+
         if(selected){
-            if(browsers == null) browsers = new ArrayList<>();
-            if(!browsers.contains(browserName)) browsers.add(browserName);
+            if(!browsers.contains(browserName)){
+                browsers.add(browserName);
+            }
         }
-        else if(browsers != null){
+        else {
             browsers.remove(browserName);
         }
     }
-
 }

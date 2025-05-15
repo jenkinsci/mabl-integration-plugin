@@ -50,7 +50,7 @@ public class MablStepDeploymentRunnerTest {
     private final EnvVars envVars = new EnvVars();
     private final String webUrlOverride = "https://test-web-override.example.com";
     private final String apiUrlOverride = "https://test-api-override.example.com";
-    private final List<String> browser = Arrays.asList("firefox", "Chrome", "safari", "Edge");
+    private final List<String> browser = Arrays.asList("firefox", "chrome", "webkit", "edge");
     private final String revision = "Plan successful";
 
     private MablStepDeploymentRunner runner;
