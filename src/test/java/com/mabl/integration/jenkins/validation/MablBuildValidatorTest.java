@@ -188,7 +188,7 @@ public class MablBuildValidatorTest {
                 "sample-key-id", false, freeStyleProject)).thenReturn(
                 new MablRestApiClient() {
                     @Override
-                    public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties) throws IOException {
+                    public CreateDeploymentResult createDeploymentEvent(String environmentId, String applicationId, String labels, String mablBranch, CreateDeploymentProperties properties, String revision) throws IOException {
                         return null;
                     }
 

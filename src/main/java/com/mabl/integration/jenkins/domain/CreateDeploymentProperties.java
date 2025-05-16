@@ -134,7 +134,6 @@ public class CreateDeploymentProperties {
         copy.setBuildPlanName(buildPlanName);
         copy.setBuildPlanNumber(buildPlanNumber);
         copy.setBuildPlanResultUrl(buildPlanResultUrl);
-
         /**
          * Checks for URL changes and browser type configurations within the plan. If any changes are detected,
          * the URLs and browser types in the plan are updated accordingly.

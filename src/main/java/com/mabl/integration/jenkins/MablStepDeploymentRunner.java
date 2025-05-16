@@ -161,7 +161,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
             final CreateDeploymentResult deployment =
-                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
+                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties, revision);
             if (deployment != null) {
                 outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
                         client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
@@ -249,7 +249,6 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         }
 
         if(revision !=null && !revision.trim().isEmpty()) {
-            properties.setRevision(revision.trim());
             outputStream.println("Revision: [" + revision + "]");
         }
         return properties;
