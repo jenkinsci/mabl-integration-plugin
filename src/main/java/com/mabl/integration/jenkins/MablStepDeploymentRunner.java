@@ -228,9 +228,6 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
 
 
             CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
-            if(overrides == null) {
-                overrides = new CreateDeploymentProperties.PlanOverride();
-            }
 
             if(hasWebUrl){
                 overrides.setWeb_url(webUrlOverride.trim());
