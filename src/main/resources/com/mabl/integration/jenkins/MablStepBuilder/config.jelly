@@ -59,7 +59,7 @@
               </div>
           </f:entry>
       </f:section>
-      <f:entry title="${%Revision}" field="revisions">
+      <f:entry title="${%Revision}" field="revision">
           <f:textbox/>
       </f:entry>
   </f:advanced>

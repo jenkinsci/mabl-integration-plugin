@@ -569,7 +569,7 @@ public class MablStepDeploymentRunnerTest {
                     assertEquals("Should have 2 browsers", 2, browserTypes.size());
                     assertTrue("Should contain webkit", browserTypes.contains("webkit"));
                     assertTrue("Should contain edge", browserTypes.contains("edge"));
-                    assertEquals("Revision should match",revision, props.getRevisions());
+                    assertEquals("Revision should match",revision, props.getRevision());
                     return new CreateDeploymentResult(eventId, "workspace-w");
                 });
 

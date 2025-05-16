@@ -76,7 +76,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final String webUrlOverride;
     private final String  apiUrlOverride;
     private final List<String> browsers;
-    private final String revisions;
+    private final String revision;
 
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
@@ -97,7 +97,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final String webUrlOverride,
             final String apiUrlOverride,
             final List<String> browsers,
-            final String revisions
+            final String revision
 
     ) {
         this.outputStream = outputStream;
@@ -118,7 +118,7 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             throw new IllegalArgumentException("Browsers list cannot be null");
         }
         this.browsers = new ArrayList<>(browsers);
-        this.revisions = revisions;
+        this.revision = revision;
 
     }
 
@@ -227,30 +227,30 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         boolean hasBrowsers = browsers != null && !browsers.isEmpty();
 
 
-            CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+        CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
 
-            if(hasWebUrl){
-                overrides.setWeb_url(webUrlOverride.trim());
-                outputStream.println("webURL: [" +webUrlOverride+ "]");
-            }
-            if(hasApiUrl){
-                overrides.setApi_url(apiUrlOverride.trim());
-                outputStream.println("apiURL: [" +apiUrlOverride+ "]");
-            }
+        if(hasWebUrl){
+            overrides.setWeb_url(webUrlOverride.trim());
+            outputStream.println("webURL: [" +webUrlOverride+ "]");
+        }
+        if(hasApiUrl){
+            overrides.setApi_url(apiUrlOverride.trim());
+            outputStream.println("apiURL: [" +apiUrlOverride+ "]");
+        }
 
-            if(hasBrowsers){
-                overrides.setBrowser_types(browsers);
-                outputStream.println("Deployment created with browsers: [" + String.join(", ", browsers) + "]");
-            }
+        if(hasBrowsers){
+            overrides.setBrowser_types(browsers);
+            outputStream.println("Deployment created with browsers: [" + String.join(", ", browsers) + "]");
+        }
 
-            if(hasApiUrl || hasWebUrl || hasBrowsers) {
-                properties.setPlan_overrides(overrides);
-                outputStream.println("Url Overrides set");
-            }
+        if(hasApiUrl || hasWebUrl || hasBrowsers) {
+            properties.setPlan_overrides(overrides);
+            outputStream.println("Url Overrides set");
+        }
 
-        if(revisions !=null && !revisions.trim().isEmpty()) {
-            properties.setRevisions(revisions.trim());
-            outputStream.println("Revision: [" + revisions + "]");
+        if(revision !=null && !revision.trim().isEmpty()) {
+            properties.setRevision(revision.trim());
+            outputStream.println("Revision: [" + revision + "]");
         }
         return properties;
     }
@@ -304,8 +304,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                     safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
                 outputStream.printf("    Test [%s] is %s%n",
-                    safeJourneyName(summary, journeyResult.id),
-                    executionResultToString(journeyResult));
+                        safeJourneyName(summary, journeyResult.id),
+                        executionResultToString(journeyResult));
             }
         }
     }
@@ -440,8 +440,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         return summary.plan != null &&
                 summary.plan.name != null &&
                 !summary.plan.name.isEmpty()
-                    ? summary.plan.name :
-                    "<Unnamed Plan>";
+                ? summary.plan.name :
+                "<Unnamed Plan>";
     }
 
     private static String safeJourneyName(
