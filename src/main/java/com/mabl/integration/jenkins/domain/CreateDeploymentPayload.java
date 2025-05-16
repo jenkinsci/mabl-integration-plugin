@@ -24,7 +24,7 @@ public class CreateDeploymentPayload {
         this.planLabels = isBlank(planLabels) ? null :
                 Arrays.asList(commaDelimitedListToStringArray(planLabels));
         this.sourceControlTag = isBlank(mablBranch) ? null : mablBranch;
-        this.revision = revision;
+        this.revision = revision; // Setting the revision into Root properties
         if (properties != null && properties.getPlan_overrides() != null) {
             this.plan_overrides = properties.getPlan_overrides();
 

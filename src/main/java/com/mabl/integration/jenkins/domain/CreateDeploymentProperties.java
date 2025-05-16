@@ -117,7 +117,7 @@ public class CreateDeploymentProperties {
 
     public void setRevision(String revision) {
         if(revision != null && !revision.isEmpty()) {
-            this.revision = revision;
+            this.revision = revision; // Adding the Revision String to Deployment Properties
         }
     }
 

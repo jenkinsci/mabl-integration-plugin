@@ -645,4 +645,5 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         }
         return null;
     }
+
 }

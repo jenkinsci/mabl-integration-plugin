@@ -20,7 +20,7 @@ public interface MablRestApiClient {
             String labels,
             String mablBranch,
             CreateDeploymentProperties properties,
-            String revision
+            String revision // added revision
     ) throws IOException;
 
     /**

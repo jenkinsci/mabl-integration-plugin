@@ -191,7 +191,7 @@ public class MablRestApiClientImpl implements MablRestApiClient {
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
         final String jsonPayload = gson.toJson(
-                new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties, revision));
+                new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties, revision)); // To add revision in the root properties
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes(StandardCharsets.UTF_8));
 
         final HttpPost request = new HttpPost(url);
