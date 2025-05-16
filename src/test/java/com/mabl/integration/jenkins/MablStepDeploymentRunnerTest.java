@@ -50,7 +50,7 @@ public class MablStepDeploymentRunnerTest {
     private final EnvVars envVars = new EnvVars();
     private final String webUrlOverride = "https://test-web-override.example.com";
     private final String apiUrlOverride = "https://test-api-override.example.com";
-    private final List<String> browser = Arrays.asList("firefox", "chrome", "webkit", "edge");
+    private final List<String> browser = Arrays.asList("webkit", "edge");
     private final String revision = "Plan successful";
 
     private MablStepDeploymentRunner runner;
@@ -562,8 +562,14 @@ public class MablStepDeploymentRunnerTest {
                     CreateDeploymentProperties props = invocation.getArgument(4);
                     assertNotNull("Properties should not be null", props);
                     assertNotNull("Plan overrides should not be null", props.getPlan_overrides());
+                    assertNotNull("Browser types should not be null", props.getPlan_overrides().getBrowser_types());
                     assertEquals("Web URL override should match", webUrlOverride, props.getPlan_overrides().getWeb_url());
                     assertEquals("API URL override should match", apiUrlOverride, props.getPlan_overrides().getApi_url());
+                    List<String> browserTypes = props.getPlan_overrides().getBrowser_types();
+                    assertEquals("Should have 2 browsers", 2, browserTypes.size());
+                    assertTrue("Should contain webkit", browserTypes.contains("webkit"));
+                    assertTrue("Should contain edge", browserTypes.contains("edge"));
+                    assertEquals("Revision should match",revision, props.getRevisions());
                     return new CreateDeploymentResult(eventId, "workspace-w");
                 });
 
