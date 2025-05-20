@@ -16,6 +16,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -31,6 +33,7 @@ import static com.mabl.integration.jenkins.MablRestApiClientImpl.REST_API_USERNA
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -52,16 +55,17 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = "foo-env-e";
         final String applicationId = "foo-app-a";
         final String labels = "foo-label";
+        final String revision = "foo-revision";
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKeyId,
-                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
+                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\",\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+",\"revision\":\"foo-revision\"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels, revision);
 
         // in reality, you would use the same event ID, but it is eeasier to test with separate ones
         final String eventId1 = "fake-event-id-1";
@@ -131,7 +135,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = "foo-env-e";
         final String applicationId = null;
         final String labels = null;
-
+        final String revision = null;
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
@@ -140,7 +144,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 "{\"environment_id\":\"foo-env-e\",\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels, revision);
     }
 
     @Test
@@ -150,6 +154,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = null;
         final String applicationId = "foo-app-a";
         final String labels = null;
+        final String revision = null;
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -159,7 +164,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 "{\"application_id\":\"foo-app-a\",\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels, revision);
     }
 
     @Test
@@ -169,6 +174,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = null;
         final String applicationId = null;
         final String labels = "foo-label";
+        final String revision = null;
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
@@ -178,7 +184,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
                 "{\"plan_labels\":[\"foo-label\"],\"properties\":"+fakeProperties+"}"
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, labels, revision);
     }
 
     @Test
@@ -187,18 +193,101 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String environmentId = "my-env-e";
         final String applicationId = "my-app-a";
         final String branch = "my-test-branch";
+        final String revision = "my-test-revision";
 
         registerPostMapping(
                 MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
                 MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
                 REST_API_USERNAME_PLACEHOLDER,
                 fakeRestApiKeyId,
-                String.format("{\"environment_id\":\"%s\",\"application_id\":\"%s\",\"source_control_tag\":\"%s\",\"properties\":%s}",
-                        environmentId, applicationId, branch, fakeProperties)
+                String.format("{\"environment_id\":\"%s\",\"application_id\":\"%s\",\"source_control_tag\":\"%s\",\"properties\":%s,\"revision\":\"%s\"}",
+                        environmentId, applicationId, branch, fakeProperties, revision)
         );
 
-        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, branch);
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, branch, revision);
     }
+
+    @Test
+    public void createDeploymentWithUrlOverridesAndBrowsers() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+        final String environmentId = "foo-env-e";
+        final String applicationId = "foo-app-a";
+        final String webUrl = "https://test-web-override.example.com";
+        final String apiUrl = "https://test-api-override.example.com";
+        final List<String> browsers = Arrays.asList("chrome", "firefox");
+        final String revision = "test-revision-123";
+
+        // Create a JSON string with the structure we expect
+        // The key is making sure it's properly escaped and has the right structure
+        String expectedJsonBody = "{" +
+                "\"environment_id\":\"" + environmentId + "\"," +
+                "\"application_id\":\"" + applicationId + "\"," +
+                "\"properties\":{\"deployment_origin\":\"" + MablStepConstants.PLUGIN_USER_AGENT + "\"}," +
+                "\"plan_overrides\":{" +
+                "\"web_url\":\"" + webUrl + "\"," +
+                "\"api_url\":\"" + apiUrl + "\"," +
+                "\"browser_types\":[\"chrome\",\"firefox\"]" +
+                "}," +
+                "\"revision\":\"" + revision + "\"" +
+                "}";
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId,
+                expectedJsonBody
+        );
+
+        final String baseUrl = getBaseUrl();
+
+        MablRestApiClient client = null;
+        try {
+            client = new MablRestApiClientImpl(baseUrl, mockSecret(fakeRestApiKeyId), MABL_APP_BASE_URL);
+
+            // Create properties with plan overrides
+            CreateDeploymentProperties properties = new CreateDeploymentProperties();
+            properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
+
+            CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+            overrides.setWeb_url(webUrl);
+            overrides.setApi_url(apiUrl);
+            overrides.setBrowser_types(browsers);
+            properties.setPlan_overrides(overrides);
+
+            // Call create deployment with revision
+            CreateDeploymentResult result =
+                    client.createDeploymentEvent(environmentId, applicationId, null, null, properties, revision);
+            assertNotNull("Result should not be null", result);
+            assertEquals(EXPECTED_DEPLOYMENT_EVENT_ID, result.id);
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+
+        verifyExpectedUrls();
+    }
+
+    @Test
+    public void createDeploymentWithRevisionOnly() throws IOException {
+        final String fakeRestApiKeyId = "aFakeRestApiKeyId";
+        final String environmentId = "foo-env-e";
+        final String applicationId = "foo-app-a";
+        final String revision = "test-revision-only";
+
+        registerPostMapping(
+                MablRestApiClientImpl.DEPLOYMENT_TRIGGER_ENDPOINT,
+                MablTestConstants.CREATE_DEPLOYMENT_EVENT_RESULT_JSON,
+                REST_API_USERNAME_PLACEHOLDER,
+                fakeRestApiKeyId,
+                "{\"environment_id\":\"foo-env-e\",\"application_id\":\"foo-app-a\"," +
+                        "\"properties\":" + fakeProperties + ",\"revision\":\"test-revision-only\"}"
+        );
+
+        assertSuccessfulCreateDeploymentRequest(fakeRestApiKeyId, environmentId, applicationId, null, null, revision);
+    }
+
 
     @Test
     public void testCheckConnection_Ok() throws IOException {
@@ -314,7 +403,18 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             final String environmentId,
             final String applicationId,
             final String labels,
-            final String mablBranch
+            final String revision
+    ) throws IOException {
+        assertSuccessfulCreateDeploymentRequest(restApiKey, environmentId, applicationId, labels, null, revision);
+    }
+
+    private void assertSuccessfulCreateDeploymentRequest(
+            final String restApiKey,
+            final String environmentId,
+            final String applicationId,
+            final String labels,
+            final String mablBranch,
+            final String revision
     ) throws IOException {
         final String baseUrl = getBaseUrl();
 
@@ -324,7 +424,7 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
             CreateDeploymentProperties properties = new CreateDeploymentProperties();
             properties.setDeploymentOrigin(MablStepConstants.PLUGIN_USER_AGENT);
             CreateDeploymentResult result =
-                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
+                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties, revision);
             assertEquals(EXPECTED_DEPLOYMENT_EVENT_ID, result.id);
         } finally {
             if (client != null) {
@@ -428,13 +528,13 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         final String organization_id = "fakeOrganizationId";
 
         WireMock.stubFor(get(urlPathEqualTo("/applications"))
-            .withQueryParam("organization_id", equalTo(organization_id))
+                .withQueryParam("organization_id", equalTo(organization_id))
                 .withBasicAuth(REST_API_USERNAME_PLACEHOLDER, fakeRestApiKeyId)
                 .withHeader("user-agent", new EqualToPattern(MablStepConstants.PLUGIN_USER_AGENT))
-            .willReturn(ok()
-                .withHeader("Content-Type", "application/json")
-                .withBody(MablTestConstants.APPLICATIONS_RESULT_JSON)
-            ));
+                .willReturn(ok()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(MablTestConstants.APPLICATIONS_RESULT_JSON)
+                ));
 
         final String baseUrl = getBaseUrl();
 
@@ -478,30 +578,28 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         }
     }
 
-
-
     @Test(expected = MablSystemException.class)
     public void apiClientDoesntRetryOn503() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "503", 503, 1);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label", "foo-revision");
     }
 
     @Test
     public void apiClientRetriesOn501() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 1);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label", "foo-revision");
     }
 
     @Test
     public void apiClientRetriesOn501MaxtimesSuccess() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 5);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label", "foo-revision");
     }
 
     @Test(expected = MablSystemException.class)
     public void apiClientRetriesOn501OverMaxtimesFailure() throws IOException {
         registerPostCreateRetryMappings("/events/deployment", "501", 501, 6);
-        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label");
+        assertSuccessfulCreateDeploymentRequest("pa$$\\/\\/orD", "foo-env-e", "foo-app-a", "foo-label", "foo-revision");
     }
 
     private void registerPostCreateRetryMappings(
@@ -547,4 +645,5 @@ public class MablRestApiClientTest extends AbstractWiremockTest {
         }
         return null;
     }
+
 }

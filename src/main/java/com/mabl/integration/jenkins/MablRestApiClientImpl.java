@@ -184,13 +184,14 @@ public class MablRestApiClientImpl implements MablRestApiClient {
             final String applicationId,
             final String labels,
             final String mablBranch,
-            final CreateDeploymentProperties properties
+            final CreateDeploymentProperties properties,
+            String revision
             ) throws IOException {
         final String url = restApiBaseUrl + DEPLOYMENT_TRIGGER_ENDPOINT; // TODO validate inputs so we can't have illegal urls
 
         // TODO do sanity check of parameters, so we can catch the encoding exception
         final String jsonPayload = gson.toJson(
-                new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties));
+                new CreateDeploymentPayload(environmentId, applicationId, labels, mablBranch, properties, revision)); // To add revision in the root properties
         final AbstractHttpEntity payloadEntity = new ByteArrayEntity(jsonPayload.getBytes(StandardCharsets.UTF_8));
 
         final HttpPost request = new HttpPost(url);

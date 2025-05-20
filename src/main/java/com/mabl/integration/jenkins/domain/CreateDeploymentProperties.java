@@ -3,7 +3,7 @@ package com.mabl.integration.jenkins.domain;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
-
+import java.util.List;
 public class CreateDeploymentProperties {
     private String deploymentOrigin;
     private String repositoryBranchName;
@@ -16,6 +16,7 @@ public class CreateDeploymentProperties {
     private String buildPlanName;
     private String buildPlanNumber;
     private String buildPlanResultUrl;
+    private String revision;
 
     @SerializedName("plan_overrides")
     private PlanOverride plan_overrides;
@@ -66,6 +67,8 @@ public class CreateDeploymentProperties {
 
     public PlanOverride getPlan_overrides() {return plan_overrides; }   // this it to override both api and web URL
 
+    public String getRevision() {return revision;}
+
     public void setDeploymentOrigin(String plugin) {
         this.deploymentOrigin = plugin;
     }
@@ -112,6 +115,12 @@ public class CreateDeploymentProperties {
 
     public void setPlan_overrides(PlanOverride plan_overrides) { this.plan_overrides = plan_overrides; }
 
+    public void setRevision(String revision) {
+        if(revision != null && !revision.isEmpty()) {
+            this.revision = revision; // Adding the Revision String to Deployment Properties
+        }
+    }
+
     public CreateDeploymentProperties copy() {
         CreateDeploymentProperties copy = new CreateDeploymentProperties();
         copy.setDeploymentOrigin(deploymentOrigin);
@@ -122,25 +131,28 @@ public class CreateDeploymentProperties {
         copy.setRepositoryPreviousRevisionNumber(repositoryPreviousRevisionNumber);
         copy.setRepositoryCommitUsername(repositoryCommitUsername);
         copy.setBuildPlanId(buildPlanId);
-        copy.setBuildPlanId(buildPlanName);
+        copy.setBuildPlanName(buildPlanName);
         copy.setBuildPlanNumber(buildPlanNumber);
         copy.setBuildPlanResultUrl(buildPlanResultUrl);
-
         /**
-         * Checks for URL changes within the plan. If any changes are detected,
-         * the URLs in the plan are updated accordingly.
+         * Checks for URL changes and browser type configurations within the plan. If any changes are detected,
+         * the URLs and browser types in the plan are updated accordingly.
          */
         if(plan_overrides != null){
             boolean hasWebUrl = plan_overrides.getWeb_url() != null && !plan_overrides.getWeb_url().isEmpty();
             boolean hasApiUrl = plan_overrides.getApi_url() != null && !plan_overrides.getApi_url().isEmpty();
+            boolean hasBrowserTypes = plan_overrides.getBrowser_types() != null && !plan_overrides.getBrowser_types().isEmpty();
 
-            if(hasWebUrl || hasApiUrl){
+            if(hasWebUrl || hasApiUrl || hasBrowserTypes){
                 PlanOverride overrideCopy = new PlanOverride();
                 if(hasWebUrl){
                     overrideCopy.setWeb_url(plan_overrides.getWeb_url());
                 }
                 if(hasApiUrl){
                     overrideCopy.setApi_url(plan_overrides.getApi_url());
+                }
+                if(hasBrowserTypes){
+                    overrideCopy.setBrowser_types(plan_overrides.getBrowser_types());
                 }
                 copy.setPlan_overrides(overrideCopy);
             }
@@ -151,13 +163,15 @@ public class CreateDeploymentProperties {
 
     /**
      * Inner class responsible for updating the application's plans
-     * based on changes to the web URL and API URL configurations.
+     * based on changes to the web URL, API URL, and browser type configurations.
      */
     public static class PlanOverride{
         @SerializedName("web_url")
         private String web_url;
         @SerializedName("api_url")
         private String api_url;
+        @SerializedName("browser_types")
+        private List<String> browser_types;
 
         public void setWeb_url(String web_url) {
             this.web_url = web_url;
@@ -167,11 +181,18 @@ public class CreateDeploymentProperties {
             this.api_url = api_url;
         }
 
+        public void setBrowser_types(List<String> browser_types) {
+            this.browser_types = browser_types;
+        }
+
         public String getWeb_url() {
             return web_url;
         }
         public String getApi_url() {
             return api_url;
+        }
+        public List<String> getBrowser_types() {
+            return browser_types;
         }
 
         @Override
@@ -181,13 +202,13 @@ public class CreateDeploymentProperties {
 
             PlanOverride other = (PlanOverride) obj;
             return  Objects.equals(web_url, other.web_url) &&
-                    Objects.equals(api_url, other.api_url);
+                    Objects.equals(api_url, other.api_url) &&
+                    Objects.equals(browser_types, other.browser_types);
         }
 
         @Override
         public int hashCode(){
-            return Objects.hash(web_url, api_url);
+            return Objects.hash(web_url, api_url, browser_types);
         }
     }
 }
-

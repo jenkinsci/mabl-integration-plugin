@@ -16,14 +16,15 @@ public class CreateDeploymentPayload {
     final CreateDeploymentProperties properties;
     @SerializedName("plan_overrides")
     final CreateDeploymentProperties.PlanOverride plan_overrides;
+    final String revision;
 
-    public CreateDeploymentPayload(String environmentId, String applicationId, String planLabels, String mablBranch, CreateDeploymentProperties properties) {
+    public CreateDeploymentPayload(String environmentId, String applicationId, String planLabels, String mablBranch, CreateDeploymentProperties properties, String revision) {
         this.environmentId = environmentId;
         this.applicationId = applicationId;
         this.planLabels = isBlank(planLabels) ? null :
                 Arrays.asList(commaDelimitedListToStringArray(planLabels));
         this.sourceControlTag = isBlank(mablBranch) ? null : mablBranch;
-
+        this.revision = revision; // Setting the revision into Root properties
         if (properties != null && properties.getPlan_overrides() != null) {
             this.plan_overrides = properties.getPlan_overrides();
 

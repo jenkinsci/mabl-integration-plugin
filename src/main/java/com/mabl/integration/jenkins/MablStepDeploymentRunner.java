@@ -75,6 +75,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
     private final EnvVars environmentVars;
     private final String webUrlOverride;
     private final String  apiUrlOverride;
+    private final List<String> browsers;
+    private final String revision;
 
 
     @SuppressWarnings("WeakerAccess") // required public for DataBound
@@ -93,7 +95,9 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
             final FilePath buildPath,
             final EnvVars environmentVars,
             final String webUrlOverride,
-            final String apiUrlOverride
+            final String apiUrlOverride,
+            final List<String> browsers,
+            final String revision
 
     ) {
         this.outputStream = outputStream;
@@ -110,6 +114,11 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         this.environmentVars = environmentVars;
         this.webUrlOverride = webUrlOverride;
         this.apiUrlOverride = apiUrlOverride;
+        if (browsers == null) {
+            throw new IllegalArgumentException("Browsers list cannot be null");
+        }
+        this.browsers = new ArrayList<>(browsers);
+        this.revision = revision;
 
     }
 
@@ -145,13 +154,14 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                 environmentId == null ? "empty" : environmentId,
                 applicationId == null ? "empty" : applicationId,
                 labels == null ? "empty" : labels,
-                mablBranch == null ? "master" : mablBranch
+                mablBranch == null ? "master" : mablBranch,
+                browsers == null ? "default" : String.join(", ", browsers)
         );
 
         try {
             final CreateDeploymentProperties properties = getDeploymentProperties();
             final CreateDeploymentResult deployment =
-                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties);
+                    client.createDeploymentEvent(environmentId, applicationId, labels, mablBranch, properties, revision); // Added Revision to Deployment
             if (deployment != null) {
                 outputStream.printf("Deployment event was created in mabl at [%s/workspaces/%s/events/%s]%n",
                         client.getAppBaseUrl(), deployment.workspaceId, deployment.id);
@@ -214,20 +224,32 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
          */
         boolean hasWebUrl = webUrlOverride != null && !webUrlOverride.trim().isEmpty();
         boolean hasApiUrl = apiUrlOverride != null && !apiUrlOverride.trim().isEmpty();
+        boolean hasBrowsers = browsers != null && !browsers.isEmpty();
 
-        if(hasWebUrl || hasApiUrl) {
-            CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
-            if(hasWebUrl){
-                overrides.setWeb_url(webUrlOverride.trim());
-                outputStream.println("webURL: [" +webUrlOverride+ "]");
-            }
-            if(hasApiUrl){
-                overrides.setApi_url(apiUrlOverride.trim());
-                outputStream.println("apiURL: [" +apiUrlOverride+ "]");
-            }
 
+        CreateDeploymentProperties.PlanOverride overrides = new CreateDeploymentProperties.PlanOverride();
+
+        if(hasWebUrl){
+            overrides.setWeb_url(webUrlOverride.trim());
+            outputStream.println("webURL: [" +webUrlOverride+ "]");
+        }
+        if(hasApiUrl){
+            overrides.setApi_url(apiUrlOverride.trim());
+            outputStream.println("apiURL: [" +apiUrlOverride+ "]");
+        }
+
+        if(hasBrowsers){
+            overrides.setBrowser_types(browsers);
+            outputStream.println("Deployment created with browsers: [" + String.join(", ", browsers) + "]");
+        }
+
+        if(hasApiUrl || hasWebUrl || hasBrowsers) {
             properties.setPlan_overrides(overrides);
             outputStream.println("Url Overrides set");
+        }
+
+        if(revision !=null && !revision.trim().isEmpty()) {
+            outputStream.println("Revision: [" + revision + "]");
         }
         return properties;
     }
@@ -281,8 +303,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
                     safePlanName(summary), summary.status);
             for (ExecutionResult.JourneyExecutionResult journeyResult : summary.journeyExecutions) {
                 outputStream.printf("    Test [%s] is %s%n",
-                    safeJourneyName(summary, journeyResult.id),
-                    executionResultToString(journeyResult));
+                        safeJourneyName(summary, journeyResult.id),
+                        executionResultToString(journeyResult));
             }
         }
     }
@@ -417,8 +439,8 @@ public class MablStepDeploymentRunner implements Callable<Boolean> {
         return summary.plan != null &&
                 summary.plan.name != null &&
                 !summary.plan.name.isEmpty()
-                    ? summary.plan.name :
-                    "<Unnamed Plan>";
+                ? summary.plan.name :
+                "<Unnamed Plan>";
     }
 
     private static String safeJourneyName(

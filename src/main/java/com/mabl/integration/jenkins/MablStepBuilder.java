@@ -61,6 +61,9 @@ import static com.mabl.integration.jenkins.MablStepConstants.TEST_OUTPUT_XML_FIL
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Optional;
 /**
  * mabl custom build step
  */
@@ -83,6 +86,8 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     private String appBaseUrl;
     private String webUrlOverride;
     private String apiUrlOverride;
+    private List<String> browsers = new ArrayList<>();
+    private String revision;
 
     @DataBoundConstructor
     public MablStepBuilder(
@@ -118,7 +123,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public void setContinueOnMablError(boolean continueOnMablError) {
         this.continueOnMablError = continueOnMablError;
     }
-    
+
     @DataBoundSetter
     public void setDisableSslVerification(boolean disableSslVerification) {
         this.disableSslVerification = disableSslVerification;
@@ -148,6 +153,34 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
     public void setApiUrlOverride(String apiUrlOverride){
         this.apiUrlOverride = apiUrlOverride;
     }
+
+    /**
+     * To change the browser for test deployment execution
+     */
+    @DataBoundSetter
+    public void setBrowsers(List<String> browsers){this.browsers = browsers != null ? browsers : new ArrayList<>() ;}
+
+    /**
+     * Individual browser checkbox setter
+     */
+
+    @DataBoundSetter
+    public void setChrome(boolean chrome){ updateBrowser("chrome", chrome);}
+
+    @DataBoundSetter
+    public void setFirefox(boolean firefox){updateBrowser("firefox", firefox);}
+
+    @DataBoundSetter
+    public void setEdge(boolean edge){updateBrowser("edge", edge);}
+
+    @DataBoundSetter
+    public void setwebkit(boolean webkit){updateBrowser("webkit", webkit);}
+
+    /**
+     * To update the arbitary supplied String
+     */
+    @DataBoundSetter
+    public void setRevision(String revision){this.revision = revision;}
 
     // Accessors to be used by Jelly UI templates
     public String getRestApiKeyId() {
@@ -192,6 +225,18 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
 
     public String getApiUrlOverride() { return this.apiUrlOverride; }
 
+    public List<String> getBrowsers() { return this.browsers; }
+
+    public boolean isChrome() {return browsers !=null && browsers.contains("chrome");}
+
+    public boolean isFirefox() {return browsers !=null && browsers.contains("firefox");}
+
+    public boolean isEdge() {return browsers !=null && browsers.contains("edge");}
+
+    public boolean iswebkit() {return browsers !=null && browsers.contains("webkit");}
+
+    public String getRevision() { return this.revision; }
+
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
@@ -203,10 +248,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
         final PrintStream outputStream = listener.getLogger();
 
         StringCredentials credentials = CredentialsProvider.findCredentialById(
-            restApiKeyId,
-            StringCredentials.class,
-            run,
-            Collections.emptyList()
+                restApiKeyId,
+                StringCredentials.class,
+                run,
+                Collections.emptyList()
         );
 
         if (credentials == null) {
@@ -234,9 +279,11 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 getOutputFileLocation(workspace),
                 getEnvironmentVars(run, listener),
                 webUrlOverride,
-                apiUrlOverride
+                apiUrlOverride,
+                browsers,
+                revision
         );
-    
+
         Executor executor = Executor.currentExecutor();
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> runnerFuture = executorService.submit(runner);
@@ -367,20 +414,20 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
             } else {
                 if (!item.hasPermission(Item.EXTENDED_READ)
-                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return result.includeCurrentValue(restApiKeyId);
                 }
             }
 
             return result
-                .includeEmptyValue()
-                .includeMatchingAs(
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
-                    item,
-                    StringCredentials.class,
-                    Collections.emptyList(),
-                    CredentialsMatchers.always()
-                );
+                    .includeEmptyValue()
+                    .includeMatchingAs(
+                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            item,
+                            StringCredentials.class,
+                            Collections.emptyList(),
+                            CredentialsMatchers.always()
+                    );
         }
 
         public FormValidation doCheckRestApiKeyIds(
@@ -393,7 +440,7 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
             } else {
                 if (!item.hasPermission(Item.EXTENDED_READ)
-                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return FormValidation.warning("Insufficient permissions");
                 }
             }
@@ -426,19 +473,19 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
             } else {
                 if (!item.hasPermission(Item.EXTENDED_READ)
-                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return new ListBoxModel();
                 }
             }
 
             StringCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(
-                    StringCredentials.class,
-                    item,
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
-                    Collections.emptyList()
-                ),
-                CredentialsMatchers.withId(restApiKeyId)
+                    CredentialsProvider.lookupCredentials(
+                            StringCredentials.class,
+                            item,
+                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            Collections.emptyList()
+                    ),
+                    CredentialsMatchers.withId(restApiKeyId)
             );
 
             if (credentials == null) {
@@ -446,10 +493,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             final MablRestApiClient client =
-                createMablRestApiClient(
-                    credentials.getSecret(),
-                    disableSslVerification
-                );
+                    createMablRestApiClient(
+                            credentials.getSecret(),
+                            disableSslVerification
+                    );
             return getApplicationIdItems(client);
         }
 
@@ -495,19 +542,19 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 }
             } else {
                 if (!item.hasPermission(Item.EXTENDED_READ)
-                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return new ListBoxModel();
                 }
             }
 
             StringCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(
-                    StringCredentials.class,
-                    item,
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
-                    Collections.emptyList()
-                ),
-                CredentialsMatchers.withId(restApiKeyId)
+                    CredentialsProvider.lookupCredentials(
+                            StringCredentials.class,
+                            item,
+                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            Collections.emptyList()
+                    ),
+                    CredentialsMatchers.withId(restApiKeyId)
             );
 
             if (credentials == null) {
@@ -515,10 +562,10 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             }
 
             final MablRestApiClient client =
-                createMablRestApiClient(
-                    credentials.getSecret(),
-                    disableSslVerification
-                );
+                    createMablRestApiClient(
+                            credentials.getSecret(),
+                            disableSslVerification
+                    );
             return getEnvironmentIdItems(client);
         }
 
@@ -585,13 +632,13 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
             final Job job
     ) {
         StringCredentials credentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
-                StringCredentials.class,
-                job,
-                job instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) job) : ACL.SYSTEM,
-                Collections.emptyList()
-            ),
-            CredentialsMatchers.withId(restApiKeyId)
+                CredentialsProvider.lookupCredentials(
+                        StringCredentials.class,
+                        job,
+                        job instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) job) : ACL.SYSTEM,
+                        Collections.emptyList()
+                ),
+                CredentialsMatchers.withId(restApiKeyId)
         );
 
         if (credentials == null) {
@@ -605,4 +652,15 @@ public class MablStepBuilder extends Builder implements SimpleBuildStep {
                 disableSslVerification);
     }
 
+    private void updateBrowser(String browserName , boolean selected){
+
+        if(selected){
+            if(!browsers.contains(browserName)){
+                browsers.add(browserName);
+            }
+        }
+        else {
+            browsers.remove(browserName);
+        }
+    }
 }

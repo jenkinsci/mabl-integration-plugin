@@ -19,7 +19,8 @@ public interface MablRestApiClient {
             String applicationId,
             String labels,
             String mablBranch,
-            CreateDeploymentProperties properties
+            CreateDeploymentProperties properties,
+            String revision // added revision
     ) throws IOException;
 
     /**

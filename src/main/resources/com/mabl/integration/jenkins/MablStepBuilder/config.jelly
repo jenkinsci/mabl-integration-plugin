@@ -37,6 +37,31 @@
     <f:entry title="${%API URL Override}" field="apiUrlOverride">
       <f:textbox/>
     </f:entry>
+      <f:section title="BrowserSelection">
+          <f:entry title="Browser" field="browser">
+              <div style="display: flex; gap: 20px;">
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="chrome" title="" checked="${instance.chrome}" />
+                      <span style="margin-left: 8px;">Chrome</span>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="firefox" title="" checked="${instance.firefox}" />
+                      <span style="margin-left: 8px;">Firefox</span>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="edge" title="" checked="${instance.edge}" />
+                      <span style="margin-left: 8px;">Edge</span>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <f:checkbox name="webkit" title="" checked="${instance.webkit}" />
+                      <span style="margin-left: 8px;">Webkit</span>
+                  </div>
+              </div>
+          </f:entry>
+      </f:section>
+      <f:entry title="${%Revision}" field="revision">
+          <f:textbox/>
+      </f:entry>
   </f:advanced>
   <f:validateButton
       title="${%Validate}" progress="${%Validating...}"
