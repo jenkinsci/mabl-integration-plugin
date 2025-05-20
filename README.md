@@ -193,6 +193,10 @@ Note that
 
 ### Change Log
 
+#### v0.0.51 (05/20/2025)
+- Added support for browser selection (multiSelect) -[chrome, firefox, webkit, edge]
+- Added support for revision (An arbitrary Supplied String)
+
 #### v0.0.50 (05/08/2025)
 - Added support for browser and API URL Override fields
 
